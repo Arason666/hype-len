@@ -1374,6 +1374,10 @@ canvas:focus-visible {
   margin-top: 18px;
 }
 
+.opinion-log .section-kicker {
+  font-size: 13px;
+}
+
 .opinion-log-head {
   display: flex;
   align-items: flex-end;
@@ -1382,12 +1386,16 @@ canvas:focus-visible {
 
 .opinion-log-head > span {
   color: var(--muted);
-  font-size: 9px;
+  font-size: 12px;
+}
+
+.opinion-log-head h3 {
+  font-size: 19px;
 }
 
 .opinion-list {
   display: grid;
-  gap: 10px;
+  gap: 14px;
   margin-top: 17px;
 }
 
@@ -1415,16 +1423,16 @@ canvas:focus-visible {
 
 .opinion-empty strong {
   color: var(--muted-strong);
-  font-size: 11px;
+  font-size: 14px;
 }
 
 .opinion-empty p {
   margin: 6px 0 0;
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .opinion-card {
-  padding: 15px;
+  padding: 18px;
   border: 1px solid var(--line);
   border-radius: 12px;
   background: rgba(5, 15, 12, 0.3);
@@ -1436,19 +1444,19 @@ canvas:focus-visible {
 
 .auto-source-badge {
   display: inline-flex;
-  min-height: 28px;
-  padding: 0 8px;
+  min-height: 34px;
+  padding: 0 10px;
   align-items: center;
   border: 1px solid rgba(127, 245, 182, 0.16);
   border-radius: 8px;
   color: var(--mint);
   background: rgba(127, 245, 182, 0.06);
-  font-size: 8px;
+  font-size: 11px;
   font-weight: 750;
 }
 
 .opinion-card-head {
-  gap: 10px;
+  gap: 13px;
   justify-content: space-between;
 }
 
@@ -1463,33 +1471,35 @@ canvas:focus-visible {
 
 .opinion-author strong {
   color: var(--muted-strong);
-  font-size: 10px;
+  font-size: 13px;
 }
 
 .opinion-author span {
-  margin-top: 3px;
+  margin-top: 5px;
   color: var(--muted);
-  font-size: 8px;
+  font-size: 11px;
 }
 
 .opinion-actions {
   display: flex;
-  gap: 5px;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
 }
 
 .opinion-actions a,
 .opinion-actions button {
   display: grid;
-  min-width: 28px;
-  height: 28px;
-  padding: 0 8px;
+  min-width: 34px;
+  height: 34px;
+  padding: 0 10px;
   place-items: center;
   border: 1px solid var(--line);
   border-radius: 8px;
   color: var(--muted-strong);
   background: transparent;
   cursor: pointer;
-  font-size: 9px;
+  font-size: 12px;
   text-decoration: none;
 }
 
@@ -1504,40 +1514,46 @@ canvas:focus-visible {
   margin: 12px 0;
   overflow: hidden;
   color: var(--muted-strong);
-  font-size: 10px;
-  line-height: 1.65;
+  font-size: 13px;
+  line-height: 1.72;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
 }
 
 .opinion-analysis {
-  margin: -2px 0 12px;
-  padding: 10px 11px;
+  margin: -2px 0 15px;
+  padding: 13px 14px;
   border-left: 2px solid rgba(127, 245, 182, 0.34);
   border-radius: 0 8px 8px 0;
   color: var(--muted);
   background: rgba(127, 245, 182, 0.035);
-  font-size: 9px;
-  line-height: 1.65;
+  font-size: 12px;
+  line-height: 1.7;
 }
 
 .opinion-meta {
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 8px;
 }
 
 .opinion-meta span {
-  padding: 5px 7px;
+  padding: 7px 9px;
   border-radius: 7px;
   color: var(--muted);
   background: rgba(183, 205, 194, 0.055);
-  font-size: 8px;
+  font-size: 11px;
+}
+
+.opinion-card .direction-badge {
+  min-height: 34px;
+  padding-inline: 11px;
+  font-size: 14px;
 }
 
 .verification-grid {
-  gap: 6px;
-  margin-top: 12px;
-  padding-top: 12px;
+  gap: 8px;
+  margin-top: 15px;
+  padding-top: 15px;
   overflow-x: auto;
   border-top: 1px solid var(--line);
   scrollbar-width: none;
@@ -1549,22 +1565,22 @@ canvas:focus-visible {
 
 .verification-cell {
   display: grid;
-  flex: 1 0 72px;
-  gap: 3px;
-  min-height: 45px;
-  padding: 7px;
+  flex: 1 0 88px;
+  gap: 5px;
+  min-height: 56px;
+  padding: 9px;
   border-radius: 8px;
   background: rgba(183, 205, 194, 0.045);
 }
 
 .verification-cell small {
   color: var(--muted);
-  font-size: 7px;
+  font-size: 10px;
 }
 
 .verification-cell strong {
   color: var(--muted-strong);
-  font-size: 9px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -1794,6 +1810,16 @@ footer p { margin: 0; }
 
   .analysis-score-row {
     grid-template-columns: 1fr;
+  }
+
+  .opinion-card-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .opinion-actions {
+    width: 100%;
+    justify-content: flex-start;
   }
 
   .matrix-panel {

@@ -10,7 +10,7 @@
     />
     <title>HYPE 相对强弱监控</title>
     <link rel="manifest" href="./manifest.webmanifest" />
-    <link rel="stylesheet" href="./styles.css?v=20260808-6" />
+    <link rel="stylesheet" href="./styles.css?v=20260808-7" />
   </head>
   <body>
     <div class="ambient ambient-one" aria-hidden="true"></div>
@@ -326,6 +326,22 @@
             </div>
             <span id="opinion-count">0 条记录</span>
           </div>
+          <section class="opinion-summary" id="opinion-summary" aria-labelledby="opinion-summary-title">
+            <div class="opinion-summary-head">
+              <div>
+                <p class="section-kicker">CONSENSUS</p>
+                <h4 id="opinion-summary-title">观点汇总分析</h4>
+              </div>
+              <div class="summary-period-switch" role="tablist" aria-label="观点汇总时间范围">
+                <button class="active" type="button" role="tab" aria-selected="true" data-summary-window="24h">24小时</button>
+                <button type="button" role="tab" aria-selected="false" data-summary-window="3d">3日</button>
+                <button type="button" role="tab" aria-selected="false" data-summary-window="7d">7日</button>
+              </div>
+            </div>
+            <div class="opinion-summary-content" id="opinion-summary-content">
+              <p class="summary-empty">正在汇总观点…</p>
+            </div>
+          </section>
           <div class="opinion-list" id="opinion-list">
             <div class="opinion-empty">
               <span>◎</span>
@@ -349,6 +365,6 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
     <script async src="https://platform.x.com/widgets.js" charset="utf-8"></script>
-    <script type="module" src="./app.js?v=20260808-5"></script>
+    <script type="module" src="./app.js?v=20260808-7"></script>
   </body>
 </html>

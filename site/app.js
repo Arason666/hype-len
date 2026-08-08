@@ -24,6 +24,12 @@ const OPINION_HORIZONS = [
   { key: "24h", label: "1日", milliseconds: DAY },
   { key: "7d", label: "7日", milliseconds: 7 * DAY },
 ];
+const SUMMARY_WINDOWS = {
+  "24h": { label: "24小时", milliseconds: DAY },
+  "3d": { label: "3日", milliseconds: 3 * DAY },
+  "7d": { label: "7日", milliseconds: 7 * DAY },
+};
+const X_SNOWFLAKE_EPOCH = 1288834974657n;
 
 const state = {
   activePeriod: "15m",
@@ -33,6 +39,8 @@ const state = {
   automatedOpinions: [],
   xUsage: null,
   activeSocialSource: SOCIAL_SOURCES[0].handle,
+  summaryWindow: "24h",
+  opinionFilter: "all",
 };
 
 const $ = (id) => document.getElementById(id);
@@ -985,12 +993,27 @@ function allOpinions() {
     .slice(0, 100);
 }
 
+function xPostTimestamp(post) {
+  let snowflakeTime = Number.NaN;
+  try {
+    const snowflake = BigInt(String(post.id || ""));
+    snowflakeTime = Number((snowflake >> 22n) + X_SNOWFLAKE_EPOCH);
+  } catch {
+    // Older hand-entered records may not have a valid X snowflake ID.
+  }
+  const apiTime = Date.parse(post.created_at || post.fetched_at || "");
+  const plausibleSnowflake = Number.isFinite(snowflakeTime)
+    && snowflakeTime >= Date.UTC(2006, 0, 1)
+    && snowflakeTime <= Date.now() + DAY;
+  return plausibleSnowflake ? snowflakeTime : (Number.isFinite(apiTime) ? apiTime : Date.now());
+}
+
 function normalizeAutomatedOpinion(post) {
   const analysis = post.analysis || {};
-  const createdAt = Date.parse(post.created_at || post.fetched_at || "");
+  const createdAt = xPostTimestamp(post);
   return {
     id: String(post.id),
-    createdAt: Number.isFinite(createdAt) ? createdAt : Date.now(),
+    createdAt,
     author: post.username,
     postId: String(post.id),
     url: post.url,
@@ -1013,6 +1036,132 @@ function normalizeAutomatedOpinion(post) {
     baseline: null,
     measurements: {},
   };
+}
+
+function summaryDirection(score) {
+  if (score >= 18) return { key: "bullish", label: "偏多" };
+  if (score <= -18) return { key: "bearish", label: "偏空" };
+  return { key: "neutral", label: "中性 / 分歧" };
+}
+
+function opinionWeight(record, now, windowSize) {
+  const analysis = record.analysis || {};
+  const sourceWeight = Math.max(0.45, sourceFor(record.author).influence / 100);
+  const confidenceWeight = Math.max(0.4, Number(analysis.confidence || 40) / 100);
+  const impactWeight = analysis.impact === "高" ? 1.2 : analysis.impact === "中等" ? 1 : 0.8;
+  const metrics = record.publicMetrics || {};
+  const engagement = Number(metrics.like_count || 0) + Number(metrics.retweet_count || 0) * 2;
+  const engagementWeight = 1 + Math.min(Math.log10(engagement + 1) * 0.08, 0.24);
+  const age = Math.max(0, now - record.createdAt);
+  const recencyWeight = Math.max(0.35, 1 - age / Math.max(windowSize * 1.35, 1));
+  return sourceWeight * confidenceWeight * impactWeight * engagementWeight * recencyWeight;
+}
+
+function horizonBucket(horizon = "") {
+  if (/月|周/.test(horizon)) return "中长期";
+  if (/7 天|7天|数日|1 天|1天|3 天|3天/.test(horizon)) return "未来数日";
+  return "未来数小时";
+}
+
+function topOpinionFactors(records, direction) {
+  const counts = new Map();
+  records
+    .filter((record) => record.analysis?.direction === direction)
+    .forEach((record) => {
+      const label = record.analysis?.eventType || "一般市场观点";
+      counts.set(label, (counts.get(label) || 0) + 1);
+    });
+  return [...counts.entries()]
+    .sort((left, right) => right[1] - left[1])
+    .slice(0, 3)
+    .map(([label, count]) => `${label} · ${count}`);
+}
+
+function aggregateHorizon(records, bucket, now, windowSize) {
+  const candidates = records.filter((record) => horizonBucket(record.analysis?.horizon) === bucket);
+  if (!candidates.length) return { label: "暂无明确观点", key: "neutral" };
+  let weightedScore = 0;
+  let totalWeight = 0;
+  candidates.forEach((record) => {
+    const weight = opinionWeight(record, now, windowSize);
+    weightedScore += Number(record.analysis?.directionScore || 0) * weight;
+    totalWeight += weight;
+  });
+  const score = totalWeight ? Math.round(weightedScore / totalWeight) : 0;
+  const direction = summaryDirection(score);
+  return { label: `${direction.label} ${score > 0 ? "+" : ""}${score}`, key: direction.key };
+}
+
+function renderOpinionSummary(records) {
+  const container = $("opinion-summary-content");
+  if (!container) return;
+  const windowConfig = SUMMARY_WINDOWS[state.summaryWindow] || SUMMARY_WINDOWS["24h"];
+  const now = Date.now();
+  const scoped = records.filter((record) => now - record.createdAt <= windowConfig.milliseconds);
+  document.querySelectorAll("[data-summary-window]").forEach((button) => {
+    const active = button.dataset.summaryWindow === state.summaryWindow;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-selected", String(active));
+  });
+  if (!scoped.length) {
+    container.innerHTML = `<p class="summary-empty">最近${windowConfig.label}暂无可汇总的新观点，请切换更长时间范围。</p>`;
+    return;
+  }
+
+  let weightedScore = 0;
+  let totalWeight = 0;
+  const counts = { bullish: 0, bearish: 0, neutral: 0 };
+  scoped.forEach((record) => {
+    const weight = opinionWeight(record, now, windowConfig.milliseconds);
+    weightedScore += Number(record.analysis?.directionScore || 0) * weight;
+    totalWeight += weight;
+    counts[record.analysis?.direction || "neutral"] += 1;
+  });
+  const score = totalWeight ? Math.round(weightedScore / totalWeight) : 0;
+  const direction = summaryDirection(score);
+  const directionalTotal = counts.bullish + counts.bearish;
+  const minorityShare = directionalTotal ? Math.min(counts.bullish, counts.bearish) / directionalTotal : 0;
+  const disagreement = minorityShare >= 0.35 ? "分歧较高" : minorityShare >= 0.15 ? "存在分歧" : directionalTotal ? "方向较一致" : "方向信息不足";
+  const authors = new Set(scoped.map((record) => String(record.author).toLowerCase())).size;
+  const measurements = scoped.flatMap((record) => Object.values(record.measurements || {}));
+  const hitRate = measurements.length
+    ? Math.round(measurements.filter((measurement) => measurement.hit).length / measurements.length * 100)
+    : null;
+  const verification = hitRate === null ? "价格验证数据仍在积累" : `已有 ${measurements.length} 个验证点，${hitRate}% 符合原判断`;
+  const latest = Math.max(...scoped.map((record) => record.createdAt));
+  const bullishFactors = topOpinionFactors(scoped, "bullish");
+  const bearishFactors = topOpinionFactors(scoped, "bearish");
+  const summarySentence = `最近${windowConfig.label}综合判断为${direction.label}（${score > 0 ? "+" : ""}${score}/100），${disagreement}。${verification}。`;
+
+  container.innerHTML = `
+    <div class="summary-overview">
+      <div class="summary-score ${direction.key}">
+        <small>综合共识</small>
+        <strong>${score > 0 ? "+" : ""}${score}</strong>
+        <span>${direction.label}</span>
+      </div>
+      <div class="summary-narrative">
+        <p>${escapeHtml(summarySentence)}</p>
+        <div class="summary-meter" aria-label="综合共识分数 ${score}"><i style="--summary-score: ${Math.max(0, Math.min(100, (score + 100) / 2))}%"></i></div>
+        <small>${scoped.length} 条帖子 · ${authors} 位博主 · 更新至 ${formatFullTime.format(latest)} 北京时间</small>
+      </div>
+    </div>
+    <div class="summary-stat-grid">
+      <button type="button" data-opinion-filter="bullish"><small>偏多</small><strong>${counts.bullish} 条</strong></button>
+      <button type="button" data-opinion-filter="bearish"><small>偏空</small><strong>${counts.bearish} 条</strong></button>
+      <button type="button" data-opinion-filter="neutral"><small>中性</small><strong>${counts.neutral} 条</strong></button>
+      <button type="button" data-opinion-filter="all"><small>分歧程度</small><strong>${escapeHtml(disagreement)}</strong></button>
+    </div>
+    <div class="summary-detail-grid">
+      <div class="summary-horizons">
+        ${["未来数小时", "未来数日", "中长期"].map((bucket) => {
+          const item = aggregateHorizon(scoped, bucket, now, windowConfig.milliseconds);
+          return `<span><small>${bucket}</small><strong class="${item.key}">${escapeHtml(item.label)}</strong></span>`;
+        }).join("")}
+      </div>
+      <div class="summary-factors bullish"><small>主要利多主题</small><p>${bullishFactors.length ? bullishFactors.map((item) => `<span>${escapeHtml(item)}</span>`).join("") : "暂未识别明确利多主题"}</p></div>
+      <div class="summary-factors bearish"><small>主要利空主题</small><p>${bearishFactors.length ? bearishFactors.map((item) => `<span>${escapeHtml(item)}</span>`).join("") : "暂未识别明确利空主题"}</p></div>
+    </div>`;
 }
 
 function renderXUsage(payload) {
@@ -1080,19 +1229,23 @@ function verificationMarkup(record) {
 
 function renderOpinions() {
   const records = allOpinions();
-  setText("opinion-count", `${records.length} 条记录`);
+  renderOpinionSummary(records);
+  const visibleRecords = state.opinionFilter === "all"
+    ? records
+    : records.filter((record) => record.analysis?.direction === state.opinionFilter);
+  setText("opinion-count", state.opinionFilter === "all" ? `${records.length} 条记录` : `${visibleRecords.length} / ${records.length} 条记录`);
   const list = $("opinion-list");
-  if (!records.length) {
+  if (!visibleRecords.length) {
     list.innerHTML = `
       <div class="opinion-empty">
         <span>◎</span>
-        <strong>等待首次自动采集</strong>
-        <p>X API 每 15 分钟检查一次；也可以使用上方备用入口手动添加。</p>
+        <strong>${records.length ? "当前筛选没有对应观点" : "等待首次自动采集"}</strong>
+        <p>${records.length ? "可在汇总卡片中切换其他方向。" : "X API 每 15 分钟检查一次；也可以使用上方备用入口手动添加。"}</p>
       </div>`;
     return;
   }
 
-  list.innerHTML = records.map((record) => {
+  list.innerHTML = visibleRecords.map((record) => {
     const analysis = record.analysis;
     const source = sourceFor(record.author);
     const baseline = record.baseline?.hype ? `基准 HYPE $${record.baseline.hype.toFixed(3)}` : "等待行情基准";
@@ -1108,7 +1261,7 @@ function renderOpinions() {
         <div class="opinion-card-head">
           <div class="opinion-author">
             <strong>@${escapeHtml(record.author)} · ${escapeHtml(source.role)}</strong>
-            <span>${formatFullTime.format(record.createdAt)} · ${escapeHtml(baseline)}</span>
+            <span>${formatFullTime.format(record.createdAt)} 北京时间 · ${escapeHtml(baseline)}</span>
           </div>
           <div class="opinion-actions">
             <span class="direction-badge ${analysis.direction}">${escapeHtml(analysis.directionLabel)}</span>
@@ -1301,6 +1454,20 @@ function initSocial() {
     saveOpinions();
     renderOpinions();
     showToast("观点记录已从本机删除");
+  });
+
+  $("opinion-summary").addEventListener("click", (event) => {
+    const windowButton = event.target.closest("[data-summary-window]");
+    if (windowButton) {
+      state.summaryWindow = windowButton.dataset.summaryWindow;
+      renderOpinions();
+      return;
+    }
+    const filterButton = event.target.closest("[data-opinion-filter]");
+    if (filterButton) {
+      state.opinionFilter = filterButton.dataset.opinionFilter;
+      renderOpinions();
+    }
   });
 
   state.opinions = readOpinions();

@@ -3,9 +3,47 @@
     "cost_usd": 0.15,
     "posts": 20
   },
-  "generated_at": "2026-08-08T16:15:01Z",
+  "generated_at": "2026-08-08T16:55:45Z",
   "mode": "x-api-paid",
   "posts": [
+    {
+      "analysis": {
+        "confidence": 46,
+        "direction": "neutral",
+        "direction_label": "中性 / 信息型",
+        "direction_score": 0,
+        "engine": "rules-v1-server",
+        "event_type": "一般市场观点",
+        "factors": [
+          "一般市场观点",
+          "自动采集",
+          "方向词不足"
+        ],
+        "horizon": "数小时至 3 天",
+        "impact": "中等",
+        "impact_score": 78,
+        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "2040391464761413633",
+      "author_name": "Louis",
+      "conversation_id": "2086129691245850895",
+      "created_at": "2026-08-08T16:37:31.000Z",
+      "fetched_at": "2026-08-08T16:55:45Z",
+      "id": "2086129691245850895",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 0,
+        "impression_count": 185,
+        "like_count": 8,
+        "quote_count": 0,
+        "reply_count": 2,
+        "retweet_count": 0
+      },
+      "source_role": "研究 / 数据",
+      "text": "We have more perp DEXes running right now than anyone can realistically farm, eg: Variational, Arcus, TxFlow, Hypernova, N1, and others.\n\nBut your points are only worth something if the project survives, pays you fairly, and doesn't get drained first.\n\nHere are the three ways https://t.co/T7mDciMm5p",
+      "url": "https://x.com/louisdives/status/2086129691245850895",
+      "username": "louisdives"
+    },
     {
       "analysis": {
         "confidence": 46,
@@ -1159,7 +1197,7 @@
     {
       "handle": "louisdives",
       "influence": 78,
-      "last_seen_id": "2086082277680054409",
+      "last_seen_id": "2086129691245850895",
       "name": "Louis",
       "role": "研究 / 数据",
       "user_id": "2040391464761413633"
@@ -1191,10 +1229,10 @@
   ],
   "timezone": "Asia/Shanghai",
   "usage_today": {
-    "analyses": 10,
+    "analyses": 11,
     "date": "2026-08-09",
-    "estimated_cost_usd": 0.05,
-    "post_reads": 10,
+    "estimated_cost_usd": 0.055,
+    "post_reads": 11,
     "user_reads": 0
   },
   "version": 1

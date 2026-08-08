@@ -8,11 +8,28 @@ const PERIODS = {
 };
 const PERIOD_ORDER = ["15m", "1h", "4h", "1d"];
 const CACHE_PREFIX = "hype-lens-v1-";
+const OPINION_STORAGE_KEY = "hype-lens-opinions-v1";
+const SOCIAL_SOURCES = [
+  { handle: "0xMaxs", name: "0xMaxs", role: "交易观点", influence: 72 },
+  { handle: "louisdives", name: "Louis", role: "研究 / 数据", influence: 78 },
+  { handle: "HyperliquidX", name: "Hyperliquid", role: "官方动态", influence: 90 },
+  { handle: "Hyperliquid_Hub", name: "HL Hub", role: "生态资讯", influence: 64 },
+  { handle: "HYPEconomist", name: "HYPEconomist", role: "市场观察", influence: 60 },
+];
+const OPINION_HORIZONS = [
+  { key: "15m", label: "15分钟", milliseconds: 15 * 60 * 1000 },
+  { key: "1h", label: "1小时", milliseconds: 60 * 60 * 1000 },
+  { key: "4h", label: "4小时", milliseconds: 4 * 60 * 60 * 1000 },
+  { key: "24h", label: "1日", milliseconds: DAY },
+  { key: "7d", label: "7日", milliseconds: 7 * DAY },
+];
 
 const state = {
   activePeriod: "15m",
   cache: new Map(),
   loading: false,
+  opinions: [],
+  activeSocialSource: SOCIAL_SOURCES[0].handle,
 };
 
 const $ = (id) => document.getElementById(id);
@@ -162,6 +179,9 @@ function alignRatios(ethCandles, btcCandles, hypeCandles) {
       t: item.t,
       eth: eth.get(item.t) / item.close,
       btc: btc.get(item.t) / item.close,
+      hype: item.close,
+      ethUsd: eth.get(item.t),
+      btcUsd: btc.get(item.t),
     }))
     .sort((a, b) => a.t - b.t);
 }
@@ -637,6 +657,7 @@ function renderMetrics() {
     setChange(`${prefix}-change-24h`, percentChange(rows, key, 96));
   });
   setText("last-updated", `更新于 ${formatFullTime.format(result.savedAt)} CST${result.stale ? " · 缓存" : ""}`);
+  evaluateOpinions();
 }
 
 function renderMatrix() {
@@ -765,6 +786,7 @@ async function refreshAll(force = false) {
     );
     const failed = secondaryResults.filter((result) => result.status === "rejected").length;
     renderMatrix();
+    evaluateOpinions();
     if (state.cache.has(state.activePeriod)) renderCharts(state.activePeriod);
     if (failed) showToast(`${failed} 个大周期暂时未更新，已显示可用数据`);
     else if (force) showToast("行情已更新");
@@ -780,6 +802,408 @@ async function refreshAll(force = false) {
   }
 }
 
+const DIRECTION_RULES = {
+  bullish: [
+    "bullish", "accumulate", "accumulation", "long $hype", "buy $hype", "breakout", "undervalued",
+    "adoption", "growth", "record revenue", "new high", "all-time high", "ath", "buyback", "burn",
+    "看多", "做多", "买入", "加仓", "积累", "突破", "低估", "采用增长", "收入新高", "历史新高", "回购", "销毁",
+  ],
+  bearish: [
+    "bearish", "short $hype", "sell $hype", "breakdown", "overvalued", "unlock", "exploit", "hacked",
+    "outage", "outflow", "weakness", "dump", "liquidation risk", "看空", "做空", "卖出", "减仓", "跌破",
+    "高估", "解锁", "漏洞", "被盗", "宕机", "资金流出", "弱势", "砸盘", "清算风险",
+  ],
+};
+
+const EVENT_RULES = [
+  {
+    key: "security",
+    label: "安全 / 运行事件",
+    terms: ["exploit", "hack", "hacked", "vulnerability", "outage", "downtime", "incident", "漏洞", "攻击", "被盗", "宕机", "故障"],
+    impactBoost: 16,
+    horizon: "数小时至 7 天",
+  },
+  {
+    key: "policy",
+    label: "监管 / 上市事件",
+    terms: ["etf", "sec", "regulation", "regulatory", "listing", "delist", "approval", "监管", "合规", "上币", "下架", "批准"],
+    impactBoost: 14,
+    horizon: "1 天至数周",
+  },
+  {
+    key: "fundamental",
+    label: "基本面 / 生态事件",
+    terms: ["revenue", "fees", "volume", "buyback", "burn", "hip-", "adoption", "integration", "users", "open interest", "收入", "手续费", "交易量", "回购", "销毁", "采用", "集成", "用户增长", "持仓量"],
+    impactBoost: 10,
+    horizon: "数日至数月",
+  },
+  {
+    key: "technical",
+    label: "技术面 / 仓位观点",
+    terms: ["breakout", "breakdown", "support", "resistance", "chart", "rsi", "funding", "liquidation", "target", "突破", "跌破", "支撑", "阻力", "技术面", "资金费率", "清算", "目标位"],
+    impactBoost: 4,
+    horizon: "数小时至 3 天",
+  },
+];
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function countTerms(text, terms) {
+  const normalized = text.toLowerCase();
+  return terms.reduce((count, term) => {
+    const matches = normalized.match(new RegExp(escapeRegExp(term.toLowerCase()), "g"));
+    return count + (matches?.length || 0);
+  }, 0);
+}
+
+function sourceFor(handle) {
+  return SOCIAL_SOURCES.find((source) => source.handle.toLowerCase() === String(handle).toLowerCase()) || {
+    handle,
+    name: handle,
+    role: "其他账号",
+    influence: 50,
+  };
+}
+
+function parseXPostUrl(value) {
+  let url;
+  try {
+    url = new URL(value);
+  } catch {
+    return null;
+  }
+  const hostname = url.hostname.toLowerCase();
+  const allowed = ["x.com", "www.x.com", "mobile.x.com", "twitter.com", "www.twitter.com", "mobile.twitter.com"];
+  if (!allowed.includes(hostname)) return null;
+  const match = url.pathname.match(/^\/([A-Za-z0-9_]{1,15})\/status\/(\d+)/);
+  if (!match) return null;
+  return { url: `https://x.com/${match[1]}/status/${match[2]}`, handle: match[1], postId: match[2] };
+}
+
+function analyzeOpinion(text, handle) {
+  const bullishMatches = countTerms(text, DIRECTION_RULES.bullish);
+  const bearishMatches = countTerms(text, DIRECTION_RULES.bearish);
+  const rawDirection = bullishMatches - bearishMatches;
+  let direction = "neutral";
+  let directionLabel = "中性 / 信息型";
+  if (rawDirection > 0) {
+    direction = "bullish";
+    directionLabel = "偏多";
+  } else if (rawDirection < 0) {
+    direction = "bearish";
+    directionLabel = "偏空";
+  }
+
+  const eventMatches = EVENT_RULES
+    .map((event) => ({ ...event, matches: countTerms(text, event.terms) }))
+    .filter((event) => event.matches > 0)
+    .sort((a, b) => (b.matches + b.impactBoost / 20) - (a.matches + a.impactBoost / 20));
+  const event = eventMatches[0] || {
+    key: "commentary",
+    label: "一般市场观点",
+    impactBoost: 0,
+    horizon: "数小时至 3 天",
+    matches: 0,
+  };
+
+  const source = sourceFor(handle);
+  const directionalEvidence = bullishMatches + bearishMatches;
+  const confidence = Math.min(
+    92,
+    Math.max(40, direction === "neutral" ? 43 + Math.min(text.length / 90, 8) : 52 + Math.abs(rawDirection) * 9 + Math.min(directionalEvidence, 4) * 3)
+  );
+  const directionScore = Math.max(-100, Math.min(100, rawDirection * 22));
+  const impactScore = Math.min(100, source.influence + event.impactBoost + Math.min(event.matches * 3, 9));
+  const impact = impactScore >= 84 ? "高" : impactScore >= 62 ? "中等" : "有限";
+  const evidence = [];
+  if (bullishMatches) evidence.push(`偏多词 ${bullishMatches} 个`);
+  if (bearishMatches) evidence.push(`偏空词 ${bearishMatches} 个`);
+  evidence.push(event.label);
+  evidence.push(`${source.role}来源`);
+  if (!directionalEvidence) evidence.push("方向词不足");
+
+  const directionSentence = direction === "neutral"
+    ? "没有识别到足够明确的方向表达，暂按信息型观点处理"
+    : `识别到的${direction === "bullish" ? "正向" : "负向"}措辞更多，整体判断为${directionLabel}`;
+  const summary = `${directionSentence}。事件类型更接近“${event.label}”，主要影响窗口预计为${event.horizon}；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。`;
+
+  return {
+    direction,
+    directionLabel,
+    directionScore,
+    confidence: Math.round(confidence),
+    impact,
+    impactScore,
+    eventType: event.label,
+    horizon: event.horizon,
+    factors: evidence,
+    summary,
+    engine: "rules-v1",
+  };
+}
+
+function latestMarketSnapshot() {
+  const row = state.cache.get("15m")?.rows?.at(-1);
+  if (!row || !Number.isFinite(row.hype)) return null;
+  return { t: row.t, hype: row.hype, eth: row.eth, btc: row.btc };
+}
+
+function readOpinions() {
+  try {
+    const records = JSON.parse(localStorage.getItem(OPINION_STORAGE_KEY));
+    return Array.isArray(records) ? records.slice(0, 50) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveOpinions() {
+  try {
+    localStorage.setItem(OPINION_STORAGE_KEY, JSON.stringify(state.opinions.slice(0, 50)));
+  } catch {
+    showToast("浏览器未允许本机保存，刷新后记录可能丢失");
+  }
+}
+
+function resultMarkup(record) {
+  const analysis = record.analysis;
+  return `
+    <div class="analysis-result-head">
+      <span class="direction-badge ${analysis.direction}">${escapeHtml(analysis.directionLabel)}</span>
+      <span class="analysis-confidence">置信度 ${analysis.confidence}% · 已保存到本机</span>
+    </div>
+    <div class="analysis-score-row">
+      <div><small>情绪分数</small><strong>${analysis.directionScore > 0 ? "+" : ""}${analysis.directionScore}</strong></div>
+      <div><small>预计影响面</small><strong>${escapeHtml(analysis.impact)}</strong></div>
+      <div><small>主要窗口</small><strong>${escapeHtml(analysis.horizon)}</strong></div>
+    </div>
+    <p class="analysis-summary">${escapeHtml(analysis.summary)}</p>
+    <div class="analysis-factors">${analysis.factors.map((factor) => `<span>${escapeHtml(factor)}</span>`).join("")}</div>
+  `;
+}
+
+function verificationMarkup(record) {
+  return OPINION_HORIZONS.map((horizon) => {
+    const measurement = record.measurements?.[horizon.key];
+    if (!measurement) {
+      return `<span class="verification-cell"><small>${horizon.label}</small><strong>待验证</strong></span>`;
+    }
+    const sign = measurement.hypeReturn > 0 ? "+" : "";
+    return `<span class="verification-cell ${measurement.hit ? "hit" : "miss"}"><small>${horizon.label} · ${measurement.hit ? "符合" : "偏离"}</small><strong>${sign}${measurement.hypeReturn.toFixed(2)}%</strong></span>`;
+  }).join("");
+}
+
+function renderOpinions() {
+  setText("opinion-count", `${state.opinions.length} 条记录`);
+  const list = $("opinion-list");
+  if (!state.opinions.length) {
+    list.innerHTML = `
+      <div class="opinion-empty">
+        <span>◎</span>
+        <strong>还没有观点记录</strong>
+        <p>从上方时间线发现重要帖子后，粘贴链接和正文开始追踪。</p>
+      </div>`;
+    return;
+  }
+
+  list.innerHTML = state.opinions.map((record) => {
+    const analysis = record.analysis;
+    const source = sourceFor(record.author);
+    const baseline = record.baseline?.hype ? `基准 HYPE $${record.baseline.hype.toFixed(3)}` : "等待行情基准";
+    return `
+      <article class="opinion-card" data-opinion-id="${escapeHtml(record.id)}">
+        <div class="opinion-card-head">
+          <div class="opinion-author">
+            <strong>@${escapeHtml(record.author)} · ${escapeHtml(source.role)}</strong>
+            <span>${formatFullTime.format(record.createdAt)} · ${escapeHtml(baseline)}</span>
+          </div>
+          <div class="opinion-actions">
+            <span class="direction-badge ${analysis.direction}">${escapeHtml(analysis.directionLabel)}</span>
+            <a href="${escapeHtml(record.url)}" target="_blank" rel="noopener noreferrer" aria-label="打开 X 原帖">原帖 ↗</a>
+            <button type="button" data-delete-opinion="${escapeHtml(record.id)}" aria-label="删除这条观点记录">删除</button>
+          </div>
+        </div>
+        <p class="opinion-excerpt">${escapeHtml(record.text)}</p>
+        <div class="opinion-meta">
+          <span>置信度 ${analysis.confidence}%</span>
+          <span>影响 ${escapeHtml(analysis.impact)}</span>
+          <span>${escapeHtml(analysis.eventType)}</span>
+          <span>${escapeHtml(analysis.horizon)}</span>
+        </div>
+        <div class="verification-grid" aria-label="观点发布后的 HYPE 价格验证">${verificationMarkup(record)}</div>
+      </article>`;
+  }).join("");
+}
+
+function findMarketRow(targetTime, horizonKey) {
+  const preferredPeriods = horizonKey === "7d" ? ["1h", "4h", "15m"] : ["15m", "1h"];
+  const tolerance = horizonKey === "7d" ? 2 * 60 * 60 * 1000 : horizonKey === "24h" ? 60 * 60 * 1000 : 30 * 60 * 1000;
+  for (const period of preferredPeriods) {
+    const rows = state.cache.get(period)?.rows;
+    if (!rows?.length) continue;
+    const row = rows.find((candidate) => candidate.t >= targetTime);
+    if (row && Number.isFinite(row.hype) && row.t - targetTime <= tolerance) return row;
+  }
+  return null;
+}
+
+function evaluateOpinions() {
+  if (!state.opinions.length || !state.cache.has("15m")) return;
+  let changed = false;
+  state.opinions.forEach((record) => {
+    if (!record.baseline) {
+      record.baseline = latestMarketSnapshot();
+      changed = Boolean(record.baseline) || changed;
+    }
+    if (!record.baseline?.hype) return;
+    record.measurements ||= {};
+    OPINION_HORIZONS.forEach((horizon) => {
+      if (record.measurements[horizon.key]) return;
+      const targetTime = record.baseline.t + horizon.milliseconds;
+      const row = findMarketRow(targetTime, horizon.key);
+      if (!row) return;
+      const hypeReturn = ((row.hype / record.baseline.hype) - 1) * 100;
+      const direction = record.analysis.direction;
+      const hit = direction === "bullish" ? hypeReturn > 0 : direction === "bearish" ? hypeReturn < 0 : Math.abs(hypeReturn) < 0.75;
+      record.measurements[horizon.key] = {
+        measuredAt: row.t,
+        hypeReturn,
+        ethRatioChange: ((row.eth / record.baseline.eth) - 1) * 100,
+        btcRatioChange: ((row.btc / record.baseline.btc) - 1) * 100,
+        hit,
+      };
+      changed = true;
+    });
+  });
+  if (changed) {
+    saveOpinions();
+    renderOpinions();
+  }
+}
+
+function timelineFallback(source) {
+  const frame = $("timeline-frame");
+  if (state.activeSocialSource !== source.handle || frame.querySelector("iframe")) return;
+  frame.innerHTML = `
+    <div class="timeline-fallback">
+      <strong>当前网络没有载入 X 时间线</strong>
+      <p>部分网络或隐私设置会阻止第三方嵌入。可以直接打开账号查看最新帖子，再把链接和正文粘贴到右侧分析。</p>
+      <a href="https://x.com/${encodeURIComponent(source.handle)}" target="_blank" rel="noopener noreferrer">打开 @${escapeHtml(source.handle)} ↗</a>
+    </div>`;
+}
+
+function renderTimeline(handle) {
+  const source = sourceFor(handle);
+  state.activeSocialSource = source.handle;
+  document.querySelectorAll(".source-tab").forEach((button) => {
+    const active = button.dataset.handle === source.handle;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-selected", String(active));
+  });
+  const profileUrl = `https://x.com/${source.handle}`;
+  const profileLink = $("active-x-profile");
+  profileLink.href = profileUrl;
+  const frame = $("timeline-frame");
+  frame.innerHTML = `<a class="twitter-timeline" data-theme="dark" data-height="600" data-chrome="noheader nofooter noborders transparent" data-dnt="true" href="${profileUrl}">正在载入 @${escapeHtml(source.handle)} 的官方 X 时间线…</a>`;
+
+  let attempts = 0;
+  const loadWidget = () => {
+    if (state.activeSocialSource !== source.handle) return;
+    if (window.twttr?.widgets?.load) {
+      Promise.resolve(window.twttr.widgets.load(frame)).catch(() => timelineFallback(source));
+      window.setTimeout(() => timelineFallback(source), 12_000);
+      return;
+    }
+    attempts += 1;
+    if (attempts < 24) window.setTimeout(loadWidget, 400);
+    else timelineFallback(source);
+  };
+  loadWidget();
+}
+
+function initSocial() {
+  const tabs = $("source-tabs");
+  tabs.innerHTML = SOCIAL_SOURCES.map((source, index) => `
+    <button class="source-tab${index === 0 ? " active" : ""}" type="button" role="tab" aria-selected="${index === 0}" data-handle="${escapeHtml(source.handle)}">
+      <span class="source-avatar">${escapeHtml(source.name.slice(0, 1).toUpperCase())}</span>
+      <strong>@${escapeHtml(source.handle)}</strong>
+      <small>${escapeHtml(source.role)}</small>
+    </button>`).join("");
+  tabs.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-handle]");
+    if (button) renderTimeline(button.dataset.handle);
+  });
+
+  const authorSelect = $("opinion-author");
+  authorSelect.innerHTML = SOCIAL_SOURCES.map((source) => `<option value="${escapeHtml(source.handle)}">@${escapeHtml(source.handle)} · ${escapeHtml(source.role)}</option>`).join("") + '<option value="other">其他账号</option>';
+
+  $("opinion-url").addEventListener("change", (event) => {
+    const parsed = parseXPostUrl(event.target.value);
+    if (!parsed) return;
+    const known = SOCIAL_SOURCES.find((source) => source.handle.toLowerCase() === parsed.handle.toLowerCase());
+    authorSelect.value = known?.handle || "other";
+  });
+
+  $("opinion-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const parsed = parseXPostUrl($("opinion-url").value.trim());
+    if (!parsed) {
+      showToast("请输入有效的 X 帖子链接，例如 https://x.com/账号/status/数字");
+      return;
+    }
+    const text = $("opinion-text").value.trim();
+    if (text.length < 12) {
+      showToast("帖子正文太短，至少需要 12 个字符才能判断");
+      return;
+    }
+    const selectedAuthor = authorSelect.value === "other" ? parsed.handle : authorSelect.value;
+    const analysis = analyzeOpinion(text, selectedAuthor);
+    const record = {
+      id: window.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      createdAt: Date.now(),
+      author: selectedAuthor,
+      postId: parsed.postId,
+      url: parsed.url,
+      text,
+      analysis,
+      baseline: latestMarketSnapshot(),
+      measurements: {},
+    };
+    state.opinions.unshift(record);
+    state.opinions = state.opinions.slice(0, 50);
+    saveOpinions();
+    renderOpinions();
+    const result = $("analysis-result");
+    result.innerHTML = resultMarkup(record);
+    result.hidden = false;
+    showToast("观点已加入验证记录");
+  });
+
+  $("opinion-list").addEventListener("click", (event) => {
+    const button = event.target.closest("[data-delete-opinion]");
+    if (!button) return;
+    state.opinions = state.opinions.filter((record) => record.id !== button.dataset.deleteOpinion);
+    saveOpinions();
+    renderOpinions();
+    showToast("观点记录已从本机删除");
+  });
+
+  state.opinions = readOpinions();
+  renderOpinions();
+  renderTimeline(SOCIAL_SOURCES[0].handle);
+}
+
 document.querySelectorAll("[data-period]").forEach((button) => {
   button.addEventListener("click", () => switchPeriod(button.dataset.period));
 });
@@ -791,5 +1215,6 @@ window.addEventListener("online", () => {
 });
 window.addEventListener("offline", () => setConnection("error", "网络离线"));
 
+initSocial();
 refreshAll();
 window.setInterval(() => refreshAll(true), 5 * 60 * 1000);

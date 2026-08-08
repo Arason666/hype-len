@@ -10,7 +10,7 @@
     />
     <title>HYPE 相对强弱监控</title>
     <link rel="manifest" href="./manifest.webmanifest" />
-    <link rel="stylesheet" href="./styles.css?v=20260808-3" />
+    <link rel="stylesheet" href="./styles.css?v=20260808-4" />
   </head>
   <body>
     <div class="ambient ambient-one" aria-hidden="true"></div>
@@ -215,6 +215,113 @@
         </article>
       </section>
 
+      <section class="social-section" id="social-intel" aria-labelledby="social-title">
+        <div class="section-head social-section-head">
+          <div>
+            <div class="social-heading-line">
+              <p class="section-kicker">HYPE SOCIAL INTELLIGENCE</p>
+              <span class="beta-badge">免费测试版</span>
+            </div>
+            <h2 id="social-title">HYPE 观点追踪</h2>
+            <p class="social-intro">浏览重点账号的官方 X 时间线，并把值得关注的帖子加入观点验证。</p>
+          </div>
+          <div class="social-mode-note">
+            <strong>半自动追踪</strong>
+            <span>官方嵌入展示 · 本机保存分析</span>
+          </div>
+        </div>
+
+        <div class="social-workspace">
+          <article class="timeline-panel" aria-labelledby="timeline-title">
+            <div class="panel-heading social-panel-heading">
+              <div>
+                <p class="section-kicker">WATCHLIST</p>
+                <h3 id="timeline-title">重点账号</h3>
+              </div>
+              <a class="x-profile-link" id="active-x-profile" href="https://x.com/0xMaxs" target="_blank" rel="noopener noreferrer">在 X 打开 ↗</a>
+            </div>
+
+            <div class="source-tabs" id="source-tabs" role="tablist" aria-label="选择要查看的 X 账号"></div>
+
+            <div class="timeline-frame" id="timeline-frame" aria-live="polite">
+              <div class="timeline-loading">
+                <span></span>
+                <strong>正在载入官方 X 时间线</strong>
+                <small>若网络阻止嵌入，可点击右上角直接在 X 查看</small>
+              </div>
+            </div>
+          </article>
+
+          <article class="analysis-panel" aria-labelledby="analysis-title">
+            <div class="panel-heading social-panel-heading">
+              <div>
+                <p class="section-kicker">OPINION CHECK</p>
+                <h3 id="analysis-title">分析一条观点</h3>
+              </div>
+              <span class="analysis-engine">规则模型 v1</span>
+            </div>
+
+            <form class="opinion-form" id="opinion-form">
+              <label>
+                <span>作者</span>
+                <select id="opinion-author" name="author" aria-label="帖子作者"></select>
+              </label>
+
+              <label>
+                <span>帖子链接</span>
+                <input
+                  id="opinion-url"
+                  name="url"
+                  type="url"
+                  inputmode="url"
+                  autocomplete="url"
+                  placeholder="https://x.com/账号/status/..."
+                  required
+                />
+              </label>
+
+              <label>
+                <span>帖子正文</span>
+                <textarea
+                  id="opinion-text"
+                  name="text"
+                  rows="6"
+                  maxlength="2000"
+                  placeholder="免费版暂不自动读取原文，请从 X 复制正文粘贴到这里。中英文都可以。"
+                  required
+                ></textarea>
+              </label>
+
+              <div class="form-foot">
+                <p><i></i> 分析结果是研究辅助，不是交易指令</p>
+                <button class="analyze-button" type="submit">生成观点分析</button>
+              </div>
+            </form>
+
+            <div class="analysis-result" id="analysis-result" hidden></div>
+          </article>
+        </div>
+
+        <div class="opinion-log">
+          <div class="opinion-log-head">
+            <div>
+              <p class="section-kicker">TRACK RECORD</p>
+              <h3>观点验证记录</h3>
+            </div>
+            <span id="opinion-count">0 条记录</span>
+          </div>
+          <div class="opinion-list" id="opinion-list">
+            <div class="opinion-empty">
+              <span>◎</span>
+              <strong>还没有观点记录</strong>
+              <p>从上方时间线发现重要帖子后，粘贴链接和正文开始追踪。</p>
+            </div>
+          </div>
+        </div>
+
+        <p class="social-disclaimer">免费版通过 X 官方嵌入展示内容，不会自动抓取或搜索帖子。观点分析和验证记录仅保存在当前浏览器；接入 D1 后可跨设备同步。</p>
+      </section>
+
       <footer>
         <div>
           <span class="footer-status"><i></i> 数据来自 Hyperliquid 公共行情接口</span>
@@ -225,6 +332,7 @@
     </main>
 
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
-    <script type="module" src="./app.js?v=20260808-3"></script>
+    <script async src="https://platform.x.com/widgets.js" charset="utf-8"></script>
+    <script type="module" src="./app.js?v=20260808-4"></script>
   </body>
 </html>

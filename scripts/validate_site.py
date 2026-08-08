@@ -36,6 +36,13 @@ def main() -> None:
         "hidden loading overlays": ".chart-empty[hidden]" in stylesheet and "pointer-events: none" in stylesheet,
         "drag-to-pan charts": "panFromPointer" in javascript and 'classList.add("dragging")' in javascript,
         "readable EMA tooltip": 'class="tooltip-ema"' in javascript and ".tooltip-ema" in stylesheet,
+        "social intelligence section": 'id="social-intel"' in html and 'id="opinion-form"' in html,
+        "official X embed": "platform.x.com/widgets.js" in html and "twitter-timeline" in javascript,
+        "curated HYPE sources": "0xMaxs" in javascript and "louisdives" in javascript and "HyperliquidX" in javascript,
+        "manual opinion analysis": "analyzeOpinion" in javascript and "parseXPostUrl" in javascript,
+        "local opinion persistence": "OPINION_STORAGE_KEY" in javascript and "saveOpinions" in javascript,
+        "multi-horizon opinion checks": "OPINION_HORIZONS" in javascript and "evaluateOpinions" in javascript,
+        "social mobile layout": ".social-workspace" in stylesheet and ".source-tabs" in stylesheet,
     }
     failed = [name for name, passed in checks.items() if not passed]
     if failed:

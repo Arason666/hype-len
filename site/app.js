@@ -973,7 +973,17 @@ function latestMarketSnapshot() {
 function readOpinions() {
   try {
     const records = JSON.parse(localStorage.getItem(OPINION_STORAGE_KEY));
-    return Array.isArray(records) ? records.slice(0, 50) : [];
+    if (!Array.isArray(records)) return [];
+    let migrated = false;
+    const normalized = records.slice(0, 50).map((record) => {
+      const parsedPostId = record.postId || parseXPostUrl(record.url || "")?.postId;
+      const publishedAt = xSnowflakeTimestamp(parsedPostId);
+      if (!Number.isFinite(publishedAt) || record.createdAt === publishedAt) return record;
+      migrated = true;
+      return { ...record, postId: parsedPostId, createdAt: publishedAt };
+    });
+    if (migrated) localStorage.setItem(OPINION_STORAGE_KEY, JSON.stringify(normalized));
+    return normalized;
   } catch {
     return [];
   }
@@ -993,19 +1003,25 @@ function allOpinions() {
     .slice(0, 100);
 }
 
-function xPostTimestamp(post) {
+function xSnowflakeTimestamp(id) {
   let snowflakeTime = Number.NaN;
   try {
-    const snowflake = BigInt(String(post.id || ""));
+    const snowflake = BigInt(String(id || ""));
     snowflakeTime = Number((snowflake >> 22n) + X_SNOWFLAKE_EPOCH);
   } catch {
     // Older hand-entered records may not have a valid X snowflake ID.
   }
-  const apiTime = Date.parse(post.created_at || post.fetched_at || "");
   const plausibleSnowflake = Number.isFinite(snowflakeTime)
     && snowflakeTime >= Date.UTC(2006, 0, 1)
     && snowflakeTime <= Date.now() + DAY;
-  return plausibleSnowflake ? snowflakeTime : (Number.isFinite(apiTime) ? apiTime : Date.now());
+  return plausibleSnowflake ? snowflakeTime : Number.NaN;
+}
+
+function xPostTimestamp(post) {
+  const snowflakeTime = xSnowflakeTimestamp(post.id);
+  if (Number.isFinite(snowflakeTime)) return snowflakeTime;
+  const apiTime = Date.parse(post.created_at || post.fetched_at || "");
+  return Number.isFinite(apiTime) ? apiTime : Date.now();
 }
 
 function normalizeAutomatedOpinion(post) {
@@ -1425,9 +1441,10 @@ function initSocial() {
     }
     const selectedAuthor = authorSelect.value === "other" ? parsed.handle : authorSelect.value;
     const analysis = analyzeOpinion(text, selectedAuthor);
+    const publishedAt = xSnowflakeTimestamp(parsed.postId);
     const record = {
       id: window.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`,
-      createdAt: Date.now(),
+      createdAt: Number.isFinite(publishedAt) ? publishedAt : Date.now(),
       author: selectedAuthor,
       postId: parsed.postId,
       url: parsed.url,

@@ -10,7 +10,7 @@
     />
     <title>HYPE 趋势分析</title>
     <link rel="manifest" href="./manifest.webmanifest" />
-    <link rel="stylesheet" href="./styles.css?v=20260808-7" />
+    <link rel="stylesheet" href="./styles.css?v=20260808-9" />
   </head>
   <body>
     <div class="ambient ambient-one" aria-hidden="true"></div>
@@ -53,6 +53,25 @@
             <h2 id="strength-label">加载行情中</h2>
             <p id="strength-detail">正在计算多周期共振</p>
           </div>
+        </div>
+      </section>
+
+      <section class="four-hour-brief loading-block" id="four-hour-brief" aria-labelledby="four-hour-title">
+        <div class="four-hour-heading">
+          <p class="section-kicker">4H STRATEGY BRIEF</p>
+          <h2 id="four-hour-title">未来4小时策略参考</h2>
+          <span class="four-hour-stance neutral" id="four-hour-stance">等待数据</span>
+        </div>
+        <div class="four-hour-content">
+          <p id="four-hour-summary">正在汇总 15分钟、1小时、4小时行情与观点数据…</p>
+          <div class="four-hour-signals" id="four-hour-signals" aria-label="策略依据"></div>
+          <p class="four-hour-condition" id="four-hour-condition">数据完整后将给出观察重点和失效条件。</p>
+        </div>
+        <div class="four-hour-score">
+          <small>综合评分</small>
+          <strong id="four-hour-score">--</strong>
+          <span id="four-hour-confidence">置信度 --</span>
+          <small>研究辅助 · 非投资指令</small>
         </div>
       </section>
 
@@ -365,6 +384,6 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
     <script async src="https://platform.x.com/widgets.js" charset="utf-8"></script>
-    <script type="module" src="./app.js?v=20260808-8"></script>
+    <script type="module" src="./app.js?v=20260808-9"></script>
   </body>
 </html>

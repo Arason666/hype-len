@@ -669,6 +669,7 @@ function renderMetrics() {
   });
   setText("last-updated", `更新于 ${formatFullTime.format(result.savedAt)} CST${result.stale ? " · 缓存" : ""}`);
   evaluateOpinions();
+  renderFourHourBrief();
 }
 
 function renderMatrix() {
@@ -798,6 +799,7 @@ async function refreshAll(force = false) {
     const failed = secondaryResults.filter((result) => result.status === "rejected").length;
     renderMatrix();
     evaluateOpinions();
+    renderFourHourBrief();
     if (state.cache.has(state.activePeriod)) renderCharts(state.activePeriod);
     if (failed) showToast(`${failed} 个大周期暂时未更新，已显示可用数据`);
     else if (force) showToast("行情已更新");
@@ -1073,6 +1075,92 @@ function opinionWeight(record, now, windowSize) {
   return sourceWeight * confidenceWeight * impactWeight * engagementWeight * recencyWeight;
 }
 
+function relativePeriodSignal(period) {
+  const rows = state.cache.get(period)?.rows;
+  if (!rows || rows.length < 21) return null;
+  const latest = rows.at(-1);
+  const pairScores = ["eth", "btc"].map((key) => {
+    const fast = Number(latest[`${key}Fast`]);
+    const slow = Number(latest[`${key}Slow`]);
+    if (!Number.isFinite(fast) || !Number.isFinite(slow) || slow === 0) return 0;
+    const distance = (fast - slow) / slow;
+    return Math.max(-100, Math.min(100, (-distance / 0.006) * 100));
+  });
+  const score = Math.round(pairScores.reduce((sum, value) => sum + value, 0) / pairScores.length);
+  const key = score >= 15 ? "bullish" : score <= -15 ? "bearish" : "neutral";
+  const label = key === "bullish" ? "HYPE偏强" : key === "bearish" ? "HYPE偏弱" : "震荡";
+  return { score, key, label };
+}
+
+function recentOpinionSignal(records, now = Date.now()) {
+  const scoped = records.filter((record) => record.createdAt <= now && now - record.createdAt <= DAY);
+  if (!scoped.length) return null;
+  let weightedScore = 0;
+  let totalWeight = 0;
+  scoped.forEach((record) => {
+    const weight = opinionWeight(record, now, DAY);
+    weightedScore += Number(record.analysis?.directionScore || 0) * weight;
+    totalWeight += weight;
+  });
+  const score = totalWeight ? Math.round(weightedScore / totalWeight) : 0;
+  const direction = summaryDirection(score);
+  return { score, key: direction.key, label: `${direction.label} · ${scoped.length}条` };
+}
+
+function renderFourHourBrief() {
+  const panel = $("four-hour-brief");
+  if (!panel) return;
+  const components = [
+    { id: "15m", label: "15分钟", weight: 0.2, signal: relativePeriodSignal("15m") },
+    { id: "1h", label: "1小时", weight: 0.25, signal: relativePeriodSignal("1h") },
+    { id: "4h", label: "4小时", weight: 0.3, signal: relativePeriodSignal("4h") },
+    { id: "opinion", label: "观点汇总", weight: 0.25, signal: recentOpinionSignal(allOpinions()) },
+  ];
+  const available = components.filter((component) => component.signal);
+  const availableWeight = available.reduce((sum, component) => sum + component.weight, 0);
+  if (!available.length || !availableWeight) return;
+
+  const score = Math.round(available.reduce((sum, component) => (
+    sum + component.signal.score * component.weight
+  ), 0) / availableWeight);
+  const direction = score >= 25
+    ? { key: "bullish", label: "条件偏强" }
+    : score <= -25
+      ? { key: "bearish", label: "条件偏弱" }
+      : { key: "neutral", label: "观望为主" };
+  const directional = available.filter((component) => Math.abs(component.signal.score) >= 15);
+  const positive = directional.filter((component) => component.signal.score > 0).length;
+  const negative = directional.filter((component) => component.signal.score < 0).length;
+  const alignment = directional.length ? Math.max(positive, negative) / directional.length : 0.5;
+  const completeness = availableWeight;
+  const confidence = Math.min(92, Math.round(32 + completeness * 24 + alignment * 23 + Math.min(Math.abs(score) * 0.22, 13)));
+  const marketLabels = components.slice(0, 3).map((component) => (
+    `${component.label}${component.signal ? component.signal.label : "待更新"}`
+  )).join("、");
+  const opinion = components[3].signal;
+  const opinionText = opinion ? `最近24小时观点为${opinion.label}` : "最近24小时观点数据不足";
+  const summary = `${marketLabels}；${opinionText}。综合评分 ${score > 0 ? "+" : ""}${score}/100。`;
+  const condition = direction.key === "bullish"
+    ? "策略参考：等待回踩确认，避免追高；只有15分钟与1小时保持同向、且4小时不转弱时，偏强判断才继续有效。"
+    : direction.key === "bearish"
+      ? "策略参考：优先控制风险，避免逆势追多；只有15分钟与1小时先转强、且4小时停止走弱时，才视为修复信号。"
+      : "策略参考：暂不依据单一周期采取动作；等待15分钟与1小时同向，并获得4小时趋势或观点共识确认。";
+
+  panel.classList.remove("loading-block");
+  panel.dataset.direction = direction.key;
+  const stance = $("four-hour-stance");
+  stance.className = `four-hour-stance ${direction.key}`;
+  stance.textContent = direction.label;
+  setText("four-hour-summary", summary);
+  setText("four-hour-condition", condition);
+  setText("four-hour-score", `${score > 0 ? "+" : ""}${score}`);
+  setText("four-hour-confidence", `置信度 ${confidence}%`);
+  $("four-hour-signals").innerHTML = components.map((component) => {
+    const signal = component.signal || { key: "neutral", label: "待更新", score: 0 };
+    return `<span class="${signal.key}"><small>${component.label}</small><strong>${escapeHtml(signal.label)}</strong></span>`;
+  }).join("");
+}
+
 function horizonBucket(horizon = "") {
   if (/月|周/.test(horizon)) return "中长期";
   if (/7 天|7天|数日|1 天|1天|3 天|3天/.test(horizon)) return "未来数日";
@@ -1246,6 +1334,7 @@ function verificationMarkup(record) {
 function renderOpinions() {
   const records = allOpinions();
   renderOpinionSummary(records);
+  renderFourHourBrief();
   const visibleRecords = state.opinionFilter === "all"
     ? records
     : records.filter((record) => record.analysis?.direction === state.opinionFilter);

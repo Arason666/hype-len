@@ -314,6 +314,154 @@ button {
   line-height: 1.5;
 }
 
+.four-hour-brief {
+  display: grid;
+  grid-template-columns: minmax(190px, 0.42fr) minmax(0, 1.7fr) minmax(130px, 0.35fr);
+  gap: 22px;
+  align-items: center;
+  margin-top: 18px;
+  padding: 21px 24px;
+  border: 1px solid var(--line);
+  border-radius: 19px;
+  background:
+    linear-gradient(110deg, rgba(127, 245, 182, 0.045), transparent 42%),
+    rgba(8, 23, 18, 0.78);
+  box-shadow: 0 15px 46px rgba(0, 0, 0, 0.14);
+  transition: border-color 180ms ease, background 180ms ease;
+}
+
+.four-hour-brief[data-direction="bullish"] {
+  border-color: rgba(127, 245, 182, 0.25);
+}
+
+.four-hour-brief[data-direction="bearish"] {
+  border-color: rgba(255, 184, 107, 0.25);
+  background:
+    linear-gradient(110deg, rgba(255, 184, 107, 0.04), transparent 42%),
+    rgba(8, 23, 18, 0.78);
+}
+
+.four-hour-heading .section-kicker {
+  margin-bottom: 7px;
+  font-size: 9px;
+}
+
+.four-hour-heading h2 {
+  margin: 0 0 10px;
+  font-size: 18px;
+  letter-spacing: -0.025em;
+}
+
+.four-hour-stance {
+  display: inline-flex;
+  min-height: 28px;
+  padding: 0 10px;
+  align-items: center;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.four-hour-stance.bullish {
+  color: var(--mint-bright);
+  background: rgba(127, 245, 182, 0.1);
+}
+
+.four-hour-stance.bearish {
+  color: #ffd4a7;
+  background: rgba(255, 184, 107, 0.1);
+}
+
+.four-hour-stance.neutral {
+  color: var(--muted-strong);
+  background: rgba(183, 205, 194, 0.08);
+}
+
+.four-hour-content > p {
+  margin: 0;
+}
+
+#four-hour-summary {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 680;
+  line-height: 1.65;
+}
+
+.four-hour-signals {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 7px;
+  margin: 12px 0;
+}
+
+.four-hour-signals > span {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: rgba(5, 15, 12, 0.34);
+}
+
+.four-hour-signals small {
+  color: var(--muted);
+  font-size: 8px;
+}
+
+.four-hour-signals strong {
+  overflow: hidden;
+  color: var(--muted-strong);
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.four-hour-signals .bullish strong { color: var(--mint-bright); }
+.four-hour-signals .bearish strong { color: #ffd4a7; }
+
+.four-hour-condition {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.four-hour-score {
+  display: grid;
+  min-height: 116px;
+  padding: 13px;
+  align-content: center;
+  justify-items: center;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: rgba(4, 14, 10, 0.48);
+  text-align: center;
+}
+
+.four-hour-score small {
+  color: var(--muted);
+  font-size: 8px;
+}
+
+.four-hour-score strong {
+  margin: 3px 0;
+  color: var(--muted-strong);
+  font-size: 30px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em;
+}
+
+.four-hour-brief[data-direction="bullish"] .four-hour-score strong { color: var(--mint-bright); }
+.four-hour-brief[data-direction="bearish"] .four-hour-score strong { color: #ffd4a7; }
+
+.four-hour-score span {
+  margin-bottom: 6px;
+  color: var(--muted-strong);
+  font-size: 10px;
+  font-weight: 750;
+}
+
 .metric-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1944,6 +2092,19 @@ footer p { margin: 0; }
   .summary-detail-grid {
     grid-template-columns: 1fr;
   }
+
+  .four-hour-brief {
+    grid-template-columns: minmax(170px, 0.48fr) minmax(0, 1.52fr);
+  }
+
+  .four-hour-score {
+    grid-column: 1 / -1;
+    min-height: 0;
+    grid-template-columns: repeat(4, auto);
+    gap: 12px;
+    align-items: center;
+    justify-content: center;
+  }
 }
 
 @media (max-width: 680px) {
@@ -1975,6 +2136,26 @@ footer p { margin: 0; }
   }
 
   .hero-state h2 { font-size: 19px; }
+
+  .four-hour-brief {
+    grid-template-columns: 1fr;
+    gap: 17px;
+    padding: 19px;
+    border-radius: 18px;
+  }
+
+  .four-hour-signals {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .four-hour-score {
+    grid-column: auto;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .four-hour-score strong {
+    font-size: 26px;
+  }
 
   .metric-grid {
     grid-template-columns: 1fr;

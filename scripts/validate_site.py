@@ -55,6 +55,7 @@ def main() -> None:
         "local opinion persistence": "OPINION_STORAGE_KEY" in javascript and "saveOpinions" in javascript,
         "multi-horizon opinion checks": "OPINION_HORIZONS" in javascript and "evaluateOpinions" in javascript,
         "weighted opinion summary": 'id="opinion-summary"' in html and "renderOpinionSummary" in javascript and "opinionWeight" in javascript,
+        "four hour strategy brief": 'id="four-hour-brief"' in html and "renderFourHourBrief" in javascript and "relativePeriodSignal" in javascript,
         "summary range and direction filters": "data-summary-window" in html and "data-opinion-filter" in javascript,
         "canonical X snowflake time": "X_SNOWFLAKE_EPOCH" in javascript and "xPostTimestamp" in javascript and "北京时间" in javascript,
         "manual X published time migration": "xSnowflakeTimestamp(parsedPostId)" in javascript and "migrated" in javascript,

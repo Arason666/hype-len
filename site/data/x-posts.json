@@ -3,9 +3,47 @@
     "cost_usd": 0.15,
     "posts": 20
   },
-  "generated_at": "2026-08-08T16:55:45Z",
+  "generated_at": "2026-08-08T23:14:05Z",
   "mode": "x-api-paid",
   "posts": [
+    {
+      "analysis": {
+        "confidence": 44,
+        "direction": "neutral",
+        "direction_label": "中性 / 信息型",
+        "direction_score": 0,
+        "engine": "rules-v1-server",
+        "event_type": "一般市场观点",
+        "factors": [
+          "一般市场观点",
+          "自动采集",
+          "方向词不足"
+        ],
+        "horizon": "数小时至 3 天",
+        "impact": "有限",
+        "impact_score": 60,
+        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "1903429012535525376",
+      "author_name": "HYPEconomist",
+      "conversation_id": "2086225772247761161",
+      "created_at": "2026-08-08T22:59:18.000Z",
+      "fetched_at": "2026-08-08T23:14:05Z",
+      "id": "2086225772247761161",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 0,
+        "impression_count": 486,
+        "like_count": 14,
+        "quote_count": 0,
+        "reply_count": 3,
+        "retweet_count": 0
+      },
+      "source_role": "市场观察",
+      "text": "what is dead may never die https://t.co/uxraz8ZO6o",
+      "url": "https://x.com/HYPEconomist/status/2086225772247761161",
+      "username": "HYPEconomist"
+    },
     {
       "analysis": {
         "confidence": 46,
@@ -1221,7 +1259,7 @@
     {
       "handle": "HYPEconomist",
       "influence": 60,
-      "last_seen_id": "2086104321846899006",
+      "last_seen_id": "2086225772247761161",
       "name": "HYPEconomist",
       "role": "市场观察",
       "user_id": "1903429012535525376"
@@ -1229,10 +1267,10 @@
   ],
   "timezone": "Asia/Shanghai",
   "usage_today": {
-    "analyses": 11,
+    "analyses": 12,
     "date": "2026-08-09",
-    "estimated_cost_usd": 0.055,
-    "post_reads": 11,
+    "estimated_cost_usd": 0.06,
+    "post_reads": 12,
     "user_reads": 0
   },
   "version": 1

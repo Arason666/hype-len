@@ -35,6 +35,7 @@ def main() -> None:
         "crosshair labels": "axisTime" in javascript and "axisValue" in javascript,
         "hidden loading overlays": ".chart-empty[hidden]" in stylesheet and "pointer-events: none" in stylesheet,
         "drag-to-pan charts": "panFromPointer" in javascript and 'classList.add("dragging")' in javascript,
+        "readable EMA tooltip": 'class="tooltip-ema"' in javascript and ".tooltip-ema" in stylesheet,
     }
     failed = [name for name, passed in checks.items() if not passed]
     if failed:

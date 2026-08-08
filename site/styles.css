@@ -492,7 +492,7 @@ button {
 .chart-context {
   margin: 23px 0 14px;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .chart-context-notes,
@@ -564,7 +564,8 @@ button {
   display: flex;
   gap: 11px;
   color: var(--muted);
-  font-size: 8px;
+  font-size: 10px;
+  font-weight: 650;
 }
 
 .legend span {
@@ -574,14 +575,18 @@ button {
 }
 
 .line {
-  width: 10px;
-  height: 2px;
+  width: 14px;
+  height: 2.5px;
   border-radius: 1px;
   background: var(--muted-strong);
 }
 
-.line.fast { opacity: 0.58; }
-.line.slow { opacity: 0.28; }
+.eth-chart-card .line.main { background: #aebaff; }
+.eth-chart-card .line.fast { background: #77c7ff; }
+.eth-chart-card .line.slow { background: #6488c9; }
+.btc-chart-card .line.main { background: #f2b861; }
+.btc-chart-card .line.fast { background: #ffd98d; }
+.btc-chart-card .line.slow { background: #d88f4d; }
 
 .zoom-controls {
   gap: 4px;
@@ -620,13 +625,13 @@ button {
 .zoom-controls .reset-zoom {
   min-width: 38px;
   color: var(--muted);
-  font-size: 9px;
+  font-size: 10px;
 }
 
 .zoom-controls > span {
   min-width: 36px;
   color: var(--muted);
-  font-size: 8px;
+  font-size: 10px;
   font-variant-numeric: tabular-nums;
   text-align: center;
 }
@@ -661,23 +666,53 @@ canvas:focus-visible {
 .chart-tooltip {
   position: absolute;
   z-index: 4;
-  min-width: 128px;
-  padding: 9px 11px;
+  min-width: 180px;
+  padding: 11px 13px;
   border: 1px solid var(--line-strong);
   border-radius: 10px;
   color: var(--muted-strong);
   background: rgba(6, 16, 13, 0.94);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.28);
   pointer-events: none;
-  font-size: 9px;
-  line-height: 1.55;
+  font-size: 11px;
+  line-height: 1.5;
 }
 
 .chart-tooltip strong {
   display: block;
+  margin: 3px 0 5px;
   color: var(--text);
-  font-size: 12px;
+  font-size: 16px;
   font-variant-numeric: tabular-nums;
+}
+
+.chart-tooltip > span {
+  display: block;
+}
+
+.chart-tooltip .tooltip-time {
+  color: var(--muted-strong);
+}
+
+.chart-tooltip .tooltip-ema {
+  display: flex;
+  gap: 18px;
+  justify-content: space-between;
+  font-variant-numeric: tabular-nums;
+}
+
+.chart-tooltip .tooltip-ema + .tooltip-ema {
+  margin-top: 2px;
+}
+
+.chart-tooltip .tooltip-ema i {
+  color: var(--muted-strong);
+  font-style: normal;
+}
+
+.chart-tooltip .tooltip-ema b {
+  color: var(--text);
+  font-weight: 700;
 }
 
 .chart-empty {

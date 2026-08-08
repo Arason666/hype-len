@@ -306,7 +306,7 @@ class RatioChart {
     }
     const context = this.canvas.getContext("2d");
     context.setTransform(dpr, 0, 0, dpr, 0, 0);
-    return { context, width, height, dpr, padding: { top: 14, right: 10, bottom: 28, left: 48 } };
+    return { context, width, height, dpr, padding: { top: 16, right: 12, bottom: 34, left: 60 } };
   }
 
   draw(highlightIndex = this.hoverIndex) {
@@ -328,7 +328,7 @@ class RatioChart {
     const yFor = (value) => padding.top + ((max - value) / (max - min)) * plotHeight;
 
     context.lineWidth = 1;
-    context.font = "9px ui-sans-serif, -apple-system, sans-serif";
+    context.font = "11px ui-sans-serif, -apple-system, sans-serif";
     context.textBaseline = "middle";
     for (let line = 0; line <= 4; line += 1) {
       const ratio = line / 4;
@@ -368,9 +368,9 @@ class RatioChart {
     context.fillStyle = mainGradient;
     context.fill();
 
-    this.drawLine(context, this.rows.map((row) => row[`${key}Slow`]), xFor, yFor, this.options.slow, 1.1);
-    this.drawLine(context, this.rows.map((row) => row[`${key}Fast`]), xFor, yFor, this.options.fast, 1.25);
-    this.drawLine(context, this.rows.map((row) => row[key]), xFor, yFor, this.options.main, 1.75);
+    this.drawLine(context, this.rows.map((row) => row[`${key}Slow`]), xFor, yFor, this.options.slow, 1.6);
+    this.drawLine(context, this.rows.map((row) => row[`${key}Fast`]), xFor, yFor, this.options.fast, 1.9);
+    this.drawLine(context, this.rows.map((row) => row[key]), xFor, yFor, this.options.main, 2.05);
 
     if (this.viewEnd === this.fullRows.length) {
       const lastIndex = this.rows.length - 1;
@@ -406,22 +406,22 @@ class RatioChart {
       context.stroke();
 
       const axisTime = formatTime.format(row.t);
-      const timeWidth = Math.ceil(context.measureText(axisTime).width) + 12;
+      const timeWidth = Math.ceil(context.measureText(axisTime).width) + 14;
       const timeLeft = Math.max(padding.left, Math.min(width - padding.right - timeWidth, x - timeWidth / 2));
       context.fillStyle = "rgba(6,16,13,0.96)";
-      context.fillRect(timeLeft, height - padding.bottom + 4, timeWidth, 18);
+      context.fillRect(timeLeft, height - padding.bottom + 5, timeWidth, 22);
       context.fillStyle = this.options.main;
-      context.font = "9px ui-sans-serif, -apple-system, sans-serif";
+      context.font = "11px ui-sans-serif, -apple-system, sans-serif";
       context.textAlign = "center";
       context.textBaseline = "middle";
-      context.fillText(axisTime, timeLeft + timeWidth / 2, height - padding.bottom + 13);
+      context.fillText(axisTime, timeLeft + timeWidth / 2, height - padding.bottom + 16);
 
       const axisValue = formatRatio(row[key]);
       context.fillStyle = "rgba(6,16,13,0.96)";
-      context.fillRect(0, y - 9, padding.left - 4, 18);
+      context.fillRect(0, y - 11, padding.left - 5, 22);
       context.fillStyle = this.options.main;
       context.textAlign = "right";
-      context.fillText(axisValue, padding.left - 8, y);
+      context.fillText(axisValue, padding.left - 9, y);
     }
 
     this.geometry = { xFor, yFor, padding, width, height, plotWidth };
@@ -455,11 +455,12 @@ class RatioChart {
     const key = this.options.key;
     this.draw(this.hoverIndex);
     const pinnedLabel = this.pinnedIndex === index ? " · 已固定" : "";
-    this.tooltip.innerHTML = `<span>${formatFullTime.format(row.t)}${pinnedLabel}</span><strong>${formatRatio(row[key])}</strong><span>EMA 8　${formatRatio(row[`${key}Fast`])}</span><span>EMA 21　${formatRatio(row[`${key}Slow`])}</span>`;
+    this.tooltip.innerHTML = `<span class="tooltip-time">${formatFullTime.format(row.t)}${pinnedLabel}</span><strong>${formatRatio(row[key])}</strong><span class="tooltip-ema"><i>EMA 8</i><b>${formatRatio(row[`${key}Fast`])}</b></span><span class="tooltip-ema"><i>EMA 21</i><b>${formatRatio(row[`${key}Slow`])}</b></span>`;
     this.tooltip.hidden = false;
     const pointX = this.geometry.xFor(this.hoverIndex);
-    const left = pointX > this.geometry.width * 0.68 ? pointX - 142 : pointX + 9;
-    this.tooltip.style.left = `${Math.max(4, left)}px`;
+    const tooltipWidth = Math.max(180, this.tooltip.offsetWidth || 180);
+    const left = pointX > this.geometry.width * 0.68 ? pointX - tooltipWidth - 10 : pointX + 10;
+    this.tooltip.style.left = `${Math.max(4, Math.min(this.geometry.width - tooltipWidth - 4, left))}px`;
     this.tooltip.style.top = "12px";
   }
 
@@ -580,16 +581,16 @@ class RatioChart {
 const ethChart = new RatioChart($("eth-chart"), $("eth-tooltip"), {
   key: "eth",
   main: "#aebaff",
-  fast: "rgba(144,165,255,0.58)",
-  slow: "rgba(144,165,255,0.27)",
+  fast: "rgba(119,199,255,0.92)",
+  slow: "rgba(100,136,201,0.78)",
   fillStart: "rgba(144,165,255,0.15)",
   glow: "rgba(174,186,255,0.42)",
 });
 const btcChart = new RatioChart($("btc-chart"), $("btc-tooltip"), {
   key: "btc",
   main: "#f2b861",
-  fast: "rgba(242,184,97,0.58)",
-  slow: "rgba(242,184,97,0.27)",
+  fast: "rgba(255,217,141,0.92)",
+  slow: "rgba(216,143,77,0.78)",
   fillStart: "rgba(242,184,97,0.14)",
   glow: "rgba(242,184,97,0.4)",
 });

@@ -20,8 +20,8 @@ def main() -> None:
     checks = {
         "responsive viewport": 'name="viewport"' in html,
         "Chinese language": 'lang="zh-CN"' in html,
-        "dashboard script": 'src="./app.js"' in html,
-        "dashboard stylesheet": 'href="./styles.css"' in html,
+        "dashboard script": 'src="./app.js' in html,
+        "dashboard stylesheet": 'href="./styles.css' in html,
         "Hyperliquid endpoint": "api.hyperliquid.xyz/info" in javascript,
         "15m period": '"15m"' in javascript,
         "1h period": '"1h"' in javascript,
@@ -33,6 +33,8 @@ def main() -> None:
         "wheel zoom": 'addEventListener("wheel"' in javascript,
         "click pinning": "this.pinnedIndex = index" in javascript,
         "crosshair labels": "axisTime" in javascript and "axisValue" in javascript,
+        "hidden loading overlays": ".chart-empty[hidden]" in stylesheet and "pointer-events: none" in stylesheet,
+        "drag-to-pan charts": "panFromPointer" in javascript and 'classList.add("dragging")' in javascript,
     }
     failed = [name for name, passed in checks.items() if not passed]
     if failed:

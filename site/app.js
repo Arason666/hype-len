@@ -222,10 +222,13 @@ class RatioChart {
     this.viewEnd = 0;
     this.hoverIndex = null;
     this.pinnedIndex = null;
+    this.dragState = null;
     this.resizeObserver = new ResizeObserver(() => this.draw());
     this.resizeObserver.observe(canvas.parentElement);
+    canvas.addEventListener("pointerdown", (event) => this.onPointerDown(event));
     canvas.addEventListener("pointermove", (event) => this.onPointerMove(event));
-    canvas.addEventListener("click", (event) => this.onClick(event));
+    canvas.addEventListener("pointerup", (event) => this.onPointerUp(event));
+    canvas.addEventListener("pointercancel", (event) => this.onPointerCancel(event));
     canvas.addEventListener("pointerleave", () => this.onPointerLeave());
     canvas.addEventListener("wheel", (event) => this.onWheel(event), { passive: false });
     canvas.addEventListener("keydown", (event) => this.onKeyDown(event));
@@ -252,6 +255,7 @@ class RatioChart {
     const full = Math.max(1, this.fullRows.length);
     const zoom = Math.round((full / visible) * 100);
     setText(`${this.options.key}-zoom-level`, `${zoom}%`);
+    this.canvas.classList.toggle("can-pan", visible < full);
     document.querySelectorAll(`[data-chart="${this.options.key}"][data-zoom]`).forEach((button) => {
       if (button.dataset.zoom === "out" || button.dataset.zoom === "reset") {
         button.disabled = visible >= full;
@@ -460,8 +464,66 @@ class RatioChart {
   }
 
   onPointerMove(event) {
+    if (this.dragState) {
+      this.panFromPointer(event);
+      return;
+    }
     if (this.pinnedIndex !== null || event.pointerType === "touch") return;
     this.showPoint(this.pointerIndex(event));
+  }
+
+  onPointerDown(event) {
+    if (!event.isPrimary || (event.pointerType === "mouse" && event.button !== 0)) return;
+    const visible = this.viewEnd - this.viewStart;
+    this.dragState = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startViewStart: this.viewStart,
+      canPan: visible < this.fullRows.length,
+      moved: false,
+    };
+    this.canvas.setPointerCapture?.(event.pointerId);
+  }
+
+  panFromPointer(event) {
+    if (!this.dragState || event.pointerId !== this.dragState.pointerId || !this.dragState.canPan) return;
+    const distance = event.clientX - this.dragState.startX;
+    if (Math.abs(distance) < 3 && !this.dragState.moved) return;
+    this.dragState.moved = true;
+    this.canvas.classList.add("dragging");
+
+    const visible = this.viewEnd - this.viewStart;
+    const barsPerPixel = visible / Math.max(1, this.geometry?.plotWidth || this.canvas.clientWidth);
+    const shift = Math.round(-distance * barsPerPixel);
+    const nextStart = Math.max(
+      0,
+      Math.min(this.fullRows.length - visible, this.dragState.startViewStart + shift)
+    );
+    if (nextStart === this.viewStart) return;
+    this.viewStart = nextStart;
+    this.viewEnd = nextStart + visible;
+    this.updateVisibleRows();
+    this.hoverIndex = null;
+    this.pinnedIndex = null;
+    this.tooltip.hidden = true;
+    this.draw();
+  }
+
+  onPointerUp(event) {
+    if (!this.dragState || event.pointerId !== this.dragState.pointerId) return;
+    const moved = this.dragState.moved;
+    this.finishDrag(event.pointerId);
+    if (!moved) this.onClick(event);
+  }
+
+  onPointerCancel(event) {
+    if (this.dragState?.pointerId === event.pointerId) this.finishDrag(event.pointerId);
+  }
+
+  finishDrag(pointerId) {
+    if (this.canvas.hasPointerCapture?.(pointerId)) this.canvas.releasePointerCapture(pointerId);
+    this.dragState = null;
+    this.canvas.classList.remove("dragging");
   }
 
   onClick(event) {
@@ -476,6 +538,7 @@ class RatioChart {
   }
 
   onPointerLeave() {
+    if (this.dragState) return;
     if (this.pinnedIndex === null) this.clearPointer();
   }
 

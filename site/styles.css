@@ -645,6 +645,15 @@ canvas {
   touch-action: pan-y;
 }
 
+canvas.can-pan {
+  cursor: grab;
+}
+
+canvas.dragging {
+  cursor: grabbing;
+  user-select: none;
+}
+
 canvas:focus-visible {
   outline-offset: 2px;
 }
@@ -677,7 +686,12 @@ canvas:focus-visible {
   display: grid;
   place-items: center;
   color: var(--muted);
+  pointer-events: none;
   font-size: 11px;
+}
+
+.chart-empty[hidden] {
+  display: none;
 }
 
 .lower-grid {

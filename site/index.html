@@ -10,7 +10,7 @@
     />
     <title>HYPE 相对强弱监控</title>
     <link rel="manifest" href="./manifest.webmanifest" />
-    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./styles.css?v=20260808-2" />
   </head>
   <body>
     <div class="ambient ambient-one" aria-hidden="true"></div>
@@ -110,7 +110,7 @@
         <div class="chart-context">
           <span id="range-label">最近 7 天</span>
           <div class="chart-context-notes">
-            <span class="interaction-hint">悬停查看 · 点击固定 · 滚轮缩放</span>
+            <span class="interaction-hint">悬停查看 · 点击固定 · 滚轮缩放 · 放大后拖动平移</span>
             <span class="explain-dot"><i></i> 比值下降代表 HYPE 相对走强</span>
           </div>
         </div>
@@ -137,7 +137,7 @@
               </div>
             </div>
             <div class="canvas-wrap">
-              <canvas id="eth-chart" tabindex="0" aria-label="ETH/HYPE 交互趋势图；可悬停或点击查看数据，使用滚轮缩放"></canvas>
+              <canvas id="eth-chart" tabindex="0" aria-label="ETH/HYPE 交互趋势图；可悬停或点击查看数据，使用滚轮缩放，放大后拖动平移"></canvas>
               <div class="chart-tooltip" id="eth-tooltip" role="status" aria-live="polite" hidden></div>
               <div class="chart-empty" id="eth-chart-empty">正在载入趋势</div>
             </div>
@@ -164,7 +164,7 @@
               </div>
             </div>
             <div class="canvas-wrap">
-              <canvas id="btc-chart" tabindex="0" aria-label="BTC/HYPE 交互趋势图；可悬停或点击查看数据，使用滚轮缩放"></canvas>
+              <canvas id="btc-chart" tabindex="0" aria-label="BTC/HYPE 交互趋势图；可悬停或点击查看数据，使用滚轮缩放，放大后拖动平移"></canvas>
               <div class="chart-tooltip" id="btc-tooltip" role="status" aria-live="polite" hidden></div>
               <div class="chart-empty" id="btc-chart-empty">正在载入趋势</div>
             </div>
@@ -225,6 +225,6 @@
     </main>
 
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
-    <script type="module" src="./app.js"></script>
+    <script type="module" src="./app.js?v=20260808-2"></script>
   </body>
 </html>

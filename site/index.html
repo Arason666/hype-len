@@ -109,7 +109,10 @@
 
         <div class="chart-context">
           <span id="range-label">最近 7 天</span>
-          <span class="explain-dot"><i></i> 比值下降代表 HYPE 相对走强</span>
+          <div class="chart-context-notes">
+            <span class="interaction-hint">悬停查看 · 点击固定 · 滚轮缩放</span>
+            <span class="explain-dot"><i></i> 比值下降代表 HYPE 相对走强</span>
+          </div>
         </div>
 
         <div class="chart-grid">
@@ -119,15 +122,23 @@
                 <span class="chart-dot eth"></span>
                 <strong>ETH / HYPE</strong>
               </div>
-              <div class="legend" aria-label="图例">
-                <span><i class="line main"></i>比值</span>
-                <span><i class="line fast"></i>EMA 8</span>
-                <span><i class="line slow"></i>EMA 21</span>
+              <div class="chart-tools">
+                <div class="legend" aria-label="图例">
+                  <span><i class="line main"></i>比值</span>
+                  <span><i class="line fast"></i>EMA 8</span>
+                  <span><i class="line slow"></i>EMA 21</span>
+                </div>
+                <div class="zoom-controls" aria-label="ETH/HYPE 图表缩放">
+                  <button type="button" data-chart="eth" data-zoom="out" aria-label="缩小 ETH/HYPE 图表">−</button>
+                  <span id="eth-zoom-level">100%</span>
+                  <button type="button" data-chart="eth" data-zoom="in" aria-label="放大 ETH/HYPE 图表">＋</button>
+                  <button class="reset-zoom" type="button" data-chart="eth" data-zoom="reset">重置</button>
+                </div>
               </div>
             </div>
             <div class="canvas-wrap">
-              <canvas id="eth-chart" aria-label="ETH/HYPE 趋势图"></canvas>
-              <div class="chart-tooltip" id="eth-tooltip" hidden></div>
+              <canvas id="eth-chart" tabindex="0" aria-label="ETH/HYPE 交互趋势图；可悬停或点击查看数据，使用滚轮缩放"></canvas>
+              <div class="chart-tooltip" id="eth-tooltip" role="status" aria-live="polite" hidden></div>
               <div class="chart-empty" id="eth-chart-empty">正在载入趋势</div>
             </div>
           </article>
@@ -138,15 +149,23 @@
                 <span class="chart-dot btc"></span>
                 <strong>BTC / HYPE</strong>
               </div>
-              <div class="legend" aria-label="图例">
-                <span><i class="line main"></i>比值</span>
-                <span><i class="line fast"></i>EMA 8</span>
-                <span><i class="line slow"></i>EMA 21</span>
+              <div class="chart-tools">
+                <div class="legend" aria-label="图例">
+                  <span><i class="line main"></i>比值</span>
+                  <span><i class="line fast"></i>EMA 8</span>
+                  <span><i class="line slow"></i>EMA 21</span>
+                </div>
+                <div class="zoom-controls" aria-label="BTC/HYPE 图表缩放">
+                  <button type="button" data-chart="btc" data-zoom="out" aria-label="缩小 BTC/HYPE 图表">−</button>
+                  <span id="btc-zoom-level">100%</span>
+                  <button type="button" data-chart="btc" data-zoom="in" aria-label="放大 BTC/HYPE 图表">＋</button>
+                  <button class="reset-zoom" type="button" data-chart="btc" data-zoom="reset">重置</button>
+                </div>
               </div>
             </div>
             <div class="canvas-wrap">
-              <canvas id="btc-chart" aria-label="BTC/HYPE 趋势图"></canvas>
-              <div class="chart-tooltip" id="btc-tooltip" hidden></div>
+              <canvas id="btc-chart" tabindex="0" aria-label="BTC/HYPE 交互趋势图；可悬停或点击查看数据，使用滚轮缩放"></canvas>
+              <div class="chart-tooltip" id="btc-tooltip" role="status" aria-live="polite" hidden></div>
               <div class="chart-empty" id="btc-chart-empty">正在载入趋势</div>
             </div>
           </article>

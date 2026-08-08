@@ -15,6 +15,7 @@ def main() -> None:
         raise SystemExit(f"Missing site files: {', '.join(missing)}")
 
     html = (SITE / "index.html").read_text(encoding="utf-8")
+    stylesheet = (SITE / "styles.css").read_text(encoding="utf-8")
     javascript = (SITE / "app.js").read_text(encoding="utf-8")
     checks = {
         "responsive viewport": 'name="viewport"' in html,
@@ -26,6 +27,12 @@ def main() -> None:
         "1h period": '"1h"' in javascript,
         "4h period": '"4h"' in javascript,
         "1d period": '"1d"' in javascript,
+        "single-column charts": ".chart-grid" in stylesheet and "grid-template-columns: minmax(0, 1fr)" in stylesheet,
+        "keyboard-accessible charts": 'canvas id="eth-chart" tabindex="0"' in html and 'canvas id="btc-chart" tabindex="0"' in html,
+        "chart zoom controls": 'data-zoom="in"' in html and 'data-zoom="out"' in html and 'data-zoom="reset"' in html,
+        "wheel zoom": 'addEventListener("wheel"' in javascript,
+        "click pinning": "this.pinnedIndex = index" in javascript,
+        "crosshair labels": "axisTime" in javascript and "axisValue" in javascript,
     }
     failed = [name for name, passed in checks.items() if not passed]
     if failed:

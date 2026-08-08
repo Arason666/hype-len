@@ -216,20 +216,80 @@ class RatioChart {
     this.canvas = canvas;
     this.tooltip = tooltip;
     this.options = options;
+    this.fullRows = [];
     this.rows = [];
+    this.viewStart = 0;
+    this.viewEnd = 0;
     this.hoverIndex = null;
+    this.pinnedIndex = null;
     this.resizeObserver = new ResizeObserver(() => this.draw());
     this.resizeObserver.observe(canvas.parentElement);
-    canvas.addEventListener("pointermove", (event) => this.onPointer(event));
-    canvas.addEventListener("pointerdown", (event) => this.onPointer(event));
-    canvas.addEventListener("pointerleave", () => this.clearPointer());
+    canvas.addEventListener("pointermove", (event) => this.onPointerMove(event));
+    canvas.addEventListener("click", (event) => this.onClick(event));
+    canvas.addEventListener("pointerleave", () => this.onPointerLeave());
+    canvas.addEventListener("wheel", (event) => this.onWheel(event), { passive: false });
+    canvas.addEventListener("keydown", (event) => this.onKeyDown(event));
   }
 
   setData(rows) {
-    this.rows = rows;
+    this.fullRows = rows;
+    this.viewStart = 0;
+    this.viewEnd = rows.length;
+    this.updateVisibleRows();
     this.hoverIndex = null;
+    this.pinnedIndex = null;
     this.tooltip.hidden = true;
+    this.updateZoomUI();
     requestAnimationFrame(() => this.draw());
+  }
+
+  updateVisibleRows() {
+    this.rows = this.fullRows.slice(this.viewStart, this.viewEnd);
+  }
+
+  updateZoomUI() {
+    const visible = Math.max(1, this.viewEnd - this.viewStart);
+    const full = Math.max(1, this.fullRows.length);
+    const zoom = Math.round((full / visible) * 100);
+    setText(`${this.options.key}-zoom-level`, `${zoom}%`);
+    document.querySelectorAll(`[data-chart="${this.options.key}"][data-zoom]`).forEach((button) => {
+      if (button.dataset.zoom === "out" || button.dataset.zoom === "reset") {
+        button.disabled = visible >= full;
+      }
+      if (button.dataset.zoom === "in") {
+        button.disabled = visible <= Math.min(30, full);
+      }
+    });
+  }
+
+  zoomBy(factor, anchorRatio = 0.5) {
+    if (this.fullRows.length < 2) return;
+    const currentCount = this.viewEnd - this.viewStart;
+    const minimumCount = Math.min(30, this.fullRows.length);
+    const nextCount = Math.min(
+      this.fullRows.length,
+      Math.max(minimumCount, Math.round(currentCount * factor))
+    );
+    if (nextCount === currentCount) return;
+
+    const anchorIndex = this.viewStart + anchorRatio * Math.max(0, currentCount - 1);
+    let nextStart = Math.round(anchorIndex - anchorRatio * Math.max(0, nextCount - 1));
+    nextStart = Math.max(0, Math.min(this.fullRows.length - nextCount, nextStart));
+    this.viewStart = nextStart;
+    this.viewEnd = nextStart + nextCount;
+    this.updateVisibleRows();
+    this.clearPointer(true);
+    this.updateZoomUI();
+    this.draw();
+  }
+
+  resetZoom() {
+    this.viewStart = 0;
+    this.viewEnd = this.fullRows.length;
+    this.updateVisibleRows();
+    this.clearPointer(true);
+    this.updateZoomUI();
+    this.draw();
   }
 
   dimensions() {
@@ -308,22 +368,27 @@ class RatioChart {
     this.drawLine(context, this.rows.map((row) => row[`${key}Fast`]), xFor, yFor, this.options.fast, 1.25);
     this.drawLine(context, this.rows.map((row) => row[key]), xFor, yFor, this.options.main, 1.75);
 
-    const lastIndex = this.rows.length - 1;
-    context.beginPath();
-    context.arc(xFor(lastIndex), yFor(this.rows[lastIndex][key]), 3, 0, Math.PI * 2);
-    context.fillStyle = this.options.main;
-    context.fill();
-    context.beginPath();
-    context.arc(xFor(lastIndex), yFor(this.rows[lastIndex][key]), 6, 0, Math.PI * 2);
-    context.strokeStyle = this.options.glow;
-    context.stroke();
+    if (this.viewEnd === this.fullRows.length) {
+      const lastIndex = this.rows.length - 1;
+      context.beginPath();
+      context.arc(xFor(lastIndex), yFor(this.rows[lastIndex][key]), 3, 0, Math.PI * 2);
+      context.fillStyle = this.options.main;
+      context.fill();
+      context.beginPath();
+      context.arc(xFor(lastIndex), yFor(this.rows[lastIndex][key]), 6, 0, Math.PI * 2);
+      context.strokeStyle = this.options.glow;
+      context.stroke();
+    }
 
     if (Number.isInteger(highlightIndex) && highlightIndex >= 0 && highlightIndex < this.rows.length) {
       const x = xFor(highlightIndex);
       const y = yFor(this.rows[highlightIndex][key]);
+      const row = this.rows[highlightIndex];
       context.beginPath();
       context.moveTo(x, padding.top);
       context.lineTo(x, height - padding.bottom);
+      context.moveTo(padding.left, y);
+      context.lineTo(width - padding.right, y);
       context.strokeStyle = "rgba(236,247,240,0.2)";
       context.setLineDash([3, 4]);
       context.stroke();
@@ -335,6 +400,24 @@ class RatioChart {
       context.lineWidth = 2;
       context.strokeStyle = this.options.main;
       context.stroke();
+
+      const axisTime = formatTime.format(row.t);
+      const timeWidth = Math.ceil(context.measureText(axisTime).width) + 12;
+      const timeLeft = Math.max(padding.left, Math.min(width - padding.right - timeWidth, x - timeWidth / 2));
+      context.fillStyle = "rgba(6,16,13,0.96)";
+      context.fillRect(timeLeft, height - padding.bottom + 4, timeWidth, 18);
+      context.fillStyle = this.options.main;
+      context.font = "9px ui-sans-serif, -apple-system, sans-serif";
+      context.textAlign = "center";
+      context.textBaseline = "middle";
+      context.fillText(axisTime, timeLeft + timeWidth / 2, height - padding.bottom + 13);
+
+      const axisValue = formatRatio(row[key]);
+      context.fillStyle = "rgba(6,16,13,0.96)";
+      context.fillRect(0, y - 9, padding.left - 4, 18);
+      context.fillStyle = this.options.main;
+      context.textAlign = "right";
+      context.fillText(axisValue, padding.left - 8, y);
     }
 
     this.geometry = { xFor, yFor, padding, width, height, plotWidth };
@@ -353,16 +436,22 @@ class RatioChart {
     context.stroke();
   }
 
-  onPointer(event) {
+  pointerIndex(event) {
     if (!this.rows.length || !this.geometry) return;
     const rect = this.canvas.getBoundingClientRect();
     const localX = event.clientX - rect.left;
     const ratio = Math.min(1, Math.max(0, (localX - this.geometry.padding.left) / this.geometry.plotWidth));
-    this.hoverIndex = Math.round(ratio * (this.rows.length - 1));
-    const row = this.rows[this.hoverIndex];
+    return Math.round(ratio * (this.rows.length - 1));
+  }
+
+  showPoint(index) {
+    if (!Number.isInteger(index) || !this.rows[index]) return;
+    this.hoverIndex = index;
+    const row = this.rows[index];
     const key = this.options.key;
     this.draw(this.hoverIndex);
-    this.tooltip.innerHTML = `<span>${formatTime.format(row.t)}</span><strong>${formatRatio(row[key])}</strong><span>EMA 8　${formatRatio(row[`${key}Fast`])}</span><span>EMA 21　${formatRatio(row[`${key}Slow`])}</span>`;
+    const pinnedLabel = this.pinnedIndex === index ? " · 已固定" : "";
+    this.tooltip.innerHTML = `<span>${formatFullTime.format(row.t)}${pinnedLabel}</span><strong>${formatRatio(row[key])}</strong><span>EMA 8　${formatRatio(row[`${key}Fast`])}</span><span>EMA 21　${formatRatio(row[`${key}Slow`])}</span>`;
     this.tooltip.hidden = false;
     const pointX = this.geometry.xFor(this.hoverIndex);
     const left = pointX > this.geometry.width * 0.68 ? pointX - 142 : pointX + 9;
@@ -370,8 +459,56 @@ class RatioChart {
     this.tooltip.style.top = "12px";
   }
 
-  clearPointer() {
+  onPointerMove(event) {
+    if (this.pinnedIndex !== null || event.pointerType === "touch") return;
+    this.showPoint(this.pointerIndex(event));
+  }
+
+  onClick(event) {
+    const index = this.pointerIndex(event);
+    if (!Number.isInteger(index)) return;
+    if (this.pinnedIndex === index) {
+      this.clearPointer(true);
+      return;
+    }
+    this.pinnedIndex = index;
+    this.showPoint(index);
+  }
+
+  onPointerLeave() {
+    if (this.pinnedIndex === null) this.clearPointer();
+  }
+
+  onWheel(event) {
+    event.preventDefault();
+    if (!this.geometry) return;
+    const rect = this.canvas.getBoundingClientRect();
+    const localX = event.clientX - rect.left;
+    const anchorRatio = Math.min(
+      1,
+      Math.max(0, (localX - this.geometry.padding.left) / this.geometry.plotWidth)
+    );
+    this.zoomBy(event.deltaY < 0 ? 0.75 : 1.35, anchorRatio);
+  }
+
+  onKeyDown(event) {
+    if (event.key === "Escape") {
+      this.clearPointer(true);
+      return;
+    }
+    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+    event.preventDefault();
+    const direction = event.key === "ArrowLeft" ? -1 : 1;
+    const current = this.pinnedIndex ?? this.hoverIndex ?? this.rows.length - 1;
+    const next = Math.max(0, Math.min(this.rows.length - 1, current + direction));
+    this.pinnedIndex = next;
+    this.showPoint(next);
+  }
+
+  clearPointer(force = false) {
+    if (!force && this.pinnedIndex !== null) return;
     this.hoverIndex = null;
+    this.pinnedIndex = null;
     this.tooltip.hidden = true;
     this.draw();
   }
@@ -392,6 +529,17 @@ const btcChart = new RatioChart($("btc-chart"), $("btc-tooltip"), {
   slow: "rgba(242,184,97,0.27)",
   fillStart: "rgba(242,184,97,0.14)",
   glow: "rgba(242,184,97,0.4)",
+});
+
+const charts = { eth: ethChart, btc: btcChart };
+document.querySelectorAll("[data-chart][data-zoom]").forEach((button) => {
+  button.addEventListener("click", () => {
+    const chart = charts[button.dataset.chart];
+    if (!chart) return;
+    if (button.dataset.zoom === "in") chart.zoomBy(0.7);
+    else if (button.dataset.zoom === "out") chart.zoomBy(1.4);
+    else chart.resetZoom();
+  });
 });
 
 function renderCharts(period) {

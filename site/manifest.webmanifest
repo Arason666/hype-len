@@ -1,0 +1,10 @@
+{
+  "name": "HYPE 相对强弱监控",
+  "short_name": "HYPE Lens",
+  "description": "BTC/HYPE 与 ETH/HYPE 多周期趋势监控",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#07110f",
+  "theme_color": "#07110f",
+  "lang": "zh-CN"
+}

@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#07110f" />
+    <meta
+      name="description"
+      content="HYPE 相对 BTC 与 ETH 的多周期趋势监控，覆盖 15 分钟、1 小时、4 小时和日线。"
+    />
+    <title>HYPE 相对强弱监控</title>
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="ambient ambient-one" aria-hidden="true"></div>
+    <div class="ambient ambient-two" aria-hidden="true"></div>
+
+    <main class="shell">
+      <header class="topbar">
+        <a class="brand" href="./" aria-label="HYPE 相对强弱监控首页">
+          <span class="brand-mark" aria-hidden="true">H</span>
+          <span>
+            <strong>HYPE Lens</strong>
+            <small>相对强弱监控</small>
+          </span>
+        </a>
+
+        <div class="top-actions">
+          <span class="connection" id="connection-state" role="status">
+            <i></i><span>正在连接</span>
+          </span>
+          <button class="refresh-button" id="refresh-button" type="button" aria-label="刷新行情">
+            <span aria-hidden="true">↻</span> 刷新
+          </button>
+        </div>
+      </header>
+
+      <section class="hero-panel" aria-labelledby="overview-title">
+        <div>
+          <p class="eyebrow">MARKET PULSE · HYPERLIQUID</p>
+          <h1 id="overview-title">HYPE <span>相对强弱</span></h1>
+          <p class="hero-copy">用 BTC/HYPE 与 ETH/HYPE 比值，观察 HYPE 在四个周期里的真实强弱。</p>
+        </div>
+
+        <div class="hero-state loading-block" id="hero-state">
+          <div class="state-orbit" aria-hidden="true">
+            <span class="orbit-ring"></span>
+            <strong id="strength-score">--</strong>
+          </div>
+          <div>
+            <small>综合状态</small>
+            <h2 id="strength-label">加载行情中</h2>
+            <p id="strength-detail">正在计算多周期共振</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="metric-grid" aria-label="核心行情指标">
+        <article class="metric-card" id="eth-card">
+          <div class="metric-head">
+            <div>
+              <span class="pair-icon eth">Ξ</span>
+              <span>ETH / HYPE</span>
+            </div>
+            <span class="trend-pill neutral" id="eth-trend">等待数据</span>
+          </div>
+          <div class="metric-value" id="eth-value">--</div>
+          <p class="metric-caption">1 枚 ETH 可兑换的 HYPE 数量</p>
+          <div class="change-row">
+            <div><small>1小时</small><strong id="eth-change-1h">--</strong></div>
+            <div><small>4小时</small><strong id="eth-change-4h">--</strong></div>
+            <div><small>24小时</small><strong id="eth-change-24h">--</strong></div>
+          </div>
+        </article>
+
+        <article class="metric-card" id="btc-card">
+          <div class="metric-head">
+            <div>
+              <span class="pair-icon btc">₿</span>
+              <span>BTC / HYPE</span>
+            </div>
+            <span class="trend-pill neutral" id="btc-trend">等待数据</span>
+          </div>
+          <div class="metric-value" id="btc-value">--</div>
+          <p class="metric-caption">1 枚 BTC 可兑换的 HYPE 数量</p>
+          <div class="change-row">
+            <div><small>1小时</small><strong id="btc-change-1h">--</strong></div>
+            <div><small>4小时</small><strong id="btc-change-4h">--</strong></div>
+            <div><small>24小时</small><strong id="btc-change-24h">--</strong></div>
+          </div>
+        </article>
+      </section>
+
+      <section class="chart-section" aria-labelledby="chart-title">
+        <div class="section-head">
+          <div>
+            <p class="section-kicker">RELATIVE TREND</p>
+            <h2 id="chart-title">比值趋势</h2>
+          </div>
+
+          <div class="period-switch" role="tablist" aria-label="选择时间周期">
+            <button class="active" type="button" role="tab" aria-selected="true" data-period="15m">15分钟</button>
+            <button type="button" role="tab" aria-selected="false" data-period="1h">1小时</button>
+            <button type="button" role="tab" aria-selected="false" data-period="4h">4小时</button>
+            <button type="button" role="tab" aria-selected="false" data-period="1d">1日</button>
+          </div>
+        </div>
+
+        <div class="chart-context">
+          <span id="range-label">最近 7 天</span>
+          <span class="explain-dot"><i></i> 比值下降代表 HYPE 相对走强</span>
+        </div>
+
+        <div class="chart-grid">
+          <article class="chart-card">
+            <div class="chart-title-row">
+              <div>
+                <span class="chart-dot eth"></span>
+                <strong>ETH / HYPE</strong>
+              </div>
+              <div class="legend" aria-label="图例">
+                <span><i class="line main"></i>比值</span>
+                <span><i class="line fast"></i>EMA 8</span>
+                <span><i class="line slow"></i>EMA 21</span>
+              </div>
+            </div>
+            <div class="canvas-wrap">
+              <canvas id="eth-chart" aria-label="ETH/HYPE 趋势图"></canvas>
+              <div class="chart-tooltip" id="eth-tooltip" hidden></div>
+              <div class="chart-empty" id="eth-chart-empty">正在载入趋势</div>
+            </div>
+          </article>
+
+          <article class="chart-card">
+            <div class="chart-title-row">
+              <div>
+                <span class="chart-dot btc"></span>
+                <strong>BTC / HYPE</strong>
+              </div>
+              <div class="legend" aria-label="图例">
+                <span><i class="line main"></i>比值</span>
+                <span><i class="line fast"></i>EMA 8</span>
+                <span><i class="line slow"></i>EMA 21</span>
+              </div>
+            </div>
+            <div class="canvas-wrap">
+              <canvas id="btc-chart" aria-label="BTC/HYPE 趋势图"></canvas>
+              <div class="chart-tooltip" id="btc-tooltip" hidden></div>
+              <div class="chart-empty" id="btc-chart-empty">正在载入趋势</div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="lower-grid">
+        <article class="matrix-panel" aria-labelledby="matrix-title">
+          <div class="panel-heading">
+            <div>
+              <p class="section-kicker">TIMEFRAME MATRIX</p>
+              <h2 id="matrix-title">多周期状态</h2>
+            </div>
+            <span class="matrix-note">基于 EMA 8 / 21</span>
+          </div>
+
+          <div class="trend-matrix" id="trend-matrix">
+            <div class="matrix-row matrix-header">
+              <span>比值</span><span>15m</span><span>1h</span><span>4h</span><span>1d</span>
+            </div>
+            <div class="matrix-row">
+              <strong>ETH/HYPE</strong>
+              <span class="matrix-cell pending">--</span><span class="matrix-cell pending">--</span>
+              <span class="matrix-cell pending">--</span><span class="matrix-cell pending">--</span>
+            </div>
+            <div class="matrix-row">
+              <strong>BTC/HYPE</strong>
+              <span class="matrix-cell pending">--</span><span class="matrix-cell pending">--</span>
+              <span class="matrix-cell pending">--</span><span class="matrix-cell pending">--</span>
+            </div>
+          </div>
+          <p class="matrix-footnote">↓ HYPE 更强　↑ HYPE 更弱　→ 震荡</p>
+        </article>
+
+        <article class="signal-panel" aria-labelledby="signal-title">
+          <div class="panel-heading">
+            <div>
+              <p class="section-kicker">LIVE READOUT</p>
+              <h2 id="signal-title">当前观察</h2>
+            </div>
+          </div>
+          <div class="signal-list" id="signal-list">
+            <div class="signal-skeleton"></div>
+            <div class="signal-skeleton short"></div>
+            <div class="signal-skeleton"></div>
+          </div>
+        </article>
+      </section>
+
+      <footer>
+        <div>
+          <span class="footer-status"><i></i> 数据来自 Hyperliquid 公共行情接口</span>
+          <span id="last-updated">尚未更新</span>
+        </div>
+        <p>趋势信息仅供观察，不构成投资建议。</p>
+      </footer>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

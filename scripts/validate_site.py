@@ -1,0 +1,37 @@
+#!/usr/bin/env python3
+"""Small dependency-free validation for the static GitHub Pages artifact."""
+
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[1]
+SITE = ROOT / "site"
+
+
+def main() -> None:
+    required = [SITE / "index.html", SITE / "styles.css", SITE / "app.js", SITE / "manifest.webmanifest"]
+    missing = [str(path.relative_to(ROOT)) for path in required if not path.is_file()]
+    if missing:
+        raise SystemExit(f"Missing site files: {', '.join(missing)}")
+
+    html = (SITE / "index.html").read_text(encoding="utf-8")
+    javascript = (SITE / "app.js").read_text(encoding="utf-8")
+    checks = {
+        "responsive viewport": 'name="viewport"' in html,
+        "Chinese language": 'lang="zh-CN"' in html,
+        "dashboard script": 'src="./app.js"' in html,
+        "dashboard stylesheet": 'href="./styles.css"' in html,
+        "Hyperliquid endpoint": "api.hyperliquid.xyz/info" in javascript,
+        "15m period": '"15m"' in javascript,
+        "1h period": '"1h"' in javascript,
+        "4h period": '"4h"' in javascript,
+        "1d period": '"1d"' in javascript,
+    }
+    failed = [name for name, passed in checks.items() if not passed]
+    if failed:
+        raise SystemExit(f"Static validation failed: {', '.join(failed)}")
+    print("Static dashboard validation passed.")
+
+
+if __name__ == "__main__":
+    main()

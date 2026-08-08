@@ -948,6 +948,58 @@ canvas:focus-visible {
   font-size: 9px;
 }
 
+.x-api-guard {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(120px, 0.45fr)) minmax(280px, 1.5fr);
+  gap: 1px;
+  margin-top: 19px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: var(--line);
+}
+
+.x-api-guard > div,
+.x-api-guard > p {
+  margin: 0;
+  padding: 12px 14px;
+  background: rgba(5, 15, 12, 0.82);
+}
+
+.x-api-guard > div {
+  display: grid;
+  gap: 4px;
+}
+
+.x-api-guard small {
+  color: var(--muted);
+  font-size: 8px;
+}
+
+.x-api-guard strong {
+  color: var(--muted-strong);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.x-api-guard > p {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.55;
+}
+
+.x-api-guard > p i {
+  flex: 0 0 6px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--orange);
+  box-shadow: 0 0 0 4px rgba(255, 184, 107, 0.08);
+}
+
 .social-workspace {
   display: grid;
   grid-template-columns: minmax(0, 1.18fr) minmax(340px, 0.82fr);
@@ -1378,6 +1430,23 @@ canvas:focus-visible {
   background: rgba(5, 15, 12, 0.3);
 }
 
+.opinion-card.automated {
+  border-color: rgba(127, 245, 182, 0.14);
+}
+
+.auto-source-badge {
+  display: inline-flex;
+  min-height: 28px;
+  padding: 0 8px;
+  align-items: center;
+  border: 1px solid rgba(127, 245, 182, 0.16);
+  border-radius: 8px;
+  color: var(--mint);
+  background: rgba(127, 245, 182, 0.06);
+  font-size: 8px;
+  font-weight: 750;
+}
+
 .opinion-card-head {
   gap: 10px;
   justify-content: space-between;
@@ -1439,6 +1508,17 @@ canvas:focus-visible {
   line-height: 1.65;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
+}
+
+.opinion-analysis {
+  margin: -2px 0 12px;
+  padding: 10px 11px;
+  border-left: 2px solid rgba(127, 245, 182, 0.34);
+  border-radius: 0 8px 8px 0;
+  color: var(--muted);
+  background: rgba(127, 245, 182, 0.035);
+  font-size: 9px;
+  line-height: 1.65;
 }
 
 .opinion-meta {
@@ -1674,6 +1754,14 @@ footer p { margin: 0; }
     display: grid;
     gap: 15px;
     align-items: start;
+  }
+
+  .x-api-guard {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .x-api-guard > p {
+    grid-column: 1 / -1;
   }
 
   .social-mode-note {

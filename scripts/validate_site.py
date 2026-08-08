@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Small dependency-free validation for the static GitHub Pages artifact."""
 
+import json
 from pathlib import Path
 
 
@@ -9,7 +10,15 @@ SITE = ROOT / "site"
 
 
 def main() -> None:
-    required = [SITE / "index.html", SITE / "styles.css", SITE / "app.js", SITE / "manifest.webmanifest"]
+    required = [
+        SITE / "index.html",
+        SITE / "styles.css",
+        SITE / "app.js",
+        SITE / "manifest.webmanifest",
+        SITE / "data" / "x-posts.json",
+        ROOT / "scripts" / "x_monitor.py",
+        ROOT / ".github" / "workflows" / "x-monitor.yml",
+    ]
     missing = [str(path.relative_to(ROOT)) for path in required if not path.is_file()]
     if missing:
         raise SystemExit(f"Missing site files: {', '.join(missing)}")
@@ -17,6 +26,9 @@ def main() -> None:
     html = (SITE / "index.html").read_text(encoding="utf-8")
     stylesheet = (SITE / "styles.css").read_text(encoding="utf-8")
     javascript = (SITE / "app.js").read_text(encoding="utf-8")
+    x_data = json.loads((SITE / "data" / "x-posts.json").read_text(encoding="utf-8"))
+    x_monitor = (ROOT / "scripts" / "x_monitor.py").read_text(encoding="utf-8")
+    x_workflow = (ROOT / ".github" / "workflows" / "x-monitor.yml").read_text(encoding="utf-8")
     checks = {
         "responsive viewport": 'name="viewport"' in html,
         "Chinese language": 'lang="zh-CN"' in html,
@@ -43,6 +55,11 @@ def main() -> None:
         "local opinion persistence": "OPINION_STORAGE_KEY" in javascript and "saveOpinions" in javascript,
         "multi-horizon opinion checks": "OPINION_HORIZONS" in javascript and "evaluateOpinions" in javascript,
         "social mobile layout": ".social-workspace" in stylesheet and ".source-tabs" in stylesheet,
+        "paid X data feed": "X_POSTS_URL" in javascript and "loadAutomatedOpinions" in javascript,
+        "X API usage display": 'id="x-api-post-usage"' in html and 'id="x-api-cost-usage"' in html,
+        "daily post hard cap": "DEFAULT_DAILY_POST_LIMIT = 20" in x_monitor and x_data["daily_limits"]["posts"] == 20,
+        "daily cost hard cap": "DEFAULT_DAILY_COST_LIMIT_MICROS = 150_000" in x_monitor and x_data["daily_limits"]["cost_usd"] == 0.15,
+        "paid X scheduled workflow": "X_BEARER_TOKEN" in x_workflow and 'X_DAILY_POST_LIMIT: "20"' in x_workflow,
     }
     failed = [name for name, passed in checks.items() if not passed]
     if failed:

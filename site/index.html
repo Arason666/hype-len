@@ -10,7 +10,7 @@
     />
     <title>HYPE 相对强弱监控</title>
     <link rel="manifest" href="./manifest.webmanifest" />
-    <link rel="stylesheet" href="./styles.css?v=20260808-4" />
+    <link rel="stylesheet" href="./styles.css?v=20260808-5" />
   </head>
   <body>
     <div class="ambient ambient-one" aria-hidden="true"></div>
@@ -220,15 +220,31 @@
           <div>
             <div class="social-heading-line">
               <p class="section-kicker">HYPE SOCIAL INTELLIGENCE</p>
-              <span class="beta-badge">免费测试版</span>
+              <span class="beta-badge">X API 自动版</span>
             </div>
             <h2 id="social-title">HYPE 观点追踪</h2>
-            <p class="social-intro">浏览重点账号的官方 X 时间线，并把值得关注的帖子加入观点验证。</p>
+            <p class="social-intro">每 15 分钟自动读取重点账号的新帖，生成观点判断并跟踪后续 HYPE 表现。</p>
           </div>
           <div class="social-mode-note">
-            <strong>半自动追踪</strong>
-            <span>官方嵌入展示 · 本机保存分析</span>
+            <strong id="x-api-connection">等待首次自动采集</strong>
+            <span id="x-api-updated">只读权限 · 不执行 X 操作</span>
           </div>
+        </div>
+
+        <div class="x-api-guard" aria-label="X API 每日费用保护">
+          <div>
+            <small>今日自动分析</small>
+            <strong id="x-api-post-usage">0 / 20 条</strong>
+          </div>
+          <div>
+            <small>今日预估费用</small>
+            <strong id="x-api-cost-usage">$0.000 / $0.15</strong>
+          </div>
+          <div>
+            <small>采集频率</small>
+            <strong>每 15 分钟</strong>
+          </div>
+          <p><i></i>达到任一上限后，当天立即停止读取 X API，北京时间次日自动恢复。</p>
         </div>
 
         <div class="social-workspace">
@@ -255,10 +271,10 @@
           <article class="analysis-panel" aria-labelledby="analysis-title">
             <div class="panel-heading social-panel-heading">
               <div>
-                <p class="section-kicker">OPINION CHECK</p>
-                <h3 id="analysis-title">分析一条观点</h3>
+                <p class="section-kicker">MANUAL FALLBACK</p>
+                <h3 id="analysis-title">手动补充观点</h3>
               </div>
-              <span class="analysis-engine">规则模型 v1</span>
+              <span class="analysis-engine">备用入口</span>
             </div>
 
             <form class="opinion-form" id="opinion-form">
@@ -306,7 +322,7 @@
           <div class="opinion-log-head">
             <div>
               <p class="section-kicker">TRACK RECORD</p>
-              <h3>观点验证记录</h3>
+              <h3>自动观点记录</h3>
             </div>
             <span id="opinion-count">0 条记录</span>
           </div>
@@ -319,7 +335,7 @@
           </div>
         </div>
 
-        <p class="social-disclaimer">免费版通过 X 官方嵌入展示内容，不会自动抓取或搜索帖子。观点分析和验证记录仅保存在当前浏览器；接入 D1 后可跨设备同步。</p>
+        <p class="social-disclaimer">自动数据来自 X 官方只读 API；每天最多分析 20 条新帖，程序预估费用达到 $0.15 后停止调用。观点判断仅供研究，不构成投资建议。</p>
       </section>
 
       <footer>
@@ -333,6 +349,6 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
     <script async src="https://platform.x.com/widgets.js" charset="utf-8"></script>
-    <script type="module" src="./app.js?v=20260808-4"></script>
+    <script type="module" src="./app.js?v=20260808-5"></script>
   </body>
 </html>

@@ -1,0 +1,19 @@
+{
+  "daily_limits": {
+    "cost_usd": 0.15,
+    "posts": 20
+  },
+  "generated_at": null,
+  "mode": "x-api-paid",
+  "posts": [],
+  "sources": [],
+  "timezone": "Asia/Shanghai",
+  "usage_today": {
+    "analyses": 0,
+    "date": null,
+    "estimated_cost_usd": 0,
+    "post_reads": 0,
+    "user_reads": 0
+  },
+  "version": 1
+}

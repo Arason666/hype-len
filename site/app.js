@@ -1,4 +1,5 @@
 const API_URL = "https://api.hyperliquid.xyz/info";
+const X_POSTS_URL = "./data/x-posts.json";
 const DAY = 24 * 60 * 60 * 1000;
 const PERIODS = {
   "15m": { interval: "15m", lookback: 7 * DAY, label: "最近 7 天" },
@@ -29,6 +30,8 @@ const state = {
   cache: new Map(),
   loading: false,
   opinions: [],
+  automatedOpinions: [],
+  xUsage: null,
   activeSocialSource: SOCIAL_SOURCES[0].handle,
 };
 
@@ -976,6 +979,77 @@ function saveOpinions() {
   }
 }
 
+function allOpinions() {
+  return [...state.automatedOpinions, ...state.opinions]
+    .sort((left, right) => right.createdAt - left.createdAt)
+    .slice(0, 100);
+}
+
+function normalizeAutomatedOpinion(post) {
+  const analysis = post.analysis || {};
+  const createdAt = Date.parse(post.created_at || post.fetched_at || "");
+  return {
+    id: String(post.id),
+    createdAt: Number.isFinite(createdAt) ? createdAt : Date.now(),
+    author: post.username,
+    postId: String(post.id),
+    url: post.url,
+    text: post.text || "",
+    publicMetrics: post.public_metrics || {},
+    origin: "x-api",
+    analysis: {
+      direction: analysis.direction || "neutral",
+      directionLabel: analysis.direction_label || "中性 / 信息型",
+      directionScore: Number(analysis.direction_score || 0),
+      confidence: Number(analysis.confidence || 0),
+      impact: analysis.impact || "有限",
+      impactScore: Number(analysis.impact_score || 0),
+      eventType: analysis.event_type || "一般市场观点",
+      horizon: analysis.horizon || "数小时至 3 天",
+      factors: Array.isArray(analysis.factors) ? analysis.factors : [],
+      summary: analysis.summary || "等待分析摘要。",
+      engine: analysis.engine || "rules-v1-server",
+    },
+    baseline: null,
+    measurements: {},
+  };
+}
+
+function renderXUsage(payload) {
+  const usage = payload?.usage_today || {};
+  const limits = payload?.daily_limits || { posts: 20, cost_usd: 0.15 };
+  const analyses = Number(usage.analyses || 0);
+  const cost = Number(usage.estimated_cost_usd || 0);
+  setText("x-api-post-usage", `${analyses} / ${Number(limits.posts || 20)} 条`);
+  setText("x-api-cost-usage", `$${cost.toFixed(3)} / $${Number(limits.cost_usd || 0.15).toFixed(2)}`);
+  if (payload?.generated_at) {
+    const updatedAt = Date.parse(payload.generated_at);
+    setText("x-api-connection", "X API 自动采集已启用");
+    setText("x-api-updated", Number.isFinite(updatedAt) ? `数据更新于 ${formatFullTime.format(updatedAt)} CST` : "自动数据已更新");
+  } else {
+    setText("x-api-connection", "等待首次自动采集");
+    setText("x-api-updated", "只读权限 · 不执行 X 操作");
+  }
+}
+
+async function loadAutomatedOpinions() {
+  try {
+    const response = await fetch(`${X_POSTS_URL}?t=${Date.now()}`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`自动观点接口返回 ${response.status}`);
+    const payload = await response.json();
+    state.automatedOpinions = Array.isArray(payload.posts)
+      ? payload.posts.map(normalizeAutomatedOpinion)
+      : [];
+    state.xUsage = payload;
+    renderXUsage(payload);
+    evaluateOpinions();
+    renderOpinions();
+  } catch (error) {
+    setText("x-api-connection", "自动观点暂时无法载入");
+    setText("x-api-updated", "稍后会自动重试");
+  }
+}
+
 function resultMarkup(record) {
   const analysis = record.analysis;
   return `
@@ -1005,24 +1079,32 @@ function verificationMarkup(record) {
 }
 
 function renderOpinions() {
-  setText("opinion-count", `${state.opinions.length} 条记录`);
+  const records = allOpinions();
+  setText("opinion-count", `${records.length} 条记录`);
   const list = $("opinion-list");
-  if (!state.opinions.length) {
+  if (!records.length) {
     list.innerHTML = `
       <div class="opinion-empty">
         <span>◎</span>
-        <strong>还没有观点记录</strong>
-        <p>从上方时间线发现重要帖子后，粘贴链接和正文开始追踪。</p>
+        <strong>等待首次自动采集</strong>
+        <p>X API 每 15 分钟检查一次；也可以使用上方备用入口手动添加。</p>
       </div>`;
     return;
   }
 
-  list.innerHTML = state.opinions.map((record) => {
+  list.innerHTML = records.map((record) => {
     const analysis = record.analysis;
     const source = sourceFor(record.author);
     const baseline = record.baseline?.hype ? `基准 HYPE $${record.baseline.hype.toFixed(3)}` : "等待行情基准";
+    const metrics = record.publicMetrics || {};
+    const metricText = record.origin === "x-api"
+      ? `<span>❤ ${Number(metrics.like_count || 0).toLocaleString("zh-CN")}</span><span>转帖 ${Number(metrics.retweet_count || 0).toLocaleString("zh-CN")}</span>`
+      : "";
+    const originAction = record.origin === "x-api"
+      ? '<span class="auto-source-badge">X API 自动</span>'
+      : `<button type="button" data-delete-opinion="${escapeHtml(record.id)}" aria-label="删除这条观点记录">删除</button>`;
     return `
-      <article class="opinion-card" data-opinion-id="${escapeHtml(record.id)}">
+      <article class="opinion-card${record.origin === "x-api" ? " automated" : ""}" data-opinion-id="${escapeHtml(record.id)}">
         <div class="opinion-card-head">
           <div class="opinion-author">
             <strong>@${escapeHtml(record.author)} · ${escapeHtml(source.role)}</strong>
@@ -1030,16 +1112,18 @@ function renderOpinions() {
           </div>
           <div class="opinion-actions">
             <span class="direction-badge ${analysis.direction}">${escapeHtml(analysis.directionLabel)}</span>
+            ${originAction}
             <a href="${escapeHtml(record.url)}" target="_blank" rel="noopener noreferrer" aria-label="打开 X 原帖">原帖 ↗</a>
-            <button type="button" data-delete-opinion="${escapeHtml(record.id)}" aria-label="删除这条观点记录">删除</button>
           </div>
         </div>
         <p class="opinion-excerpt">${escapeHtml(record.text)}</p>
+        <p class="opinion-analysis">${escapeHtml(analysis.summary)}</p>
         <div class="opinion-meta">
           <span>置信度 ${analysis.confidence}%</span>
           <span>影响 ${escapeHtml(analysis.impact)}</span>
           <span>${escapeHtml(analysis.eventType)}</span>
           <span>${escapeHtml(analysis.horizon)}</span>
+          ${metricText}
         </div>
         <div class="verification-grid" aria-label="观点发布后的 HYPE 价格验证">${verificationMarkup(record)}</div>
       </article>`;
@@ -1058,12 +1142,31 @@ function findMarketRow(targetTime, horizonKey) {
   return null;
 }
 
+function marketSnapshotAt(targetTime) {
+  for (const [period, tolerance] of [["15m", 45 * 60 * 1000], ["1h", 2 * 60 * 60 * 1000], ["4h", 6 * 60 * 60 * 1000]]) {
+    const rows = state.cache.get(period)?.rows;
+    if (!rows?.length) continue;
+    let closest = null;
+    for (const row of rows) {
+      const distance = Math.abs(row.t - targetTime);
+      if (!closest || distance < closest.distance) closest = { row, distance };
+    }
+    if (closest && closest.distance <= tolerance && Number.isFinite(closest.row.hype)) {
+      return { t: closest.row.t, hype: closest.row.hype, eth: closest.row.eth, btc: closest.row.btc };
+    }
+  }
+  return null;
+}
+
 function evaluateOpinions() {
-  if (!state.opinions.length || !state.cache.has("15m")) return;
+  const records = allOpinions();
+  if (!records.length || !state.cache.has("15m")) return;
   let changed = false;
-  state.opinions.forEach((record) => {
+  records.forEach((record) => {
     if (!record.baseline) {
-      record.baseline = latestMarketSnapshot();
+      record.baseline = record.origin === "x-api"
+        ? marketSnapshotAt(record.createdAt)
+        : latestMarketSnapshot();
       changed = Boolean(record.baseline) || changed;
     }
     if (!record.baseline?.hype) return;
@@ -1177,6 +1280,7 @@ function initSocial() {
       url: parsed.url,
       text,
       analysis,
+      origin: "manual",
       baseline: latestMarketSnapshot(),
       measurements: {},
     };
@@ -1202,6 +1306,7 @@ function initSocial() {
   state.opinions = readOpinions();
   renderOpinions();
   renderTimeline(SOCIAL_SOURCES[0].handle);
+  loadAutomatedOpinions();
 }
 
 document.querySelectorAll("[data-period]").forEach((button) => {
@@ -1218,3 +1323,4 @@ window.addEventListener("offline", () => setConnection("error", "网络离线"))
 initSocial();
 refreshAll();
 window.setInterval(() => refreshAll(true), 5 * 60 * 1000);
+window.setInterval(loadAutomatedOpinions, 5 * 60 * 1000);

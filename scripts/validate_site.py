@@ -59,6 +59,7 @@ def main() -> None:
         "summary range and direction filters": "data-summary-window" in html and "data-opinion-filter" in javascript,
         "canonical X snowflake time": "X_SNOWFLAKE_EPOCH" in javascript and "xPostTimestamp" in javascript and "北京时间" in javascript,
         "manual X published time migration": "xSnowflakeTimestamp(parsedPostId)" in javascript and "migrated" in javascript,
+        "deduplicated linked opinions": "opinionIdentity" in javascript and "deduplicated" in javascript and "opinion-title-link" in javascript,
         "social mobile layout": ".social-workspace" in stylesheet and ".source-tabs" in stylesheet,
         "paid X data feed": "X_POSTS_URL" in javascript and "loadAutomatedOpinions" in javascript,
         "X API usage display": 'id="x-api-post-usage"' in html and 'id="x-api-cost-usage"' in html,

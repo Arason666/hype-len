@@ -999,8 +999,20 @@ function saveOpinions() {
   }
 }
 
+function opinionIdentity(record) {
+  const postId = record.postId || parseXPostUrl(record.url || "")?.postId;
+  if (postId) return `post:${postId}`;
+  return `record:${record.id}`;
+}
+
 function allOpinions() {
-  return [...state.automatedOpinions, ...state.opinions]
+  const deduplicated = new Map();
+  [...state.opinions, ...state.automatedOpinions].forEach((record) => {
+    const key = opinionIdentity(record);
+    const existing = deduplicated.get(key);
+    if (!existing || record.origin === "x-api") deduplicated.set(key, record);
+  });
+  return [...deduplicated.values()]
     .sort((left, right) => right.createdAt - left.createdAt)
     .slice(0, 100);
 }
@@ -1365,7 +1377,7 @@ function renderOpinions() {
       <article class="opinion-card${record.origin === "x-api" ? " automated" : ""}" data-opinion-id="${escapeHtml(record.id)}">
         <div class="opinion-card-head">
           <div class="opinion-author">
-            <strong>@${escapeHtml(record.author)} · ${escapeHtml(source.role)}</strong>
+            <strong><a class="opinion-title-link" href="${escapeHtml(record.url)}" target="_blank" rel="noopener noreferrer" aria-label="在 X 打开 @${escapeHtml(record.author)} 的原帖">@${escapeHtml(record.author)} · ${escapeHtml(source.role)} ↗</a></strong>
             <span>${formatFullTime.format(record.createdAt)} 北京时间 · ${escapeHtml(baseline)}</span>
           </div>
           <div class="opinion-actions">

@@ -62,6 +62,7 @@ def main() -> None:
         "multi-horizon opinion checks": "OPINION_HORIZONS" in javascript and "evaluateOpinions" in javascript,
         "weighted opinion summary": 'id="opinion-summary"' in html and "renderOpinionSummary" in javascript and "opinionWeight" in javascript,
         "four hour strategy brief": 'id="four-hour-brief"' in html and "renderFourHourBrief" in javascript and "relativePeriodSignal" in javascript,
+        "explicit four hour trade action": "fourHourTradeDecision" in javascript and all(label in javascript for label in ("可以开多", "可以开空", "观望")),
         "decision first dashboard": 'class="decision-command"' in html and "data-dashboard-tab" in html and "activateDashboardTab" in javascript,
         "three analysis panels": all(f'data-dashboard-panel="{name}"' in html for name in ("market", "model", "social")),
         "progressive detail disclosures": "model-detail-disclosure" in html and "market-detail-disclosure" in html and "social-settings" in html,

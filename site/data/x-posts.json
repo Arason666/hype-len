@@ -3,9 +3,123 @@
     "cost_usd": 0.15,
     "posts": 20
   },
-  "generated_at": "2026-08-08T23:14:05Z",
+  "generated_at": "2026-08-09T02:52:58Z",
   "mode": "x-api-paid",
   "posts": [
+    {
+      "analysis": {
+        "confidence": 47,
+        "direction": "neutral",
+        "direction_label": "中性 / 信息型",
+        "direction_score": 0,
+        "engine": "rules-v1-server",
+        "event_type": "一般市场观点",
+        "factors": [
+          "一般市场观点",
+          "自动采集",
+          "方向词不足"
+        ],
+        "horizon": "数小时至 3 天",
+        "impact": "中等",
+        "impact_score": 64,
+        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "1821500190312087552",
+      "author_name": "HL Hub",
+      "conversation_id": "2086283660681236606",
+      "created_at": "2026-08-09T02:49:20.000Z",
+      "fetched_at": "2026-08-09T02:52:58Z",
+      "id": "2086283660681236606",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 0,
+        "impression_count": 100,
+        "like_count": 0,
+        "quote_count": 0,
+        "reply_count": 1,
+        "retweet_count": 0
+      },
+      "source_role": "生态资讯",
+      "text": "300–500K+ TPS. High I/O. 16–32 cores.\nSounds like exactly the kind of challenge we want to take on.\nTTT Labs has spent the past 8 years operating blockchain infrastructure across networks including Somnia, Monad, Injective, and dYdX — with experience in high-performance https://t.co/nhY9fi7I00 https://t.co/DLK3bLtoMe",
+      "url": "https://x.com/Hyperliquid_Hub/status/2086283660681236606",
+      "username": "Hyperliquid_Hub"
+    },
+    {
+      "analysis": {
+        "confidence": 46,
+        "direction": "neutral",
+        "direction_label": "中性 / 信息型",
+        "direction_score": 0,
+        "engine": "rules-v1-server",
+        "event_type": "一般市场观点",
+        "factors": [
+          "一般市场观点",
+          "自动采集",
+          "方向词不足"
+        ],
+        "horizon": "数小时至 3 天",
+        "impact": "中等",
+        "impact_score": 78,
+        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "2040391464761413633",
+      "author_name": "Louis",
+      "conversation_id": "2086263218658492689",
+      "created_at": "2026-08-09T01:28:06.000Z",
+      "fetched_at": "2026-08-09T02:52:58Z",
+      "id": "2086263218658492689",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 1,
+        "impression_count": 544,
+        "like_count": 9,
+        "quote_count": 0,
+        "reply_count": 1,
+        "retweet_count": 0
+      },
+      "source_role": "研究 / 数据",
+      "text": "Extended is on another level.\n\nMost perp DEXes quietly delete your points and hope you don’t notice. Extended just did the opposite.\n\nThey’re running a points slashing review, cutting points from wallets that gamed the system. Nothing new there, every serious points program does https://t.co/oXeBJqI6tA",
+      "url": "https://x.com/louisdives/status/2086263218658492689",
+      "username": "louisdives"
+    },
+    {
+      "analysis": {
+        "confidence": 92,
+        "direction": "bullish",
+        "direction_label": "偏多",
+        "direction_score": 88,
+        "engine": "rules-v1-server",
+        "event_type": "基本面 / 生态事件",
+        "factors": [
+          "偏多词 4 个",
+          "基本面 / 生态事件",
+          "自动采集"
+        ],
+        "horizon": "数日至数月",
+        "impact": "高",
+        "impact_score": 91,
+        "summary": "识别到的正向措辞更多，整体判断为偏多。事件类型更接近“基本面 / 生态事件”，主要影响窗口预计为数日至数月；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "897099896108404738",
+      "author_name": "0xMaxs",
+      "conversation_id": "2086258344692682874",
+      "created_at": "2026-08-09T01:08:44.000Z",
+      "fetched_at": "2026-08-09T02:52:58Z",
+      "id": "2086258344692682874",
+      "lang": "zh",
+      "public_metrics": {
+        "bookmark_count": 2,
+        "impression_count": 245,
+        "like_count": 4,
+        "quote_count": 0,
+        "reply_count": 2,
+        "retweet_count": 0
+      },
+      "source_role": "交易观点",
+      "text": "‼️Hype 日报 #221｜数据截至：2026-8-8\n\n回购：HYPE现价$55.14，昨日销毁$376.97K/6897.34枚（均价$54.65），累计销毁4629.60万枚\n\n估值：年回购金额$7.21亿，成交量(24h)$10.32亿，OI=$6.74B；最大供应9.54亿枚，FDV=$52.59B，PE=73，分位89.1% https://t.co/QUGRIcMQK6 https://t.co/anqOk17Hp7",
+      "url": "https://x.com/0xMaxs/status/2086258344692682874",
+      "username": "0xMaxs"
+    },
     {
       "analysis": {
         "confidence": 44,
@@ -1227,7 +1341,7 @@
     {
       "handle": "0xMaxs",
       "influence": 72,
-      "last_seen_id": "2086114293926478194",
+      "last_seen_id": "2086258344692682874",
       "name": "0xMaxs",
       "role": "交易观点",
       "user_id": "897099896108404738"
@@ -1235,7 +1349,7 @@
     {
       "handle": "louisdives",
       "influence": 78,
-      "last_seen_id": "2086129691245850895",
+      "last_seen_id": "2086263218658492689",
       "name": "Louis",
       "role": "研究 / 数据",
       "user_id": "2040391464761413633"
@@ -1251,7 +1365,7 @@
     {
       "handle": "Hyperliquid_Hub",
       "influence": 64,
-      "last_seen_id": "2086053291734225002",
+      "last_seen_id": "2086283660681236606",
       "name": "HL Hub",
       "role": "生态资讯",
       "user_id": "1821500190312087552"
@@ -1267,10 +1381,10 @@
   ],
   "timezone": "Asia/Shanghai",
   "usage_today": {
-    "analyses": 12,
+    "analyses": 15,
     "date": "2026-08-09",
-    "estimated_cost_usd": 0.06,
-    "post_reads": 12,
+    "estimated_cost_usd": 0.075,
+    "post_reads": 15,
     "user_reads": 0
   },
   "version": 1

@@ -78,6 +78,74 @@ function ema(values, period) {
   return output;
 }
 
+function wilderAverage(values, period) {
+  if (!values.length) return [];
+  const output = [Number(values[0]) || 0];
+  const alpha = 1 / period;
+  for (let index = 1; index < values.length; index += 1) {
+    output.push((Number(values[index]) || 0) * alpha + output[index - 1] * (1 - alpha));
+  }
+  return output;
+}
+
+function rollingZScores(values, period) {
+  const output = [];
+  let sum = 0;
+  let sumSquares = 0;
+  for (let index = 0; index < values.length; index += 1) {
+    const value = Number(values[index]) || 0;
+    sum += value;
+    sumSquares += value * value;
+    if (index >= period) {
+      const removed = Number(values[index - period]) || 0;
+      sum -= removed;
+      sumSquares -= removed * removed;
+    }
+    const count = Math.min(period, index + 1);
+    const mean = sum / count;
+    const variance = Math.max(0, sumSquares / count - mean * mean);
+    const deviation = Math.sqrt(variance);
+    output.push(count >= Math.min(8, period) && deviation > 0 ? (value - mean) / deviation : 0);
+  }
+  return output;
+}
+
+function technicalIndicatorSeries(rows, period = 14) {
+  const trueRanges = [];
+  const plusMoves = [];
+  const minusMoves = [];
+  rows.forEach((row, index) => {
+    const high = Number(row.hypeHigh ?? row.hype);
+    const low = Number(row.hypeLow ?? row.hype);
+    const previousClose = index ? Number(rows[index - 1].hype) : Number(row.hype);
+    const previousHigh = index ? Number(rows[index - 1].hypeHigh ?? rows[index - 1].hype) : high;
+    const previousLow = index ? Number(rows[index - 1].hypeLow ?? rows[index - 1].hype) : low;
+    trueRanges.push(Math.max(high - low, Math.abs(high - previousClose), Math.abs(low - previousClose)));
+    const upMove = high - previousHigh;
+    const downMove = previousLow - low;
+    plusMoves.push(upMove > downMove && upMove > 0 ? upMove : 0);
+    minusMoves.push(downMove > upMove && downMove > 0 ? downMove : 0);
+  });
+  const atr = wilderAverage(trueRanges, period);
+  const plusDm = wilderAverage(plusMoves, period);
+  const minusDm = wilderAverage(minusMoves, period);
+  const dx = rows.map((_, index) => {
+    const range = atr[index];
+    if (!range) return 0;
+    const plusDi = 100 * plusDm[index] / range;
+    const minusDi = 100 * minusDm[index] / range;
+    return plusDi + minusDi > 0 ? 100 * Math.abs(plusDi - minusDi) / (plusDi + minusDi) : 0;
+  });
+  const adx = wilderAverage(dx, period);
+  const volumeZ = rollingZScores(rows.map((row) => Number(row.hypeVolume || 0)), 24);
+  return rows.map((row, index) => ({
+    atrPercent: row.hype > 0 ? atr[index] / row.hype : 0,
+    adx: adx[index],
+    roc4h: index >= 4 ? (row.hype / rows[index - 4].hype) - 1 : 0,
+    volumeZ: volumeZ[index],
+  }));
+}
+
 function enrich(rows) {
   const eth = rows.map((row) => row.eth);
   const btc = rows.map((row) => row.btc);
@@ -88,6 +156,7 @@ function enrich(rows) {
   const btcSlow = ema(btc, 21);
   const hypeFast = ema(hype, 8);
   const hypeSlow = ema(hype, 21);
+  const indicators = technicalIndicatorSeries(rows);
   return rows.map((row, index) => ({
     ...row,
     ethFast: ethFast[index],
@@ -96,6 +165,10 @@ function enrich(rows) {
     btcSlow: btcSlow[index],
     hypeFast: hypeFast[index],
     hypeSlow: hypeSlow[index],
+    hypeAtrPercent: indicators[index].atrPercent,
+    hypeAdx: indicators[index].adx,
+    hypeRoc4h: indicators[index].roc4h,
+    hypeVolumeZ: indicators[index].volumeZ,
   }));
 }
 
@@ -1246,7 +1319,17 @@ function scaledTrendComponent(value, scale, weight) {
   return Math.max(-weight, Math.min(weight, (value / scale) * weight));
 }
 
-function trendScoreAt(rows, index) {
+function indicatorSnapshotAt(rows, index) {
+  const row = rows[index] || {};
+  return {
+    adx: Number(row.hypeAdx || 0),
+    atrPercent: Number(row.hypeAtrPercent || rollingAtrPercent(rows, index)),
+    roc4h: Number(row.hypeRoc4h || 0),
+    volumeZ: Number(row.hypeVolumeZ || 0),
+  };
+}
+
+function trendScoreAt(rows, index, useAuxIndicators = true) {
   if (index < 24 || index >= rows.length) return 0;
   const row = rows[index];
   const hype4h = safeLogReturn(row.hype, rows[index - 4].hype);
@@ -1256,16 +1339,27 @@ function trendScoreAt(rows, index) {
   const hypeEma = safeLogReturn(row.hypeFast, row.hypeSlow);
   const ethEma = -safeLogReturn(row.ethFast, row.ethSlow);
   const btcEma = -safeLogReturn(row.btcFast, row.btcSlow);
-  const recentVolume = rows.slice(index - 23, index + 1).reduce((sum, item) => sum + Number(item.hypeVolume || 0), 0) / 24;
-  const volumeDirection = recentVolume > 0 && row.hypeVolume > recentVolume * 1.35 ? Math.sign(hype4h) * 5 : 0;
-  const score = scaledTrendComponent(hype4h, 0.018, 19)
-    + scaledTrendComponent(hype24h, 0.05, 15)
-    + scaledTrendComponent(eth4h, 0.014, 13)
-    + scaledTrendComponent(btc4h, 0.014, 13)
-    + scaledTrendComponent(hypeEma, 0.016, 18)
-    + scaledTrendComponent(ethEma, 0.01, 8)
-    + scaledTrendComponent(btcEma, 0.01, 8)
-    + volumeDirection;
+  const indicators = indicatorSnapshotAt(rows, index);
+  let score = scaledTrendComponent(hype4h, 0.018, 17)
+    + scaledTrendComponent(hype24h, 0.05, 14)
+    + scaledTrendComponent(eth4h, 0.014, 12)
+    + scaledTrendComponent(btc4h, 0.014, 12)
+    + scaledTrendComponent(hypeEma, 0.016, 16)
+    + scaledTrendComponent(ethEma, 0.01, 7)
+    + scaledTrendComponent(btcEma, 0.01, 7);
+  if (useAuxIndicators) {
+    score += scaledTrendComponent(indicators.roc4h, 0.018, 10);
+    const adxFactor = indicators.adx < 14 ? 0.68
+      : indicators.adx < 18 ? 0.82
+        : indicators.adx >= 30 ? 1.08 : 1;
+    score *= adxFactor;
+    if (indicators.volumeZ > 0.75) {
+      const participationDirection = Math.sign(indicators.roc4h || hype4h);
+      score += participationDirection * Math.min(6, (indicators.volumeZ - 0.75) * 2.5);
+    } else if (indicators.volumeZ < -0.75) {
+      score *= 0.9;
+    }
+  }
   return Math.round(Math.max(-100, Math.min(100, score)));
 }
 
@@ -1285,6 +1379,7 @@ function relativeReversalScoreAt(rows, index) {
 }
 
 function rollingAtrPercent(rows, index, period = 14) {
+  if (period === 14 && Number.isFinite(rows[index]?.hypeAtrPercent)) return rows[index].hypeAtrPercent;
   if (index < 1) return 0.02;
   const start = Math.max(1, index - period + 1);
   let total = 0;
@@ -1318,7 +1413,7 @@ function closeTrade(active, rows, exitIndex, reason) {
   };
 }
 
-function simulateTrendStrategy(rows, params, startIndex = 24, endIndex = rows.length, closeAtEnd = true) {
+function simulateTrendStrategy(rows, params, startIndex = 24, endIndex = rows.length, closeAtEnd = true, useAuxIndicators = true) {
   const trades = [];
   let active = null;
   let candidate = null;
@@ -1330,9 +1425,10 @@ function simulateTrendStrategy(rows, params, startIndex = 24, endIndex = rows.le
   let occupiedBars = 0;
   for (let index = Math.max(24, startIndex); index < endIndex; index += 1) {
     const row = rows[index];
-    const score = trendScoreAt(rows, index);
+    const score = trendScoreAt(rows, index, useAuxIndicators);
     const relativeScore = relativeReversalScoreAt(rows, index);
     const atrPercent = rollingAtrPercent(rows, index);
+    const indicators = indicatorSnapshotAt(rows, index);
     if (lockedDirection && (Math.abs(score) <= params.resetScore || Math.sign(score) === -lockedDirection)) {
       lockedDirection = 0;
     }
@@ -1401,8 +1497,10 @@ function simulateTrendStrategy(rows, params, startIndex = 24, endIndex = rows.le
 
     if (!candidate) {
       let candidateDirection = 0;
-      if (score >= params.entryScore - 6 && lockedDirection !== 1) candidateDirection = 1;
-      else if (score <= -(params.entryScore - 6) && lockedDirection !== -1) candidateDirection = -1;
+      const longTrendQuality = !useAuxIndicators || indicators.adx >= 18;
+      const shortTrendQuality = !useAuxIndicators || indicators.adx >= 20;
+      if (score >= params.entryScore - 6 && lockedDirection !== 1 && longTrendQuality) candidateDirection = 1;
+      else if (score <= -(params.entryScore - 2) && lockedDirection !== -1 && shortTrendQuality) candidateDirection = -1;
       if (candidateDirection) {
         candidate = {
           direction: candidateDirection,
@@ -1414,8 +1512,12 @@ function simulateTrendStrategy(rows, params, startIndex = 24, endIndex = rows.le
       }
     }
 
-    const strongContinuation = candidate && candidate.direction * score >= params.entryScore + 4 && candidate.age >= 1;
-    const confirmedBreakout = candidate?.breakoutLevel && candidate.confirmations >= params.confirmationBars;
+    const trendQuality = candidate && (!useAuxIndicators || indicators.adx >= (candidate.direction > 0 ? 18 : 20));
+    const momentumAligned = candidate && (!useAuxIndicators || candidate.direction * indicators.roc4h >= -0.0025);
+    const strongContinuation = candidate && trendQuality && momentumAligned
+      && candidate.direction * score >= params.entryScore + 4 && candidate.age >= 1;
+    const confirmedBreakout = candidate?.breakoutLevel && candidate.confirmations >= params.confirmationBars
+      && trendQuality && momentumAligned;
     if (candidate && (strongContinuation || confirmedBreakout)) {
       active = {
         direction: candidate.direction,
@@ -1600,6 +1702,13 @@ function selectTrendParameters(rows, trainingEnd) {
   };
 }
 
+function setModelEvidence(id, value, tone = "neutral") {
+  const element = $(id);
+  if (!element) return;
+  element.textContent = value;
+  element.parentElement.dataset.tone = tone;
+}
+
 function renderWalkForwardModel() {
   const panel = $("model-lab");
   const rows = state.cache.get("1h")?.rows;
@@ -1611,9 +1720,13 @@ function renderWalkForwardModel() {
   const testing = simulateTrendStrategy(rows, params, testingStart, rows.length);
   const referenceTrends = referenceTrendSegments(rows, testingStart, rows.length);
   const capture = evaluateTrendCapture(rows, testing.trades, referenceTrends);
+  const baselineTesting = simulateTrendStrategy(rows, params, testingStart, rows.length, true, false);
+  const baselineCapture = evaluateTrendCapture(rows, baselineTesting.trades, referenceTrends);
   const live = simulateTrendStrategy(rows, params, 24, rows.length, false);
   const latest = rows.at(-1);
+  const indicators = indicatorSnapshotAt(rows, rows.length - 1);
   const rawScore = trendScoreAt(rows, rows.length - 1);
+  const relativeScore = relativeReversalScoreAt(rows, rows.length - 1);
   const opinion = recentOpinionSignal(allOpinions());
   const opinionScore = opinion ? Math.round(opinion.score * 0.1) : 0;
   const marketStructure = marketStructureSignal(state.marketContext);
@@ -1660,19 +1773,32 @@ function renderWalkForwardModel() {
   panel.classList.remove("loading-block");
   panel.dataset.direction = direction;
   setText("model-now-title", title);
-  setText("model-probability", `${displayScore > 0 ? "+" : ""}${displayScore}`);
+  setText("model-probability", `${displayScore > 0 ? "+" : ""}${displayScore}/100`);
   setText("model-summary", summary);
   setText("model-entry-price", entryPrice);
   setText("model-trend-drawdown", trendDrawdown);
   setText("model-invalidation", invalidation);
   setText("model-window", `${formatTime.format(nextReviewTime)} 收盘后`);
+  const adxLabel = indicators.adx >= 30 ? "趋势较强" : indicators.adx >= 18 ? "趋势形成中" : "震荡过滤";
+  const rocTone = indicators.roc4h > 0.002 ? "positive" : indicators.roc4h < -0.002 ? "negative" : "neutral";
+  const relativeTone = relativeScore > 10 ? "positive" : relativeScore < -10 ? "negative" : "neutral";
+  const relativeLabel = relativeScore > 10 ? "HYPE偏强" : relativeScore < -10 ? "HYPE偏弱" : "相对中性";
+  const volumeLabel = indicators.volumeZ >= 1 ? "放量" : indicators.volumeZ <= -1 ? "缩量" : "常态";
+  setModelEvidence("model-adx", `${indicators.adx.toFixed(1)} · ${adxLabel}`, indicators.adx >= 18 ? "positive" : "neutral");
+  setModelEvidence("model-atr", `${formatPercent(indicators.atrPercent * 100)} · 动态风控`);
+  setModelEvidence("model-roc", `${formatPercent(indicators.roc4h * 100)} · ${indicators.roc4h >= 0 ? "向上" : "向下"}`, rocTone);
+  setModelEvidence("model-volume-z", `${indicators.volumeZ >= 0 ? "+" : ""}${indicators.volumeZ.toFixed(2)} · ${volumeLabel}`);
+  setModelEvidence("model-relative-strength", `${relativeLabel} ${relativeScore > 0 ? "+" : ""}${relativeScore}`, relativeTone);
+  setModelEvidence("model-contract-structure", marketStructure ? `${marketStructure.label} ${marketScore > 0 ? "+" : ""}${marketScore}` : "等待结构快照",
+    marketScore > 3 ? "positive" : marketScore < -3 ? "negative" : "neutral");
   setText("model-split-badge", `${trainDays}日训练 · ${testDays}日测试`);
   setText("model-samples", `${testing.trades.length} 次趋势信号`);
   setText("model-trend-recall", referenceTrends.length ? `${Math.round(capture.recall * 100)}%` : "事件不足");
   setText("model-capture-rate", referenceTrends.length ? `${Math.round(capture.captureRate * 100)}%` : "事件不足");
   setText("model-win-rate", testing.trades.length ? `${Math.round(testing.winRate * 100)}%` : "暂无交易");
   setText("model-giveback", testing.trades.length ? `${Math.round(testing.averageGiveback * 100)}%` : "--");
-  setText("model-validation-note", `测试期以回撤超过5%的完整趋势作为参照，识别到 ${capture.detected}/${referenceTrends.length} 段；训练区间选择的动态回撤为 max(${(params.minDrawdown * 100).toFixed(1)}%，${params.atrMultiplier}倍ATR)。`);
+  const sampleConfidence = referenceTrends.length >= 20 ? "样本可信度较高" : referenceTrends.length >= 8 ? "样本可信度中等" : "样本仍有限";
+  setText("model-validation-note", `测试期以回撤超过5%的完整趋势作为参照，识别到 ${capture.detected}/${referenceTrends.length} 段，${sampleConfidence}；动态回撤为 max(${(params.minDrawdown * 100).toFixed(1)}%，${params.atrMultiplier}倍ATR)。`);
   setText("model-net-return", formatPercent(testing.netReturn * 100));
   setText("model-strategy-drawdown", formatPercent(testing.maxDrawdown * 100));
   setText("model-hold-time", testing.trades.length ? `${testing.averageHoldBars.toFixed(1)} 小时` : "--");
@@ -1680,6 +1806,9 @@ function renderWalkForwardModel() {
   setText("model-entry-delay", referenceTrends.length ? `${capture.averageEntryDelayBars.toFixed(1)} 小时` : "--");
   setText("model-early-exit", testing.trades.length ? `${Math.round(capture.earlyExitRate * 100)}%` : "--");
   setText("model-repeat-signals", referenceTrends.length ? `${capture.signalsPerTrend.toFixed(1)} 次/趋势` : "--");
+  const captureDelta = (capture.captureRate - baselineCapture.captureRate) * 100;
+  const drawdownImprovement = (Math.abs(baselineTesting.maxDrawdown) - Math.abs(testing.maxDrawdown)) * 100;
+  setText("model-aux-impact", `捕获 ${captureDelta >= 0 ? "+" : ""}${captureDelta.toFixed(1)}pp · 回撤 ${drawdownImprovement >= 0 ? "改善" : "增加"}${Math.abs(drawdownImprovement).toFixed(1)}pp`);
   setText("model-market-context", marketStructure
     ? `${marketStructure.snapshots} 条快照 · ${marketStructure.fundingPoints} 资金费率点`
     : "等待首次免费采集");

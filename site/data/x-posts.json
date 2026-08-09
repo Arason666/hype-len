@@ -3,9 +3,47 @@
     "cost_usd": 0.15,
     "posts": 20
   },
-  "generated_at": "2026-08-09T16:14:37Z",
+  "generated_at": "2026-08-09T16:59:02Z",
   "mode": "x-api-paid",
   "posts": [
+    {
+      "analysis": {
+        "confidence": 64,
+        "direction": "bearish",
+        "direction_label": "偏空",
+        "direction_score": -22,
+        "engine": "rules-v1-server",
+        "event_type": "安全 / 运行事件",
+        "factors": [
+          "偏空词 1 个",
+          "安全 / 运行事件",
+          "自动采集"
+        ],
+        "horizon": "数小时至 7 天",
+        "impact": "高",
+        "impact_score": 100,
+        "summary": "识别到的负向措辞更多，整体判断为偏空。事件类型更接近“安全 / 运行事件”，主要影响窗口预计为数小时至 7 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "2040391464761413633",
+      "author_name": "Louis",
+      "conversation_id": "2086488652738380284",
+      "created_at": "2026-08-09T16:23:54.000Z",
+      "fetched_at": "2026-08-09T16:59:02Z",
+      "id": "2086488652738380284",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 0,
+        "impression_count": 260,
+        "like_count": 8,
+        "quote_count": 0,
+        "reply_count": 2,
+        "retweet_count": 0
+      },
+      "source_role": "研究 / 数据",
+      "text": "Two perp DEX got hacked last month, Ostium &amp; AFX.\n\nTheir TVL dropped very deep. But the interesting part is people are still trading on their platform. LMAO.\n\nOstium got hit on July 15, then:\n-&gt; TVL from $63M, dropped to around $37M, and now at $18M\n-&gt; Still there is a quite good https://t.co/YleKEJiNl9",
+      "url": "https://x.com/louisdives/status/2086488652738380284",
+      "username": "louisdives"
+    },
     {
       "analysis": {
         "confidence": 44,
@@ -1691,7 +1729,7 @@
     {
       "handle": "louisdives",
       "influence": 78,
-      "last_seen_id": "2086456060961833067",
+      "last_seen_id": "2086488652738380284",
       "name": "Louis",
       "role": "研究 / 数据",
       "user_id": "2040391464761413633"
@@ -1723,10 +1761,10 @@
   ],
   "timezone": "Asia/Shanghai",
   "usage_today": {
-    "analyses": 8,
+    "analyses": 9,
     "date": "2026-08-10",
-    "estimated_cost_usd": 0.04,
-    "post_reads": 8,
+    "estimated_cost_usd": 0.045,
+    "post_reads": 9,
     "user_reads": 0
   },
   "version": 1

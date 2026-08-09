@@ -95,7 +95,10 @@
             <h2 id="model-lab-title">180日趋势捕获与模型验证</h2>
             <p>前约 150 天滚动选择趋势参数，最后 30 天做样本外验证；模型仅在趋势状态变化时给出提示。</p>
           </div>
-          <span class="model-split-badge" id="model-split-badge">150日训练 · 30日测试</span>
+          <div class="model-head-badges">
+            <span class="model-version-badge" id="model-version-badge">正式模型 · 基线</span>
+            <span class="model-split-badge" id="model-split-badge">150日训练 · 30日测试</span>
+          </div>
         </div>
 
         <div class="model-dashboard">
@@ -105,16 +108,25 @@
                 <small>当前趋势状态</small>
                 <h3 id="model-now-title">等待 180 日数据</h3>
               </div>
-              <strong class="model-probability" id="model-probability">--/100</strong>
+              <div class="model-score">
+                <span>当前动量评分 <button class="stat-help" type="button" aria-label="解释当前动量评分" data-help="范围 -100 至 +100。正数代表 HYPE 偏强，负数代表偏弱；它不是涨跌概率、预期收益率或模型准确率。">!</button></span>
+                <strong class="model-probability" id="model-probability">--/100</strong>
+                <small id="model-score-meaning">等待方向证据</small>
+              </div>
             </div>
             <p class="model-summary" id="model-summary">模型会先识别完整趋势，并用动态回撤线判断趋势是否减弱或失效。</p>
+            <div class="model-decision-grid" aria-label="当前模型结论">
+              <span><small>已有趋势</small><strong id="model-existing-trend">等待数据</strong></span>
+              <span><small>新开仓状态</small><strong id="model-new-entry">等待数据</strong></span>
+              <span><small>下一触发条件</small><strong id="model-next-trigger">等待数据</strong></span>
+            </div>
             <div class="model-evidence-grid" aria-label="当前技术指标判断依据">
-              <span><small>ADX 趋势强度</small><strong id="model-adx">--</strong></span>
-              <span><small>ATR 波动尺度</small><strong id="model-atr">--</strong></span>
-              <span><small>4小时 ROC 动量</small><strong id="model-roc">--</strong></span>
-              <span><small>成交量 Z 分数</small><strong id="model-volume-z">--</strong></span>
-              <span><small>相对强弱确认</small><strong id="model-relative-strength">--</strong></span>
-              <span><small>合约市场结构</small><strong id="model-contract-structure">--</strong></span>
+              <span><small>ADX 趋势强度 <button class="stat-help" type="button" aria-label="解释ADX" data-help="ADX只衡量趋势强度，不判断上涨或下跌。低于18通常按震荡处理，高于30代表趋势较强。">!</button></small><strong id="model-adx">--</strong></span>
+              <span><small>ATR 波动尺度 <button class="stat-help" type="button" aria-label="解释ATR" data-help="ATR%衡量近期真实波动幅度，用于设置动态失效线和风险距离，不直接判断方向。">!</button></small><strong id="model-atr">--</strong></span>
+              <span><small>4小时 ROC 动量 <button class="stat-help" type="button" aria-label="解释ROC" data-help="ROC表示HYPE过去4小时的价格变化率。正数为向上动量，负数为向下动量。">!</button></small><strong id="model-roc">--</strong></span>
+              <span><small>成交量 Z 分数 <button class="stat-help" type="button" aria-label="解释成交量Z分数" data-help="表示当前成交量偏离过去24小时均值的程度。大于+1偏放量，小于-1偏缩量。">!</button></small><strong id="model-volume-z">--</strong></span>
+              <span><small>相对强弱确认 <button class="stat-help" type="button" aria-label="解释相对强弱" data-help="综合HYPE相对BTC与ETH的4小时变化和EMA结构。正数为HYPE相对偏强，负数为相对偏弱。">!</button></small><strong id="model-relative-strength">--</strong></span>
+              <span><small>合约市场结构 <button class="stat-help" type="button" aria-label="解释合约市场结构" data-help="综合资金费率、持仓量、订单簿与主动买卖流。仅作实时修正，不参与缺少历史快照的回测。">!</button></small><strong id="model-contract-structure">--</strong></span>
             </div>
             <div class="model-trigger-grid">
               <span><small>趋势启动价</small><strong id="model-entry-price">--</strong></span>
@@ -133,10 +145,10 @@
               <span id="model-samples">-- 次趋势信号</span>
             </div>
             <div class="model-stat-grid">
-              <span><small>趋势识别率</small><strong id="model-trend-recall">--</strong></span>
-              <span><small>趋势收益捕获率</small><strong id="model-capture-rate">--</strong></span>
-              <span><small>策略最大回撤</small><strong id="model-strategy-drawdown">--</strong></span>
-              <span><small>提前退出率</small><strong id="model-early-exit">--</strong></span>
+              <span><small>趋势识别率 <button class="stat-help" type="button" aria-label="解释趋势识别率" data-help="测试期真实趋势中，被模型持有覆盖至少30%的比例。衡量有没有发现趋势，不等于交易胜率。">!</button></small><strong id="model-trend-recall">--</strong></span>
+              <span><small>趋势收益捕获率 <button class="stat-help" type="button" aria-label="解释趋势收益捕获率" data-help="模型实际捕获的顺势价格变化，占测试期完整趋势总变化的比例。">!</button></small><strong id="model-capture-rate">--</strong></span>
+              <span><small>策略最大回撤 <button class="stat-help" type="button" aria-label="解释策略最大回撤" data-help="样本外策略净值从历史高点到低点的最大跌幅。越接近0通常代表风险越低。">!</button></small><strong id="model-strategy-drawdown">--</strong></span>
+              <span><small>提前退出率 <button class="stat-help" type="button" aria-label="解释提前退出率" data-help="模型退出后，原方向仍继续运行至少3%的信号占比。越低表示越少过早离场。">!</button></small><strong id="model-early-exit">--</strong></span>
             </div>
             <p id="model-validation-note">测试按完整趋势事件统计，不要求准确抓住最高点和最低点。</p>
           </article>

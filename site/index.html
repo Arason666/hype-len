@@ -108,6 +108,14 @@
               <strong class="model-probability" id="model-probability">--/100</strong>
             </div>
             <p class="model-summary" id="model-summary">模型会先识别完整趋势，并用动态回撤线判断趋势是否减弱或失效。</p>
+            <div class="model-evidence-grid" aria-label="当前技术指标判断依据">
+              <span><small>ADX 趋势强度</small><strong id="model-adx">--</strong></span>
+              <span><small>ATR 波动尺度</small><strong id="model-atr">--</strong></span>
+              <span><small>4小时 ROC 动量</small><strong id="model-roc">--</strong></span>
+              <span><small>成交量 Z 分数</small><strong id="model-volume-z">--</strong></span>
+              <span><small>相对强弱确认</small><strong id="model-relative-strength">--</strong></span>
+              <span><small>合约市场结构</small><strong id="model-contract-structure">--</strong></span>
+            </div>
             <div class="model-trigger-grid">
               <span><small>趋势启动价</small><strong id="model-entry-price">--</strong></span>
               <span><small>趋势极值 / 当前回撤</small><strong id="model-trend-drawdown">--</strong></span>
@@ -127,8 +135,8 @@
             <div class="model-stat-grid">
               <span><small>趋势识别率</small><strong id="model-trend-recall">--</strong></span>
               <span><small>趋势收益捕获率</small><strong id="model-capture-rate">--</strong></span>
-              <span><small>信号盈利率</small><strong id="model-win-rate">--</strong></span>
-              <span><small>盈利信号平均回吐</small><strong id="model-giveback">--</strong></span>
+              <span><small>策略最大回撤</small><strong id="model-strategy-drawdown">--</strong></span>
+              <span><small>提前退出率</small><strong id="model-early-exit">--</strong></span>
             </div>
             <p id="model-validation-note">测试按完整趋势事件统计，不要求准确抓住最高点和最低点。</p>
           </article>
@@ -138,12 +146,13 @@
           <summary><span>查看详细测试数据</span><small>收益、回撤、入场延迟与重复信号</small></summary>
           <div class="model-regime-grid" aria-label="模型样本外风险与表现">
             <span><small>测试期净收益</small><strong id="model-net-return">--</strong></span>
-            <span><small>策略最大回撤</small><strong id="model-strategy-drawdown">--</strong></span>
+            <span><small>信号盈利率</small><strong id="model-win-rate">--</strong></span>
+            <span><small>盈利信号平均回吐</small><strong id="model-giveback">--</strong></span>
             <span><small>平均持有时间</small><strong id="model-hold-time">--</strong></span>
             <span><small>测试期趋势事件</small><strong id="model-reference-trends">--</strong></span>
             <span><small>平均入场延迟</small><strong id="model-entry-delay">--</strong></span>
-            <span><small>提前退出率</small><strong id="model-early-exit">--</strong></span>
             <span><small>重复进场强度</small><strong id="model-repeat-signals">--</strong></span>
+            <span><small>辅助指标消融对照</small><strong id="model-aux-impact">--</strong></span>
             <span><small>免费市场结构数据（实时修正）</small><strong id="model-market-context">等待首次采集</strong></span>
           </div>
           <p class="model-disclaimer">1小时数据负责趋势状态，4小时与相对强弱负责确认；动态回撤线随波动变化。测试净收益按每次完整进出0.10%成本估算，尚未计入实际资金费率和滑点。</p>

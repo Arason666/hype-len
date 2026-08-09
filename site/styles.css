@@ -559,15 +559,22 @@ button {
 }
 
 .model-trigger-grid,
+.model-evidence-grid,
 .model-stat-grid,
 .model-regime-grid {
   display: grid;
   gap: 8px;
 }
 
+.model-evidence-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 14px 0;
+}
+
 .model-trigger-grid,
 .model-stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
+.model-evidence-grid > span,
 .model-trigger-grid > span,
 .model-stat-grid > span,
 .model-regime-grid > span {
@@ -579,6 +586,28 @@ button {
   border-radius: 9px;
   background: rgba(126, 174, 151, 0.045);
 }
+
+.model-evidence-grid > span {
+  border-color: rgba(127, 245, 182, 0.1);
+  background: rgba(127, 245, 182, 0.035);
+}
+
+.model-evidence-grid small {
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.model-evidence-grid strong {
+  overflow: hidden;
+  color: var(--muted-strong);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.model-evidence-grid > span[data-tone="positive"] strong { color: var(--mint-bright); }
+.model-evidence-grid > span[data-tone="negative"] strong { color: #ffd4a7; }
 
 .model-trigger-grid strong,
 .model-stat-grid strong,
@@ -2490,6 +2519,7 @@ footer p { margin: 0; }
 .model-split-badge { font-size: 13px; }
 .model-now-head small,
 .model-card-title small,
+.model-evidence-grid small,
 .model-trigger-grid small,
 .model-stat-grid small,
 .model-regime-grid small,
@@ -2497,6 +2527,7 @@ footer p { margin: 0; }
 .model-now h3,
 .model-validation h3 { font-size: 18px; }
 .model-summary { font-size: 15px; }
+.model-evidence-grid strong,
 .model-trigger-grid strong,
 .model-stat-grid strong,
 .model-regime-grid strong { font-size: 14px; }
@@ -2711,6 +2742,7 @@ footer { font-size: 12px; }
   }
 
   .model-trigger-grid,
+  .model-evidence-grid,
   .model-stat-grid,
   .model-regime-grid {
     grid-template-columns: 1fr 1fr;

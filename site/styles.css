@@ -513,6 +513,23 @@ button {
   font-weight: 800;
 }
 
+.model-head-badges {
+  display: flex;
+  flex: none;
+  gap: 8px;
+  align-items: center;
+}
+
+.model-version-badge {
+  padding: 8px 11px;
+  border: 1px solid rgba(127, 245, 182, 0.2);
+  border-radius: 9px;
+  color: var(--mint-bright);
+  background: rgba(127, 245, 182, 0.07);
+  font-size: 10px;
+  font-weight: 800;
+}
+
 .model-dashboard {
   display: grid;
   grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.75fr);
@@ -547,8 +564,74 @@ button {
   letter-spacing: -0.045em;
 }
 
-.model-lab[data-direction="bullish"] .model-probability { color: var(--mint-bright); }
-.model-lab[data-direction="bearish"] .model-probability { color: #ffd4a7; }
+.model-score {
+  display: grid;
+  flex: none;
+  gap: 1px;
+  justify-items: end;
+}
+
+.model-score > span,
+.model-score > small {
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.model-score[data-tone="positive"] .model-probability { color: var(--mint-bright); }
+.model-score[data-tone="negative"] .model-probability { color: #ffd4a7; }
+
+.stat-help {
+  position: relative;
+  display: inline-grid;
+  width: 16px;
+  height: 16px;
+  margin-left: 3px;
+  padding: 0;
+  place-items: center;
+  border: 1px solid rgba(183, 205, 194, 0.26);
+  border-radius: 50%;
+  color: var(--muted-strong);
+  background: rgba(183, 205, 194, 0.06);
+  cursor: help;
+  font: 800 10px/1 system-ui, sans-serif;
+  vertical-align: 1px;
+}
+
+.stat-help::after {
+  position: absolute;
+  z-index: 40;
+  top: calc(100% + 8px);
+  left: 50%;
+  width: min(260px, calc(100vw - 48px));
+  padding: 10px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 9px;
+  color: var(--text);
+  background: rgba(5, 17, 13, 0.98);
+  box-shadow: var(--shadow);
+  content: attr(data-help);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.55;
+  opacity: 0;
+  pointer-events: none;
+  text-align: left;
+  transform: translate(-50%, -4px);
+  transition: 140ms ease;
+  visibility: hidden;
+}
+
+.stat-help:hover::after,
+.stat-help:focus-visible::after,
+.stat-help:focus::after {
+  opacity: 1;
+  transform: translate(-50%, 0);
+  visibility: visible;
+}
+
+@media (hover: none) {
+  .stat-help::after { display: none; }
+}
 
 .model-summary {
   min-height: 48px;
@@ -559,11 +642,21 @@ button {
 }
 
 .model-trigger-grid,
+.model-decision-grid,
 .model-evidence-grid,
 .model-stat-grid,
 .model-regime-grid {
   display: grid;
   gap: 8px;
+}
+
+.model-decision-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 14px 0;
+  padding: 10px;
+  border: 1px solid rgba(127, 245, 182, 0.15);
+  border-radius: 11px;
+  background: rgba(127, 245, 182, 0.045);
 }
 
 .model-evidence-grid {
@@ -575,6 +668,7 @@ button {
 .model-stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
 .model-evidence-grid > span,
+.model-decision-grid > span,
 .model-trigger-grid > span,
 .model-stat-grid > span,
 .model-regime-grid > span {
@@ -585,6 +679,23 @@ button {
   border: 1px solid rgba(125, 174, 151, 0.09);
   border-radius: 9px;
   background: rgba(126, 174, 151, 0.045);
+}
+
+.model-decision-grid > span {
+  padding: 5px 8px;
+  border: 0;
+  background: transparent;
+}
+
+.model-decision-grid small {
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.model-decision-grid strong {
+  color: var(--text);
+  font-size: 12px;
+  line-height: 1.45;
 }
 
 .model-evidence-grid > span {
@@ -2516,7 +2627,8 @@ footer p { margin: 0; }
 
 .model-lab-head h2 { font-size: 22px; }
 .model-lab-head > div > p:last-child,
-.model-split-badge { font-size: 13px; }
+.model-split-badge,
+.model-version-badge { font-size: 13px; }
 .model-now-head small,
 .model-card-title small,
 .model-evidence-grid small,
@@ -2527,6 +2639,10 @@ footer p { margin: 0; }
 .model-now h3,
 .model-validation h3 { font-size: 18px; }
 .model-summary { font-size: 15px; }
+.model-score > span,
+.model-score > small,
+.model-decision-grid small { font-size: 12px; }
+.model-decision-grid strong { font-size: 14px; }
 .model-evidence-grid strong,
 .model-trigger-grid strong,
 .model-stat-grid strong,
@@ -2746,6 +2862,14 @@ footer { font-size: 12px; }
   .model-stat-grid,
   .model-regime-grid {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .model-decision-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .model-head-badges {
+    flex-wrap: wrap;
   }
 
   .model-now,

@@ -10,7 +10,7 @@
     />
     <title>HYPE 趋势分析</title>
     <link rel="manifest" href="./manifest.webmanifest" />
-    <link rel="stylesheet" href="./styles.css?v=20260808-10" />
+    <link rel="stylesheet" href="./styles.css?v=20260809-11" />
   </head>
   <body>
     <div class="ambient ambient-one" aria-hidden="true"></div>
@@ -73,6 +73,62 @@
           <span id="four-hour-confidence">置信度 --</span>
           <small>研究辅助 · 非投资指令</small>
         </div>
+      </section>
+
+      <section class="model-lab loading-block" id="model-lab" aria-labelledby="model-lab-title">
+        <div class="model-lab-head">
+          <div>
+            <p class="section-kicker">60D OUT-OF-SAMPLE LAB</p>
+            <h2 id="model-lab-title">60日趋势与模型验证</h2>
+            <p>按时间先后训练：前 45 天训练，最后 15 天只测试，不参与参数学习。</p>
+          </div>
+          <span class="model-split-badge" id="model-split-badge">45日训练 · 15日测试</span>
+        </div>
+
+        <div class="model-dashboard">
+          <article class="model-now" aria-labelledby="model-now-title">
+            <div class="model-now-head">
+              <div>
+                <small>未来 4 小时研究信号</small>
+                <h3 id="model-now-title">等待 60 日数据</h3>
+              </div>
+              <strong class="model-probability" id="model-probability">--</strong>
+            </div>
+            <p class="model-summary" id="model-summary">模型会先完成时间切分和样本外验证，再生成候选交易窗口。</p>
+            <div class="model-trigger-grid">
+              <span><small>开多触发参考</small><strong id="model-long-trigger">--</strong></span>
+              <span><small>开空触发参考</small><strong id="model-short-trigger">--</strong></span>
+              <span><small>当前失效条件</small><strong id="model-invalidation">--</strong></span>
+              <span><small>信号有效窗口</small><strong id="model-window">等待更新</strong></span>
+            </div>
+          </article>
+
+          <article class="model-validation" aria-labelledby="model-validation-title">
+            <div class="model-card-title">
+              <div>
+                <small>严格样本外结果</small>
+                <h3 id="model-validation-title">最后 15 天测试集</h3>
+              </div>
+              <span id="model-samples">-- 个样本</span>
+            </div>
+            <div class="model-stat-grid">
+              <span><small>方向准确率</small><strong id="model-test-accuracy">--</strong></span>
+              <span><small>多数类基准</small><strong id="model-baseline">--</strong></span>
+              <span><small>高置信信号准确率</small><strong id="model-action-accuracy">--</strong></span>
+              <span><small>高置信信号覆盖率</small><strong id="model-coverage">--</strong></span>
+            </div>
+            <p id="model-validation-note">准确率只统计未参与训练的数据；尚未计入手续费、滑点和资金费率。</p>
+          </article>
+        </div>
+
+        <div class="model-regime-grid" aria-label="过去60日趋势概况">
+          <span><small>HYPE 60日涨跌</small><strong id="model-trend-60d">--</strong></span>
+          <span><small>60日最大回撤</small><strong id="model-drawdown">--</strong></span>
+          <span><small>HYPE 近7日动量</small><strong id="model-momentum-7d">--</strong></span>
+          <span><small>相对 BTC / ETH</small><strong id="model-relative-60d">--</strong></span>
+        </div>
+
+        <p class="model-disclaimer">模型使用 1 小时收盘数据预测随后 4 小时方向；15 分钟、4 小时和当前观点仅用于实时确认，不计入历史测试。研究辅助，不构成投资建议。</p>
       </section>
 
       <section class="metric-grid" aria-label="核心行情指标">
@@ -384,6 +440,6 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
     <script async src="https://platform.x.com/widgets.js" charset="utf-8"></script>
-    <script type="module" src="./app.js?v=20260808-10"></script>
+    <script type="module" src="./app.js?v=20260809-11"></script>
   </body>
 </html>

@@ -462,6 +462,164 @@ button {
   font-weight: 750;
 }
 
+.model-lab {
+  margin-top: 18px;
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: 21px;
+  background:
+    radial-gradient(circle at 88% 8%, rgba(102, 177, 255, 0.07), transparent 29%),
+    linear-gradient(125deg, rgba(127, 245, 182, 0.035), transparent 46%),
+    rgba(8, 23, 18, 0.82);
+  box-shadow: 0 15px 46px rgba(0, 0, 0, 0.14);
+}
+
+.model-lab[data-direction="bullish"] { border-color: rgba(127, 245, 182, 0.27); }
+.model-lab[data-direction="bearish"] { border-color: rgba(255, 184, 107, 0.27); }
+
+.model-lab-head,
+.model-now-head,
+.model-card-title {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.model-lab-head h2,
+.model-now h3,
+.model-validation h3 {
+  margin: 0;
+  letter-spacing: -0.025em;
+}
+
+.model-lab-head h2 { font-size: 21px; }
+
+.model-lab-head > div > p:last-child {
+  margin: 7px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.model-split-badge {
+  flex: none;
+  padding: 8px 11px;
+  border: 1px solid rgba(102, 177, 255, 0.2);
+  border-radius: 9px;
+  color: #b8d8ff;
+  background: rgba(102, 177, 255, 0.07);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.model-dashboard {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.75fr);
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.model-now,
+.model-validation {
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: rgba(4, 14, 10, 0.43);
+}
+
+.model-now-head small,
+.model-card-title small,
+.model-trigger-grid small,
+.model-stat-grid small,
+.model-regime-grid small {
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.model-now h3,
+.model-validation h3 { margin-top: 4px; font-size: 16px; }
+
+.model-probability {
+  color: var(--muted-strong);
+  font-size: 30px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.045em;
+}
+
+.model-lab[data-direction="bullish"] .model-probability { color: var(--mint-bright); }
+.model-lab[data-direction="bearish"] .model-probability { color: #ffd4a7; }
+
+.model-summary {
+  min-height: 48px;
+  margin: 14px 0;
+  color: var(--muted-strong);
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.model-trigger-grid,
+.model-stat-grid,
+.model-regime-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.model-trigger-grid,
+.model-stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+.model-trigger-grid > span,
+.model-stat-grid > span,
+.model-regime-grid > span {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  padding: 10px 11px;
+  border: 1px solid rgba(125, 174, 151, 0.09);
+  border-radius: 9px;
+  background: rgba(126, 174, 151, 0.045);
+}
+
+.model-trigger-grid strong,
+.model-stat-grid strong,
+.model-regime-grid strong {
+  overflow: hidden;
+  color: var(--text);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.model-card-title > span {
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.model-stat-grid { margin-top: 14px; }
+
+.model-validation > p {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.55;
+}
+
+.model-regime-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 12px;
+}
+
+.model-regime-grid > span { padding: 11px 13px; }
+.model-regime-grid strong { font-size: 13px; }
+
+.model-disclaimer {
+  margin: 13px 0 0;
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.6;
+}
+
 .metric-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2117,6 +2275,10 @@ footer p { margin: 0; }
     align-items: center;
     justify-content: center;
   }
+
+  .model-dashboard {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 680px) {
@@ -2168,6 +2330,33 @@ footer p { margin: 0; }
   .four-hour-score strong {
     font-size: 26px;
   }
+
+  .model-lab {
+    padding: 19px;
+    border-radius: 18px;
+  }
+
+  .model-lab-head {
+    display: grid;
+    justify-items: start;
+  }
+
+  .model-trigger-grid,
+  .model-stat-grid,
+  .model-regime-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .model-now,
+  .model-validation {
+    padding: 15px;
+  }
+
+  .model-now-head {
+    align-items: flex-start;
+  }
+
+  .model-probability { font-size: 26px; }
 
   .metric-grid {
     grid-template-columns: 1fr;

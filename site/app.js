@@ -3,12 +3,12 @@ const X_POSTS_URL = "./data/x-posts.json";
 const DAY = 24 * 60 * 60 * 1000;
 const PERIODS = {
   "15m": { interval: "15m", lookback: 7 * DAY, label: "最近 7 天" },
-  "1h": { interval: "1h", lookback: 30 * DAY, label: "最近 30 天" },
+  "1h": { interval: "1h", lookback: 60 * DAY, label: "最近 60 天" },
   "4h": { interval: "4h", lookback: 90 * DAY, label: "最近 90 天" },
   "1d": { interval: "1d", lookback: 365 * DAY, label: "最近 1 年" },
 };
 const PERIOD_ORDER = ["15m", "1h", "4h", "1d"];
-const CACHE_PREFIX = "hype-lens-v1-";
+const CACHE_PREFIX = "hype-lens-v2-";
 const OPINION_STORAGE_KEY = "hype-lens-opinions-v1";
 const SOCIAL_SOURCES = [
   { handle: "0xMaxs", name: "0xMaxs", role: "交易观点", influence: 72 },
@@ -800,6 +800,7 @@ async function refreshAll(force = false) {
     renderMatrix();
     evaluateOpinions();
     renderFourHourBrief();
+    renderWalkForwardModel();
     if (state.cache.has(state.activePeriod)) renderCharts(state.activePeriod);
     if (failed) showToast(`${failed} 个大周期暂时未更新，已显示可用数据`);
     else if (force) showToast("行情已更新");
@@ -1119,6 +1120,235 @@ function recentOpinionSignal(records, now = Date.now()) {
   return { score, key: direction.key, label: `${direction.label} · ${scoped.length}条` };
 }
 
+function safeLogReturn(current, previous) {
+  if (!Number.isFinite(current) || !Number.isFinite(previous) || current <= 0 || previous <= 0) return 0;
+  return Math.log(current / previous);
+}
+
+function modelFeatures(rows, index) {
+  if (index < 24 || index >= rows.length) return null;
+  const row = rows[index];
+  const returns = (key, bars) => safeLogReturn(row[key], rows[index - bars][key]);
+  const hourlyReturns = [];
+  for (let offset = 0; offset < 12; offset += 1) {
+    hourlyReturns.push(safeLogReturn(rows[index - offset].hype, rows[index - offset - 1].hype));
+  }
+  const mean = hourlyReturns.reduce((sum, value) => sum + value, 0) / hourlyReturns.length;
+  const volatility = Math.sqrt(hourlyReturns.reduce((sum, value) => sum + ((value - mean) ** 2), 0) / hourlyReturns.length);
+  return [
+    returns("hype", 1),
+    returns("hype", 4),
+    returns("hype", 24),
+    -returns("eth", 1),
+    -returns("eth", 4),
+    -returns("eth", 24),
+    -returns("btc", 1),
+    -returns("btc", 4),
+    -returns("btc", 24),
+    -safeLogReturn(row.ethFast, row.ethSlow),
+    -safeLogReturn(row.btcFast, row.btcSlow),
+    volatility,
+  ];
+}
+
+function buildModelSamples(rows) {
+  const samples = [];
+  for (let index = 24; index < rows.length - 4; index += 1) {
+    const features = modelFeatures(rows, index);
+    const forwardReturn = safeLogReturn(rows[index + 4].hype, rows[index].hype);
+    if (!features || !features.every(Number.isFinite) || !Number.isFinite(forwardReturn)) continue;
+    samples.push({
+      t: rows[index].t,
+      label: forwardReturn > 0 ? 1 : 0,
+      forwardReturn,
+      features,
+    });
+  }
+  return samples;
+}
+
+function sigmoid(value) {
+  const bounded = Math.max(-30, Math.min(30, value));
+  return 1 / (1 + Math.exp(-bounded));
+}
+
+function trainDirectionModel(samples) {
+  if (!samples.length) return null;
+  const featureCount = samples[0].features.length;
+  const means = Array(featureCount).fill(0);
+  const deviations = Array(featureCount).fill(0);
+  samples.forEach((sample) => sample.features.forEach((value, index) => { means[index] += value; }));
+  means.forEach((_, index) => { means[index] /= samples.length; });
+  samples.forEach((sample) => sample.features.forEach((value, index) => {
+    deviations[index] += (value - means[index]) ** 2;
+  }));
+  deviations.forEach((_, index) => {
+    deviations[index] = Math.max(Math.sqrt(deviations[index] / samples.length), 1e-8);
+  });
+  const standardize = (features) => features.map((value, index) => (value - means[index]) / deviations[index]);
+  const normalized = samples.map((sample) => ({ ...sample, x: standardize(sample.features) }));
+  const positives = normalized.filter((sample) => sample.label === 1).length;
+  const negatives = normalized.length - positives;
+  const positiveWeight = positives ? normalized.length / (2 * positives) : 1;
+  const negativeWeight = negatives ? normalized.length / (2 * negatives) : 1;
+  const weights = Array(featureCount + 1).fill(0);
+  const learningRate = 0.075;
+  const regularization = 0.004;
+  for (let epoch = 0; epoch < 420; epoch += 1) {
+    const gradient = Array(weights.length).fill(0);
+    normalized.forEach((sample) => {
+      const score = weights[0] + sample.x.reduce((sum, value, index) => sum + value * weights[index + 1], 0);
+      const probability = sigmoid(score);
+      const classWeight = sample.label ? positiveWeight : negativeWeight;
+      const error = (probability - sample.label) * classWeight;
+      gradient[0] += error;
+      sample.x.forEach((value, index) => { gradient[index + 1] += error * value; });
+    });
+    weights.forEach((weight, index) => {
+      const penalty = index === 0 ? 0 : regularization * weight;
+      weights[index] -= learningRate * ((gradient[index] / normalized.length) + penalty);
+    });
+  }
+  return {
+    predict(features) {
+      const x = standardize(features);
+      return sigmoid(weights[0] + x.reduce((sum, value, index) => sum + value * weights[index + 1], 0));
+    },
+  };
+}
+
+function evaluateDirectionModel(model, samples) {
+  if (!model || !samples.length) return null;
+  let correct = 0;
+  let actionable = 0;
+  let actionableCorrect = 0;
+  let positives = 0;
+  samples.forEach((sample) => {
+    const probability = model.predict(sample.features);
+    const predicted = probability >= 0.5 ? 1 : 0;
+    if (predicted === sample.label) correct += 1;
+    positives += sample.label;
+    if (probability >= 0.58 || probability <= 0.42) {
+      actionable += 1;
+      if (predicted === sample.label) actionableCorrect += 1;
+    }
+  });
+  const majority = Math.max(positives, samples.length - positives) / samples.length;
+  return {
+    accuracy: correct / samples.length,
+    baseline: majority,
+    actionableAccuracy: actionable ? actionableCorrect / actionable : null,
+    coverage: actionable / samples.length,
+    actionable,
+    samples: samples.length,
+  };
+}
+
+function maximumDrawdown(rows) {
+  let peak = 0;
+  let drawdown = 0;
+  rows.forEach((row) => {
+    peak = Math.max(peak, row.hype);
+    if (peak > 0) drawdown = Math.min(drawdown, (row.hype / peak) - 1);
+  });
+  return drawdown * 100;
+}
+
+function renderWalkForwardModel() {
+  const panel = $("model-lab");
+  const rows = state.cache.get("1h")?.rows;
+  if (!panel || !rows || rows.length < 900) return;
+  const allSamples = buildModelSamples(rows);
+  const cutoff = rows.at(-1).t - 15 * DAY;
+  const training = allSamples.filter((sample) => sample.t + 4 * 60 * 60 * 1000 < cutoff);
+  const testing = allSamples.filter((sample) => sample.t >= cutoff);
+  if (training.length < 500 || testing.length < 100) return;
+  const model = trainDirectionModel(training);
+  const validation = evaluateDirectionModel(model, testing);
+  const currentFeatures = modelFeatures(rows, rows.length - 1);
+  if (!model || !validation || !currentFeatures) return;
+
+  const rawProbability = model.predict(currentFeatures);
+  const opinion = recentOpinionSignal(allOpinions());
+  const opinionAdjustment = opinion ? Math.max(-0.06, Math.min(0.06, opinion.score * 0.0006)) : 0;
+  const probability = Math.max(0.03, Math.min(0.97, rawProbability + opinionAdjustment));
+  const shortTerm = relativePeriodSignal("15m");
+  const mediumTerm = relativePeriodSignal("4h");
+  const validationEdge = validation.accuracy - validation.baseline;
+  const validated = validation.samples >= 100 && validationEdge >= -0.015;
+  const supportsLong = (!shortTerm || shortTerm.score > -15) && (!mediumTerm || mediumTerm.score > -20);
+  const supportsShort = (!shortTerm || shortTerm.score < 15) && (!mediumTerm || mediumTerm.score < 20);
+  let direction = "neutral";
+  let title = "暂不交易 · 等待确认";
+  if (validated && probability >= 0.6 && supportsLong) {
+    direction = "bullish";
+    title = "开多候选 · 等待突破确认";
+  } else if (validated && probability <= 0.4 && supportsShort) {
+    direction = "bearish";
+    title = "开空候选 · 等待跌破确认";
+  } else if (!validated) {
+    title = "模型优势不足 · 暂不采用";
+  }
+
+  const latest = rows.at(-1);
+  const recent4 = rows.slice(-5);
+  const recent12 = rows.slice(-13);
+  const longTrigger = Math.max(...recent4.map((row) => row.hype)) * 1.001;
+  const shortTrigger = Math.min(...recent4.map((row) => row.hype)) * 0.999;
+  const longInvalidation = Math.min(...recent12.map((row) => row.hype));
+  const shortInvalidation = Math.max(...recent12.map((row) => row.hype));
+  const nextReviewTime = latest.t + 60 * 60 * 1000;
+  const evidence = [
+    `模型上涨概率 ${Math.round(probability * 100)}%`,
+    shortTerm ? `15分钟${shortTerm.label}` : "15分钟待更新",
+    mediumTerm ? `4小时${mediumTerm.label}` : "4小时待更新",
+    opinion ? `观点${opinion.label}` : "观点数据不足",
+  ].join("；");
+  const summary = direction === "bullish"
+    ? `${evidence}。候选窗口为下一根 1 小时收盘确认后，观察随后 4 小时；未突破参考价前不视为有效。`
+    : direction === "bearish"
+      ? `${evidence}。候选窗口为下一根 1 小时收盘确认后，观察随后 4 小时；未跌破参考价前不视为有效。`
+      : `${evidence}。多空条件尚未形成足够共振，继续等待下一根 1 小时收盘数据。`;
+
+  const first = rows[0];
+  const return60d = ((latest.hype / first.hype) - 1) * 100;
+  const return7d = percentChange(rows, "hype", Math.min(168, rows.length - 1));
+  const ethRelative = -(((latest.eth / first.eth) - 1) * 100);
+  const btcRelative = -(((latest.btc / first.btc) - 1) * 100);
+  const relativeAverage = (ethRelative + btcRelative) / 2;
+  const trainDays = Math.max(1, Math.round((training.at(-1).t - training[0].t) / DAY));
+  const testDays = Math.max(1, Math.round((testing.at(-1).t - testing[0].t) / DAY));
+
+  panel.classList.remove("loading-block");
+  panel.dataset.direction = direction;
+  setText("model-now-title", title);
+  setText("model-probability", `${Math.round(probability * 100)}%`);
+  setText("model-summary", summary);
+  setText("model-long-trigger", `HYPE > $${longTrigger.toFixed(3)}`);
+  setText("model-short-trigger", `HYPE < $${shortTrigger.toFixed(3)}`);
+  setText("model-invalidation", direction === "bullish"
+    ? `收盘低于 $${longInvalidation.toFixed(3)}`
+    : direction === "bearish"
+      ? `收盘高于 $${shortInvalidation.toFixed(3)}`
+      : "触发后按反向边界失效");
+  setText("model-window", direction === "neutral"
+    ? `${formatTime.format(nextReviewTime)} 后复核`
+    : `${formatTime.format(nextReviewTime)} 确认后4小时`);
+  setText("model-split-badge", `${trainDays}日训练 · ${testDays}日测试`);
+  setText("model-samples", `${validation.samples} 个样本`);
+  setText("model-test-accuracy", `${Math.round(validation.accuracy * 100)}%`);
+  setText("model-baseline", `${Math.round(validation.baseline * 100)}%`);
+  setText("model-action-accuracy", validation.actionableAccuracy === null ? "无信号" : `${Math.round(validation.actionableAccuracy * 100)}%`);
+  setText("model-coverage", `${Math.round(validation.coverage * 100)}% · ${validation.actionable}次`);
+  setText("model-validation-note", validationEdge > 0
+    ? `样本外准确率较多数类基准高 ${(validationEdge * 100).toFixed(1)} 个百分点；高置信结果仍未计入手续费、滑点和资金费率。`
+    : `样本外准确率未明显超过多数类基准，当前信号自动降级为谨慎参考；未计入手续费、滑点和资金费率。`);
+  setText("model-trend-60d", formatPercent(return60d));
+  setText("model-drawdown", formatPercent(maximumDrawdown(rows)));
+  setText("model-momentum-7d", formatPercent(return7d));
+  setText("model-relative-60d", `${relativeAverage >= 0 ? "领先" : "落后"} ${Math.abs(relativeAverage).toFixed(1)}%`);
+}
+
 function renderFourHourBrief() {
   const panel = $("four-hour-brief");
   if (!panel) return;
@@ -1347,6 +1577,7 @@ function renderOpinions() {
   const records = allOpinions();
   renderOpinionSummary(records);
   renderFourHourBrief();
+  renderWalkForwardModel();
   const visibleRecords = state.opinionFilter === "all"
     ? records
     : records.filter((record) => record.analysis?.direction === state.opinionFilter);

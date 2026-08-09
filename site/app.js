@@ -357,7 +357,7 @@ class RatioChart {
     }
     const context = this.canvas.getContext("2d");
     context.setTransform(dpr, 0, 0, dpr, 0, 0);
-    return { context, width, height, dpr, padding: { top: 16, right: 12, bottom: 34, left: 60 } };
+    return { context, width, height, dpr, padding: { top: 16, right: 12, bottom: 40, left: 68 } };
   }
 
   draw(highlightIndex = this.hoverIndex) {
@@ -379,7 +379,7 @@ class RatioChart {
     const yFor = (value) => padding.top + ((max - value) / (max - min)) * plotHeight;
 
     context.lineWidth = 1;
-    context.font = "11px ui-sans-serif, -apple-system, sans-serif";
+    context.font = "13px ui-sans-serif, -apple-system, sans-serif";
     context.textBaseline = "middle";
     for (let line = 0; line <= 4; line += 1) {
       const ratio = line / 4;
@@ -395,7 +395,8 @@ class RatioChart {
       context.fillText(formatRatio(value), padding.left - 8, y);
     }
 
-    const labelIndexes = [0, 0.33, 0.66, 1].map((ratio) => Math.round((this.rows.length - 1) * ratio));
+    const labelRatios = width < 520 ? [0, 0.5, 1] : [0, 0.33, 0.66, 1];
+    const labelIndexes = labelRatios.map((ratio) => Math.round((this.rows.length - 1) * ratio));
     context.textBaseline = "bottom";
     labelIndexes.forEach((index, labelIndex) => {
       context.fillStyle = "rgba(139,166,154,0.72)";
@@ -462,7 +463,7 @@ class RatioChart {
       context.fillStyle = "rgba(6,16,13,0.96)";
       context.fillRect(timeLeft, height - padding.bottom + 5, timeWidth, 22);
       context.fillStyle = this.options.main;
-      context.font = "11px ui-sans-serif, -apple-system, sans-serif";
+      context.font = "13px ui-sans-serif, -apple-system, sans-serif";
       context.textAlign = "center";
       context.textBaseline = "middle";
       context.fillText(axisTime, timeLeft + timeWidth / 2, height - padding.bottom + 16);

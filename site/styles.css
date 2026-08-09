@@ -2239,6 +2239,110 @@ footer p { margin: 0; }
   outline-offset: 3px;
 }
 
+/* Unified dashboard typography — aligned with the readable opinion cards. */
+.eyebrow,
+.section-kicker,
+.opinion-log .section-kicker,
+.opinion-summary-head .section-kicker {
+  font-size: 12px;
+}
+
+.brand strong { font-size: 16px; }
+.brand small { font-size: 13px; }
+.connection,
+.refresh-button { font-size: 14px; }
+.hero-copy { font-size: 16px; }
+.hero-state small,
+.hero-state p { font-size: 13px; }
+.hero-state h2 { font-size: 24px; }
+
+.four-hour-heading .section-kicker { font-size: 12px; }
+.four-hour-heading h2 { font-size: 20px; }
+.four-hour-stance { font-size: 14px; }
+#four-hour-summary { font-size: 16px; }
+.four-hour-signals small,
+.four-hour-score small { font-size: 12px; }
+.four-hour-signals strong,
+.four-hour-score span,
+.four-hour-condition { font-size: 14px; }
+
+.model-lab-head h2 { font-size: 22px; }
+.model-lab-head > div > p:last-child,
+.model-split-badge { font-size: 13px; }
+.model-now-head small,
+.model-card-title small,
+.model-trigger-grid small,
+.model-stat-grid small,
+.model-regime-grid small,
+.model-card-title > span { font-size: 12px; }
+.model-now h3,
+.model-validation h3 { font-size: 18px; }
+.model-summary { font-size: 15px; }
+.model-trigger-grid strong,
+.model-stat-grid strong,
+.model-regime-grid strong { font-size: 14px; }
+.model-validation > p,
+.model-disclaimer { font-size: 13px; }
+
+.metric-head > div { font-size: 16px; }
+.trend-pill { font-size: 13px; }
+.metric-caption { font-size: 14px; }
+.change-row small { font-size: 13px; }
+.change-row strong { font-size: 16px; }
+
+.section-head h2,
+.panel-heading h2 { font-size: 22px; }
+.period-switch button { font-size: 14px; }
+.chart-context { font-size: 13px; }
+.chart-title-row > div:first-child { font-size: 16px; }
+.legend { font-size: 13px; }
+.zoom-controls .reset-zoom,
+.zoom-controls > span { font-size: 12px; }
+.chart-tooltip,
+.chart-empty { font-size: 14px; }
+.chart-tooltip strong { font-size: 18px; }
+
+.matrix-note,
+.matrix-header,
+.matrix-footnote { font-size: 12px; }
+.matrix-row strong,
+.matrix-cell,
+.signal-item strong { font-size: 14px; }
+.signal-item span { font-size: 13px; }
+
+.social-section h2 { font-size: 25px; }
+.social-intro { font-size: 14px; }
+.beta-badge,
+.analysis-engine,
+.social-mode-note span,
+.x-profile-link { font-size: 12px; }
+.social-mode-note strong,
+.x-api-guard small,
+.source-tab small,
+.timeline-loading small,
+.timeline-fallback p,
+.analysis-confidence,
+.analysis-score-row small,
+.analysis-factors span,
+.form-foot p { font-size: 12px; }
+.x-api-guard strong,
+.x-api-guard > p,
+.source-tab strong,
+.timeline-loading strong,
+.timeline-fallback strong,
+.opinion-form label > span,
+.analysis-score-row strong { font-size: 13px; }
+.social-panel-heading h3 { font-size: 18px; }
+.opinion-form input,
+.opinion-form select,
+.opinion-form textarea,
+.analyze-button,
+.analysis-summary { font-size: 14px; }
+.direction-badge { font-size: 14px; }
+.social-disclaimer,
+footer { font-size: 12px; }
+.toast { font-size: 14px; }
+
 @media (max-width: 900px) {
   .hero-panel {
     grid-template-columns: 1fr;
@@ -2297,7 +2401,7 @@ footer p { margin: 0; }
     border-radius: 24px;
   }
 
-  .hero-copy { font-size: 12px; }
+  .hero-copy { font-size: 15px; }
 
   .hero-state {
     padding: 17px;
@@ -2309,7 +2413,7 @@ footer p { margin: 0; }
     height: 62px;
   }
 
-  .hero-state h2 { font-size: 19px; }
+  .hero-state h2 { font-size: 22px; }
 
   .four-hour-brief {
     grid-template-columns: 1fr;

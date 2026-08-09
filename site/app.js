@@ -43,6 +43,8 @@ const state = {
   activeSocialSource: SOCIAL_SOURCES[0].handle,
   summaryWindow: "24h",
   opinionFilter: "all",
+  opinionsExpanded: false,
+  activeDashboardTab: "market",
   marketContext: null,
 };
 
@@ -157,6 +159,53 @@ function showToast(message, duration = 3500) {
   toast.hidden = false;
   window.clearTimeout(showToast.timer);
   showToast.timer = window.setTimeout(() => { toast.hidden = true; }, duration);
+}
+
+function activateDashboardTab(tab, moveFocus = false) {
+  const validTabs = ["market", "model", "social"];
+  const nextTab = validTabs.includes(tab) ? tab : "market";
+  state.activeDashboardTab = nextTab;
+  document.querySelectorAll("[data-dashboard-tab]").forEach((button) => {
+    const active = button.dataset.dashboardTab === nextTab;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-selected", String(active));
+    button.tabIndex = active ? 0 : -1;
+    if (active && moveFocus) button.focus();
+  });
+  document.querySelectorAll("[data-dashboard-panel]").forEach((panel) => {
+    const active = panel.dataset.dashboardPanel === nextTab;
+    panel.hidden = !active;
+    panel.classList.toggle("active", active);
+  });
+  window.history.replaceState(null, "", `#${nextTab}`);
+  if (nextTab === "market") {
+    window.requestAnimationFrame(() => Object.values(charts).forEach((chart) => chart.draw()));
+  } else if (nextTab === "social") {
+    const frame = $("timeline-frame");
+    if (frame && !frame.querySelector("iframe") && document.querySelector(".social-settings")?.open) {
+      renderTimeline(state.activeSocialSource);
+    }
+  }
+}
+
+function initDashboardTabs() {
+  const tabList = document.querySelector(".dashboard-tabs");
+  const buttons = [...document.querySelectorAll("[data-dashboard-tab]")];
+  tabList.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-dashboard-tab]");
+    if (button) activateDashboardTab(button.dataset.dashboardTab);
+  });
+  tabList.addEventListener("keydown", (event) => {
+    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+    event.preventDefault();
+    const current = Math.max(0, buttons.findIndex((button) => button.dataset.dashboardTab === state.activeDashboardTab));
+    const next = event.key === "Home" ? 0
+      : event.key === "End" ? buttons.length - 1
+        : (current + (event.key === "ArrowRight" ? 1 : -1) + buttons.length) % buttons.length;
+    activateDashboardTab(buttons[next].dataset.dashboardTab, true);
+  });
+  const requested = window.location.hash.slice(1);
+  activateDashboardTab(requested, false);
 }
 
 async function fetchCandles(coin, interval, startTime, endTime, attempt = 0) {
@@ -1870,6 +1919,7 @@ function renderOpinions() {
     : records.filter((record) => record.analysis?.direction === state.opinionFilter);
   setText("opinion-count", state.opinionFilter === "all" ? `${records.length} 条记录` : `${visibleRecords.length} / ${records.length} 条记录`);
   const list = $("opinion-list");
+  const toggle = $("toggle-opinions");
   if (!visibleRecords.length) {
     list.innerHTML = `
       <div class="opinion-empty">
@@ -1877,10 +1927,15 @@ function renderOpinions() {
         <strong>${records.length ? "当前筛选没有对应观点" : "等待首次自动采集"}</strong>
         <p>${records.length ? "可在汇总卡片中切换其他方向。" : "X API 每 15 分钟检查一次；也可以使用上方备用入口手动添加。"}</p>
       </div>`;
+    toggle.hidden = true;
     return;
   }
 
-  list.innerHTML = visibleRecords.map((record) => {
+  const renderedRecords = state.opinionsExpanded ? visibleRecords : visibleRecords.slice(0, 3);
+  toggle.hidden = visibleRecords.length <= 3;
+  toggle.textContent = state.opinionsExpanded ? "收起观点记录" : `查看全部 ${visibleRecords.length} 条观点`;
+  toggle.setAttribute("aria-expanded", String(state.opinionsExpanded));
+  list.innerHTML = renderedRecords.map((record) => {
     const analysis = record.analysis;
     const source = sourceFor(record.author);
     const baseline = record.baseline?.hype ? `基准 HYPE $${record.baseline.hype.toFixed(3)}` : "等待行情基准";
@@ -2102,13 +2157,23 @@ function initSocial() {
     const filterButton = event.target.closest("[data-opinion-filter]");
     if (filterButton) {
       state.opinionFilter = filterButton.dataset.opinionFilter;
+      state.opinionsExpanded = false;
       renderOpinions();
     }
   });
 
+  $("toggle-opinions").addEventListener("click", () => {
+    state.opinionsExpanded = !state.opinionsExpanded;
+    renderOpinions();
+    if (!state.opinionsExpanded) $("opinion-summary").scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+
+  document.querySelector(".social-settings").addEventListener("toggle", (event) => {
+    if (event.currentTarget.open) renderTimeline(state.activeSocialSource);
+  });
+
   state.opinions = readOpinions();
   renderOpinions();
-  renderTimeline(SOCIAL_SOURCES[0].handle);
   loadAutomatedOpinions();
 }
 
@@ -2124,6 +2189,7 @@ window.addEventListener("online", () => {
 window.addEventListener("offline", () => setConnection("error", "网络离线"));
 
 initSocial();
+initDashboardTabs();
 loadMarketContext();
 refreshAll();
 window.setInterval(() => refreshAll(true), 5 * 60 * 1000);

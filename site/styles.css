@@ -354,27 +354,32 @@ button {
 
 .four-hour-stance {
   display: inline-flex;
-  min-height: 28px;
-  padding: 0 10px;
+  min-height: 36px;
+  padding: 0 14px;
   align-items: center;
-  border-radius: 8px;
-  font-size: 11px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  font-size: 15px;
   font-weight: 800;
+  letter-spacing: 0.02em;
 }
 
 .four-hour-stance.bullish {
   color: var(--mint-bright);
   background: rgba(127, 245, 182, 0.1);
+  border-color: rgba(127, 245, 182, 0.28);
 }
 
 .four-hour-stance.bearish {
   color: #ffd4a7;
   background: rgba(255, 184, 107, 0.1);
+  border-color: rgba(255, 184, 107, 0.28);
 }
 
 .four-hour-stance.neutral {
   color: var(--muted-strong);
   background: rgba(183, 205, 194, 0.08);
+  border-color: rgba(183, 205, 194, 0.14);
 }
 
 .four-hour-content > p {
@@ -2617,7 +2622,7 @@ footer p { margin: 0; }
 
 .four-hour-heading .section-kicker { font-size: 12px; }
 .four-hour-heading h2 { font-size: 20px; }
-.four-hour-stance { font-size: 14px; }
+.four-hour-stance { font-size: 16px; }
 #four-hour-summary { font-size: 16px; }
 .four-hour-signals small,
 .four-hour-score small { font-size: 12px; }

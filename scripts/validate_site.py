@@ -16,8 +16,11 @@ def main() -> None:
         SITE / "app.js",
         SITE / "manifest.webmanifest",
         SITE / "data" / "x-posts.json",
+        SITE / "data" / "market-context.json",
         ROOT / "scripts" / "x_monitor.py",
+        ROOT / "scripts" / "market_context.py",
         ROOT / ".github" / "workflows" / "x-monitor.yml",
+        ROOT / ".github" / "workflows" / "market-context.yml",
     ]
     missing = [str(path.relative_to(ROOT)) for path in required if not path.is_file()]
     if missing:
@@ -29,6 +32,9 @@ def main() -> None:
     x_data = json.loads((SITE / "data" / "x-posts.json").read_text(encoding="utf-8"))
     x_monitor = (ROOT / "scripts" / "x_monitor.py").read_text(encoding="utf-8")
     x_workflow = (ROOT / ".github" / "workflows" / "x-monitor.yml").read_text(encoding="utf-8")
+    market_data = json.loads((SITE / "data" / "market-context.json").read_text(encoding="utf-8"))
+    market_collector = (ROOT / "scripts" / "market_context.py").read_text(encoding="utf-8")
+    market_workflow = (ROOT / ".github" / "workflows" / "market-context.yml").read_text(encoding="utf-8")
     checks = {
         "responsive viewport": 'name="viewport"' in html,
         "Chinese language": 'lang="zh-CN"' in html,
@@ -60,6 +66,12 @@ def main() -> None:
         "chronological 30 day holdout": "30 * DAY" in javascript and "testingStart" in javascript and 'id="model-trend-recall"' in html,
         "trend capture validation": "evaluateTrendCapture" in javascript and 'id="model-capture-rate"' in html and 'id="model-giveback"' in html,
         "dynamic drawdown exit": "rollingAtrPercent" in javascript and "dynamic-stop" in javascript and 'id="model-invalidation"' in html,
+        "price confirmed trend exits": "priceConfirmedReversal" in javascript and "lockedDirection" in javascript and "cooldownUntil" in javascript,
+        "trend capture diagnostics": 'id="model-entry-delay"' in html and 'id="model-early-exit"' in html and 'id="model-repeat-signals"' in html,
+        "free market context panel": 'id="model-market-context"' in html and "marketStructureSignal" in javascript and "loadMarketContext" in javascript,
+        "free market context collector": all(token in market_collector for token in ("metaAndAssetCtxs", "fundingHistory", "l2Book", "recentTrades")),
+        "market context retention": market_data.get("snapshot_retention_days") == 60 and market_data.get("funding_retention_days") == 180,
+        "market context schedule": 'cron: "11,26,41,56 * * * *"' in market_workflow and "scripts/market_context.py" in market_workflow,
         "summary range and direction filters": "data-summary-window" in html and "data-opinion-filter" in javascript,
         "canonical X snowflake time": "X_SNOWFLAKE_EPOCH" in javascript and "xPostTimestamp" in javascript and "北京时间" in javascript,
         "manual X published time migration": "xSnowflakeTimestamp(parsedPostId)" in javascript and "migrated" in javascript,

@@ -1,5 +1,6 @@
 const API_URL = "https://api.hyperliquid.xyz/info";
 const X_POSTS_URL = "./data/x-posts.json";
+const MARKET_CONTEXT_URL = "./data/market-context.json";
 const DAY = 24 * 60 * 60 * 1000;
 const MODEL_ROUND_TRIP_COST = 0.001;
 const PERIODS = {
@@ -42,6 +43,7 @@ const state = {
   activeSocialSource: SOCIAL_SOURCES[0].handle,
   summaryWindow: "24h",
   opinionFilter: "all",
+  marketContext: null,
 };
 
 const $ = (id) => document.getElementById(id);
@@ -1138,6 +1140,52 @@ function recentOpinionSignal(records, now = Date.now()) {
   return { score, key: direction.key, label: `${direction.label} · ${scoped.length}条` };
 }
 
+function marketStructureSignal(payload) {
+  const snapshots = Array.isArray(payload?.snapshots) ? payload.snapshots : [];
+  if (!snapshots.length) return null;
+  const latest = snapshots.at(-1);
+  const previous = snapshots[Math.max(0, snapshots.length - 97)];
+  const recentSnapshots = snapshots.slice(-4);
+  const bookImbalance = recentSnapshots.reduce((sum, item) => sum + Number(item.order_book?.imbalance || 0), 0) / recentSnapshots.length;
+  const flowSamples = recentSnapshots.map((item) => Number(item.recent_flow?.buy_share)).filter(Number.isFinite);
+  const buyShare = flowSamples.length ? flowSamples.reduce((sum, value) => sum + value, 0) / flowSamples.length : null;
+  const funding = Number(latest.funding || 0);
+  const premium = Number(latest.premium || 0);
+  let score = Math.max(-5, Math.min(5, bookImbalance * 8));
+  if (recentSnapshots.length >= 3 && Number.isFinite(buyShare)) score += Math.max(-4, Math.min(4, (buyShare - 0.5) * 12));
+  score -= scaledTrendComponent(funding, 0.0001, 4);
+  score -= scaledTrendComponent(premium, 0.002, 3);
+  const currentOi = Number(latest.open_interest);
+  const previousOi = Number(previous?.open_interest);
+  const currentPrice = Number(latest.mark_price);
+  const previousPrice = Number(previous?.mark_price);
+  if (currentOi > 0 && previousOi > 0 && currentPrice > 0 && previousPrice > 0) {
+    const oiChange = (currentOi / previousOi) - 1;
+    const priceChange = (currentPrice / previousPrice) - 1;
+    if (Math.abs(oiChange) >= 0.02 && Math.abs(priceChange) >= 0.01) {
+      score += Math.sign(priceChange) * Math.min(7, Math.abs(oiChange) * 100);
+    }
+  }
+  score = Math.round(Math.max(-12, Math.min(12, score)));
+  return {
+    score,
+    label: score >= 4 ? "结构偏多" : score <= -4 ? "结构偏空" : "结构中性",
+    snapshots: snapshots.length,
+    fundingPoints: Array.isArray(payload?.funding_history) ? payload.funding_history.length : 0,
+  };
+}
+
+async function loadMarketContext() {
+  try {
+    const response = await fetch(`${MARKET_CONTEXT_URL}?t=${Date.now()}`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`市场结构数据返回 ${response.status}`);
+    state.marketContext = await response.json();
+    renderWalkForwardModel();
+  } catch {
+    state.marketContext = null;
+  }
+}
+
 function safeLogReturn(current, previous) {
   if (!Number.isFinite(current) || !Number.isFinite(previous) || current <= 0 || previous <= 0) return 0;
   return Math.log(current / previous);
@@ -1171,6 +1219,21 @@ function trendScoreAt(rows, index) {
   return Math.round(Math.max(-100, Math.min(100, score)));
 }
 
+function relativeReversalScoreAt(rows, index) {
+  if (index < 24 || index >= rows.length) return 0;
+  const row = rows[index];
+  const ethStrength = -safeLogReturn(row.eth, rows[index - 4].eth);
+  const btcStrength = -safeLogReturn(row.btc, rows[index - 4].btc);
+  const ethEma = -safeLogReturn(row.ethFast, row.ethSlow);
+  const btcEma = -safeLogReturn(row.btcFast, row.btcSlow);
+  return Math.round(Math.max(-100, Math.min(100,
+    scaledTrendComponent(ethStrength, 0.014, 30)
+    + scaledTrendComponent(btcStrength, 0.014, 30)
+    + scaledTrendComponent(ethEma, 0.01, 20)
+    + scaledTrendComponent(btcEma, 0.01, 20)
+  )));
+}
+
 function rollingAtrPercent(rows, index, period = 14) {
   if (index < 1) return 0.02;
   const start = Math.max(1, index - period + 1);
@@ -1199,6 +1262,7 @@ function closeTrade(active, rows, exitIndex, reason) {
     reason,
     bars: Math.max(1, exitIndex - active.entryIndex),
     grossReturn,
+    bestGross,
     netReturn: grossReturn - MODEL_ROUND_TRIP_COST,
     giveback: bestGross > 0 ? Math.max(0, Math.min(1.5, (bestGross - grossReturn) / bestGross)) : 1,
   };
@@ -1207,6 +1271,9 @@ function closeTrade(active, rows, exitIndex, reason) {
 function simulateTrendStrategy(rows, params, startIndex = 24, endIndex = rows.length, closeAtEnd = true) {
   const trades = [];
   let active = null;
+  let candidate = null;
+  let lockedDirection = 0;
+  let cooldownUntil = -1;
   let equity = 1;
   let peakEquity = 1;
   let maxDrawdown = 0;
@@ -1214,7 +1281,11 @@ function simulateTrendStrategy(rows, params, startIndex = 24, endIndex = rows.le
   for (let index = Math.max(24, startIndex); index < endIndex; index += 1) {
     const row = rows[index];
     const score = trendScoreAt(rows, index);
+    const relativeScore = relativeReversalScoreAt(rows, index);
     const atrPercent = rollingAtrPercent(rows, index);
+    if (lockedDirection && (Math.abs(score) <= params.resetScore || Math.sign(score) === -lockedDirection)) {
+      lockedDirection = 0;
+    }
     if (active) {
       occupiedBars += 1;
       active.extremePrice = active.direction > 0
@@ -1226,15 +1297,25 @@ function simulateTrendStrategy(rows, params, startIndex = 24, endIndex = rows.le
         ? 1 - (row.hype / active.extremePrice)
         : (row.hype / active.extremePrice) - 1;
       const drawdownLimit = Math.max(params.minDrawdown, params.atrMultiplier * atrPercent);
-      const reversal = active.direction > 0 ? score <= -params.exitScore : score >= params.exitScore;
+      const scoreReversal = active.direction > 0 ? score <= -params.exitScore : score >= params.exitScore;
+      const relativeReversal = active.direction > 0 ? relativeScore <= -18 : relativeScore >= 18;
+      const reversalSignals = Number(scoreReversal) + Number(relativeReversal);
+      const priceConfirmedReversal = pullback >= Math.max(0.012, drawdownLimit * 0.35) && reversalSignals >= 1;
+      const bestGross = active.direction * ((active.extremePrice / active.entryPrice) - 1);
+      const profitProtection = bestGross >= 0.04 && pullback >= Math.max(0.02, drawdownLimit * 0.55);
+      const hardStop = pullback >= drawdownLimit * 1.15;
       const heldLongEnough = index - active.entryIndex >= 3;
-      if (heldLongEnough && (pullback >= drawdownLimit || reversal)) {
-        const trade = closeTrade(active, rows, index, pullback >= drawdownLimit ? "dynamic-stop" : "score-reversal");
+      if (heldLongEnough && (priceConfirmedReversal || hardStop || profitProtection)) {
+        const reason = profitProtection ? "profit-protection" : hardStop ? "hard-dynamic-stop" : "two-of-three-reversal";
+        const trade = closeTrade(active, rows, index, reason);
         trades.push(trade);
         equity *= Math.max(0.01, 1 + trade.netReturn);
         peakEquity = Math.max(peakEquity, equity);
         maxDrawdown = Math.min(maxDrawdown, (equity / peakEquity) - 1);
+        lockedDirection = active.direction;
+        cooldownUntil = index + params.cooldownBars;
         active = null;
+        candidate = null;
       } else {
         const markReturn = active.direction * ((row.hype / active.entryPrice) - 1) - MODEL_ROUND_TRIP_COST;
         const markedEquity = equity * Math.max(0.01, 1 + markReturn);
@@ -1244,17 +1325,50 @@ function simulateTrendStrategy(rows, params, startIndex = 24, endIndex = rows.le
       continue;
     }
 
+    if (index < cooldownUntil) continue;
     const history = rows.slice(Math.max(0, index - params.breakoutLookback), index);
     const priorHigh = Math.max(...history.map((item) => item.hype));
     const priorLow = Math.min(...history.map((item) => item.hype));
-    const longBreakout = row.hype >= priorHigh || score >= params.entryScore + 14;
-    const shortBreakout = row.hype <= priorLow || score <= -(params.entryScore + 14);
-    let direction = 0;
-    if (score >= params.entryScore && longBreakout) direction = 1;
-    else if (score <= -params.entryScore && shortBreakout) direction = -1;
-    if (direction) {
+    if (candidate) {
+      candidate.age += 1;
+      const directionScore = candidate.direction * score;
+      if (directionScore < params.entryScore - 10 || candidate.age > 10) {
+        candidate = null;
+      } else {
+        const crossed = candidate.direction > 0 ? row.hype >= priorHigh : row.hype <= priorLow;
+        if (!candidate.breakoutLevel && crossed) {
+          candidate.breakoutLevel = candidate.direction > 0 ? priorHigh : priorLow;
+          candidate.confirmations = 1;
+        } else if (candidate.breakoutLevel) {
+          const holdingBreakout = candidate.direction > 0
+            ? row.hype >= candidate.breakoutLevel * (1 - atrPercent * 0.45)
+            : row.hype <= candidate.breakoutLevel * (1 + atrPercent * 0.45);
+          candidate.confirmations = holdingBreakout ? candidate.confirmations + 1 : 0;
+          if (!holdingBreakout) candidate.breakoutLevel = null;
+        }
+      }
+    }
+
+    if (!candidate) {
+      let candidateDirection = 0;
+      if (score >= params.entryScore - 6 && lockedDirection !== 1) candidateDirection = 1;
+      else if (score <= -(params.entryScore - 6) && lockedDirection !== -1) candidateDirection = -1;
+      if (candidateDirection) {
+        candidate = {
+          direction: candidateDirection,
+          startedAt: index,
+          age: 0,
+          breakoutLevel: null,
+          confirmations: 0,
+        };
+      }
+    }
+
+    const strongContinuation = candidate && candidate.direction * score >= params.entryScore + 4 && candidate.age >= 1;
+    const confirmedBreakout = candidate?.breakoutLevel && candidate.confirmations >= params.confirmationBars;
+    if (candidate && (strongContinuation || confirmedBreakout)) {
       active = {
-        direction,
+        direction: candidate.direction,
         entryIndex: index,
         entryTime: row.t,
         entryPrice: row.hype,
@@ -1262,6 +1376,7 @@ function simulateTrendStrategy(rows, params, startIndex = 24, endIndex = rows.le
         latestScore: score,
         latestAtrPercent: atrPercent,
       };
+      candidate = null;
     }
   }
 
@@ -1274,10 +1389,11 @@ function simulateTrendStrategy(rows, params, startIndex = 24, endIndex = rows.le
     active = null;
   }
   const wins = trades.filter((trade) => trade.netReturn > 0).length;
-  const givebacks = trades.filter((trade) => Number.isFinite(trade.giveback));
+  const givebacks = trades.filter((trade) => Number.isFinite(trade.giveback) && trade.bestGross >= 0.02);
   return {
     trades,
     active,
+    candidate,
     netReturn: equity - 1,
     maxDrawdown,
     winRate: trades.length ? wins / trades.length : 0,
@@ -1325,18 +1441,37 @@ function evaluateTrendCapture(rows, trades, trends) {
   let detected = 0;
   let capturedMove = 0;
   let idealMove = 0;
+  let entryDelayTotal = 0;
+  let entryDelayCount = 0;
+  let earlyExits = 0;
+  let matchedTrades = 0;
+  let repeatedEntries = 0;
   trends.forEach((trend) => {
     const duration = Math.max(1, trend.endIndex - trend.startIndex);
     const ideal = Math.abs((rows[trend.endIndex].hype / rows[trend.startIndex].hype) - 1);
     idealMove += ideal;
     let overlapBars = 0;
     let segmentCaptured = 0;
-    trades.filter((trade) => trade.direction === trend.direction).forEach((trade) => {
+    const matching = trades.filter((trade) => (
+      trade.direction === trend.direction
+      && Math.min(trade.exitIndex, trend.endIndex) > Math.max(trade.entryIndex, trend.startIndex)
+    ));
+    matchedTrades += matching.length;
+    repeatedEntries += Math.max(0, matching.length - 1);
+    if (matching.length) {
+      const earliest = Math.min(...matching.map((trade) => trade.entryIndex));
+      entryDelayTotal += Math.max(0, earliest - trend.startIndex);
+      entryDelayCount += 1;
+    }
+    matching.forEach((trade) => {
       const start = Math.max(trade.entryIndex, trend.startIndex);
       const end = Math.min(trade.exitIndex, trend.endIndex);
-      if (end <= start) return;
       overlapBars += end - start;
       segmentCaptured += Math.max(0, trend.direction * ((rows[end].hype / rows[start].hype) - 1));
+      if (trade.exitIndex < trend.endIndex) {
+        const continuedMove = trend.direction * ((rows[trend.endIndex].hype / rows[trade.exitIndex].hype) - 1);
+        if (continuedMove >= 0.03) earlyExits += 1;
+      }
     });
     if (overlapBars / duration >= 0.3) detected += 1;
     capturedMove += Math.min(ideal, segmentCaptured);
@@ -1346,33 +1481,73 @@ function evaluateTrendCapture(rows, trades, trends) {
     captureRate: idealMove > 0 ? capturedMove / idealMove : 0,
     detected,
     idealMove,
+    averageEntryDelayBars: entryDelayCount ? entryDelayTotal / entryDelayCount : 0,
+    earlyExitRate: matchedTrades ? earlyExits / matchedTrades : 0,
+    signalsPerTrend: trends.length ? matchedTrades / trends.length : 0,
+    repeatedEntries,
   };
 }
 
 function selectTrendParameters(rows, trainingEnd) {
   let best = null;
-  [38, 46, 54].forEach((entryScore) => {
+  const validationBars = 30 * 24;
+  const foldRanges = [3, 2, 1]
+    .map((offset) => ({
+      start: Math.max(24, trainingEnd - offset * validationBars),
+      end: trainingEnd - (offset - 1) * validationBars,
+    }))
+    .filter((range) => range.end - range.start >= 600);
+  [18, 24, 30, 38].forEach((entryScore) => {
     [0, 10, 20].forEach((exitScore) => {
       [0.025, 0.035, 0.045].forEach((minDrawdown) => {
         [1.5, 2, 2.5].forEach((atrMultiplier) => {
-          [12, 24].forEach((breakoutLookback) => {
-            const params = { entryScore, exitScore, minDrawdown, atrMultiplier, breakoutLookback };
-            const simulation = simulateTrendStrategy(rows, params, 24, trainingEnd);
-            if (simulation.trades.length < 6) return;
-            const trends = referenceTrendSegments(rows, 24, trainingEnd);
-            const capture = evaluateTrendCapture(rows, simulation.trades, trends);
-            const objective = simulation.netReturn
-              - Math.abs(simulation.maxDrawdown) * 0.45
-              + capture.captureRate * 0.12
-              + capture.recall * 0.05
-              - Math.max(0, simulation.trades.length - 90) * 0.0004;
-            if (!best || objective > best.objective) best = { params, objective };
+          [4, 8, 12].forEach((breakoutLookback) => {
+            [1, 2].forEach((confirmationBars) => {
+              const params = {
+                entryScore,
+                exitScore,
+                minDrawdown,
+                atrMultiplier,
+                breakoutLookback,
+                confirmationBars,
+                cooldownBars: 6,
+                resetScore: 18,
+              };
+              const foldScores = foldRanges.map((range) => {
+                const simulation = simulateTrendStrategy(rows, params, range.start, range.end);
+                const trends = referenceTrendSegments(rows, range.start, range.end);
+                const capture = evaluateTrendCapture(rows, simulation.trades, trends);
+                if (simulation.trades.length < 2 || trends.length < 2) return -1;
+                return simulation.netReturn
+                  - Math.abs(simulation.maxDrawdown) * 0.45
+                  + capture.captureRate * 0.8
+                  + capture.recall * 0.25
+                  - simulation.averageGiveback * 0.1
+                  - Math.min(0.08, capture.averageEntryDelayBars * 0.002)
+                  - Math.max(0, capture.signalsPerTrend - 1.5) * 0.025
+                  - capture.earlyExitRate * 0.03;
+              });
+              if (!foldScores.length || foldScores.some((score) => score <= -1)) return;
+              const meanScore = foldScores.reduce((sum, score) => sum + score, 0) / foldScores.length;
+              const worstScore = Math.min(...foldScores);
+              const objective = meanScore * 0.75 + worstScore * 0.25;
+              if (!best || objective > best.objective) best = { params, objective };
+            });
           });
         });
       });
     });
   });
-  return best?.params || { entryScore: 46, exitScore: 10, minDrawdown: 0.035, atrMultiplier: 2, breakoutLookback: 12 };
+  return best?.params || {
+    entryScore: 46,
+    exitScore: 10,
+    minDrawdown: 0.035,
+    atrMultiplier: 2,
+    breakoutLookback: 12,
+    confirmationBars: 2,
+    cooldownBars: 6,
+    resetScore: 18,
+  };
 }
 
 function renderWalkForwardModel() {
@@ -1391,8 +1566,11 @@ function renderWalkForwardModel() {
   const rawScore = trendScoreAt(rows, rows.length - 1);
   const opinion = recentOpinionSignal(allOpinions());
   const opinionScore = opinion ? Math.round(opinion.score * 0.1) : 0;
-  const displayScore = Math.max(-100, Math.min(100, rawScore + opinionScore));
+  const marketStructure = marketStructureSignal(state.marketContext);
+  const marketScore = marketStructure?.score || 0;
+  const displayScore = Math.max(-100, Math.min(100, rawScore + opinionScore + marketScore));
   const active = live.active;
+  const liveCandidate = live.candidate;
   let direction = "neutral";
   let title = "震荡观望 · 等待趋势形成";
   let summary = `趋势强度 ${displayScore > 0 ? "+" : ""}${displayScore}/100，尚未达到训练期选出的 ±${params.entryScore} 启动门槛。`;
@@ -1416,13 +1594,14 @@ function renderWalkForwardModel() {
       ? active.extremePrice * (1 - drawdownLimit)
       : active.extremePrice * (1 + drawdownLimit);
     invalidation = `${active.direction > 0 ? "收盘低于" : "收盘高于"} $${invalidationPrice.toFixed(3)}`;
-    summary = `模型从趋势启动后持续持有，不要求每小时判断正确。当前动态回撤 ${formatPercent(-pullback * 100)}，失效阈值 ${formatPercent(-drawdownLimit * 100)}；${opinion ? `观点修正 ${opinionScore > 0 ? "+" : ""}${opinionScore} 分` : "暂无观点修正"}。`;
-  } else if (displayScore >= params.entryScore - 10) {
+    const structureText = marketStructure ? `${marketStructure.label} ${marketScore > 0 ? "+" : ""}${marketScore} 分` : "市场结构正在积累";
+    summary = `模型从趋势启动后持续持有，不要求每小时判断正确。当前动态回撤 ${formatPercent(-pullback * 100)}，失效阈值 ${formatPercent(-drawdownLimit * 100)}；${opinion ? `观点修正 ${opinionScore > 0 ? "+" : ""}${opinionScore} 分` : "暂无观点修正"}，${structureText}。`;
+  } else if (liveCandidate?.direction > 0 || displayScore >= params.entryScore - 6) {
     title = "开多候选 · 等待突破确认";
-    summary = `趋势强度接近开多门槛；需1小时收盘突破最近 ${params.breakoutLookback} 小时高点后才确认。`;
-  } else if (displayScore <= -(params.entryScore - 10)) {
+    summary = `趋势强度接近开多门槛；候选信号需保持并由1小时收盘突破最近 ${params.breakoutLookback} 小时高点确认。`;
+  } else if (liveCandidate?.direction < 0 || displayScore <= -(params.entryScore - 6)) {
     title = "开空候选 · 等待跌破确认";
-    summary = `趋势强度接近开空门槛；需1小时收盘跌破最近 ${params.breakoutLookback} 小时低点后才确认。`;
+    summary = `趋势强度接近开空门槛；候选信号需保持并由1小时收盘跌破最近 ${params.breakoutLookback} 小时低点确认。`;
   }
   const nextReviewTime = latest.t + 60 * 60 * 1000;
   const trainDays = Math.max(1, Math.round((rows[testingStart - 1].t - rows[24].t) / DAY));
@@ -1448,6 +1627,12 @@ function renderWalkForwardModel() {
   setText("model-strategy-drawdown", formatPercent(testing.maxDrawdown * 100));
   setText("model-hold-time", testing.trades.length ? `${testing.averageHoldBars.toFixed(1)} 小时` : "--");
   setText("model-reference-trends", `${referenceTrends.length} 段 · ${testing.trades.length} 次信号`);
+  setText("model-entry-delay", referenceTrends.length ? `${capture.averageEntryDelayBars.toFixed(1)} 小时` : "--");
+  setText("model-early-exit", testing.trades.length ? `${Math.round(capture.earlyExitRate * 100)}%` : "--");
+  setText("model-repeat-signals", referenceTrends.length ? `${capture.signalsPerTrend.toFixed(1)} 次/趋势` : "--");
+  setText("model-market-context", marketStructure
+    ? `${marketStructure.snapshots} 条快照 · ${marketStructure.fundingPoints} 资金费率点`
+    : "等待首次免费采集");
 }
 
 function renderFourHourBrief() {
@@ -1938,6 +2123,8 @@ window.addEventListener("online", () => {
 window.addEventListener("offline", () => setConnection("error", "网络离线"));
 
 initSocial();
+loadMarketContext();
 refreshAll();
 window.setInterval(() => refreshAll(true), 5 * 60 * 1000);
 window.setInterval(loadAutomatedOpinions, 5 * 60 * 1000);
+window.setInterval(loadMarketContext, 5 * 60 * 1000);

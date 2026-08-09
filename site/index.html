@@ -10,7 +10,7 @@
     />
     <title>HYPE 趋势分析</title>
     <link rel="manifest" href="./manifest.webmanifest" />
-    <link rel="stylesheet" href="./styles.css?v=20260809-12" />
+    <link rel="stylesheet" href="./styles.css?v=20260809-13" />
   </head>
   <body>
     <div class="ambient ambient-one" aria-hidden="true"></div>
@@ -80,7 +80,7 @@
           <div>
             <p class="section-kicker">EVENT-DRIVEN TREND LAB</p>
             <h2 id="model-lab-title">180日趋势捕获与模型验证</h2>
-            <p>前约 150 天选择趋势参数，最后 30 天只测试；模型仅在趋势状态变化时给出提示。</p>
+            <p>前约 150 天滚动选择趋势参数，最后 30 天做样本外验证；模型仅在趋势状态变化时给出提示。</p>
           </div>
           <span class="model-split-badge" id="model-split-badge">150日训练 · 30日测试</span>
         </div>
@@ -106,7 +106,7 @@
           <article class="model-validation" aria-labelledby="model-validation-title">
             <div class="model-card-title">
               <div>
-                <small>严格样本外结果</small>
+                <small>滚动样本外结果</small>
                 <h3 id="model-validation-title">最后 30 天趋势测试集</h3>
               </div>
               <span id="model-samples">-- 次趋势信号</span>
@@ -114,8 +114,8 @@
             <div class="model-stat-grid">
               <span><small>趋势识别率</small><strong id="model-trend-recall">--</strong></span>
               <span><small>趋势收益捕获率</small><strong id="model-capture-rate">--</strong></span>
-              <span><small>成功趋势占比</small><strong id="model-win-rate">--</strong></span>
-              <span><small>平均退出回吐</small><strong id="model-giveback">--</strong></span>
+              <span><small>信号盈利率</small><strong id="model-win-rate">--</strong></span>
+              <span><small>盈利信号平均回吐</small><strong id="model-giveback">--</strong></span>
             </div>
             <p id="model-validation-note">测试按完整趋势事件统计，不要求准确抓住最高点和最低点。</p>
           </article>
@@ -126,6 +126,10 @@
           <span><small>策略最大回撤</small><strong id="model-strategy-drawdown">--</strong></span>
           <span><small>平均持有时间</small><strong id="model-hold-time">--</strong></span>
           <span><small>测试期趋势事件</small><strong id="model-reference-trends">--</strong></span>
+          <span><small>平均入场延迟</small><strong id="model-entry-delay">--</strong></span>
+          <span><small>提前退出率</small><strong id="model-early-exit">--</strong></span>
+          <span><small>重复进场强度</small><strong id="model-repeat-signals">--</strong></span>
+          <span><small>免费市场结构数据（实时修正）</small><strong id="model-market-context">等待首次采集</strong></span>
         </div>
 
         <p class="model-disclaimer">1小时数据负责趋势状态，4小时与相对强弱负责确认；动态回撤线随波动变化。测试净收益按每次完整进出0.10%成本估算，尚未计入实际资金费率和滑点。研究辅助，不构成投资建议。</p>
@@ -440,6 +444,6 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
     <script async src="https://platform.x.com/widgets.js" charset="utf-8"></script>
-    <script type="module" src="./app.js?v=20260809-12"></script>
+    <script type="module" src="./app.js?v=20260809-13"></script>
   </body>
 </html>

@@ -3,9 +3,47 @@
     "cost_usd": 0.15,
     "posts": 20
   },
-  "generated_at": "2026-08-09T02:52:58Z",
+  "generated_at": "2026-08-09T05:31:14Z",
   "mode": "x-api-paid",
   "posts": [
+    {
+      "analysis": {
+        "confidence": 46,
+        "direction": "neutral",
+        "direction_label": "中性 / 信息型",
+        "direction_score": 0,
+        "engine": "rules-v1-server",
+        "event_type": "基本面 / 生态事件",
+        "factors": [
+          "基本面 / 生态事件",
+          "自动采集",
+          "方向词不足"
+        ],
+        "horizon": "数日至数月",
+        "impact": "高",
+        "impact_score": 94,
+        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“基本面 / 生态事件”，主要影响窗口预计为数日至数月；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "2040391464761413633",
+      "author_name": "Louis",
+      "conversation_id": "2086312699726844411",
+      "created_at": "2026-08-09T04:44:44.000Z",
+      "fetched_at": "2026-08-09T05:31:14Z",
+      "id": "2086312699726844411",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 0,
+        "impression_count": 308,
+        "like_count": 8,
+        "quote_count": 0,
+        "reply_count": 0,
+        "retweet_count": 0
+      },
+      "source_role": "研究 / 数据",
+      "text": "I saw someone said Variational isn’t liquid because one of its assets has less than $1M in open interest.\n\nThat’s a big miss. Variational doesn’t work like that.\n\nOpen interest is not liquidity. It never was. OI only tells you how many positions are currently open.\n\nIt says https://t.co/q8xwlBjlwc",
+      "url": "https://x.com/louisdives/status/2086312699726844411",
+      "username": "louisdives"
+    },
     {
       "analysis": {
         "confidence": 47,
@@ -1349,7 +1387,7 @@
     {
       "handle": "louisdives",
       "influence": 78,
-      "last_seen_id": "2086263218658492689",
+      "last_seen_id": "2086312699726844411",
       "name": "Louis",
       "role": "研究 / 数据",
       "user_id": "2040391464761413633"
@@ -1381,10 +1419,10 @@
   ],
   "timezone": "Asia/Shanghai",
   "usage_today": {
-    "analyses": 15,
+    "analyses": 16,
     "date": "2026-08-09",
-    "estimated_cost_usd": 0.075,
-    "post_reads": 15,
+    "estimated_cost_usd": 0.08,
+    "post_reads": 16,
     "user_reads": 0
   },
   "version": 1

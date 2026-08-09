@@ -1898,6 +1898,57 @@ function renderWalkForwardModel() {
     : "等待首次免费采集");
 }
 
+function fourHourTradeDecision(components, score, confidence) {
+  const marketSignals = components.slice(0, 3);
+  const signalFor = (id) => marketSignals.find((component) => component.id === id)?.signal;
+  const oneHour = signalFor("1h");
+  const fourHour = signalFor("4h");
+  const bullishCount = marketSignals.filter((component) => component.signal?.key === "bullish").length;
+  const bearishCount = marketSignals.filter((component) => component.signal?.key === "bearish").length;
+  const marketDataComplete = marketSignals.every((component) => component.signal);
+  const canLong = marketDataComplete
+    && score >= 40
+    && confidence >= 65
+    && bullishCount >= 2
+    && oneHour?.key === "bullish"
+    && fourHour?.key === "bullish";
+  const canShort = marketDataComplete
+    && score <= -40
+    && confidence >= 65
+    && bearishCount >= 2
+    && oneHour?.key === "bearish"
+    && fourHour?.key === "bearish";
+
+  if (canLong) {
+    return {
+      key: "bullish",
+      action: "long",
+      label: "可以开多",
+      condition: "行动参考：可以考虑分批、轻仓开多，等待15分钟回踩不转弱再执行，避免追高。若1小时或4小时转弱，或综合评分跌回 +20 以下，停止加仓并考虑减仓。",
+    };
+  }
+  if (canShort) {
+    return {
+      key: "bearish",
+      action: "short",
+      label: "可以开空",
+      condition: "行动参考：可以考虑分批、轻仓开空，等待15分钟反弹不转强再执行，避免追跌。若1小时或4小时转强，或综合评分回升至 -20 以上，停止加仓并考虑减仓。",
+    };
+  }
+
+  const candidate = score >= 25
+    ? "偏多候选，但尚未同时满足1小时、4小时确认和评分门槛"
+    : score <= -25
+      ? "偏空候选，但尚未同时满足1小时、4小时确认和评分门槛"
+      : "多空证据不足或存在分歧";
+  return {
+    key: "neutral",
+    action: "wait",
+    label: "观望",
+    condition: `行动参考：暂不开仓。${candidate}；等待综合评分达到 ±40，且1小时与4小时同向后再评估。`,
+  };
+}
+
 function renderFourHourBrief() {
   const panel = $("four-hour-brief");
   if (!panel) return;
@@ -1914,36 +1965,28 @@ function renderFourHourBrief() {
   const score = Math.round(available.reduce((sum, component) => (
     sum + component.signal.score * component.weight
   ), 0) / availableWeight);
-  const direction = score >= 25
-    ? { key: "bullish", label: "条件偏强" }
-    : score <= -25
-      ? { key: "bearish", label: "条件偏弱" }
-      : { key: "neutral", label: "观望为主" };
   const directional = available.filter((component) => Math.abs(component.signal.score) >= 15);
   const positive = directional.filter((component) => component.signal.score > 0).length;
   const negative = directional.filter((component) => component.signal.score < 0).length;
   const alignment = directional.length ? Math.max(positive, negative) / directional.length : 0.5;
   const completeness = availableWeight;
   const confidence = Math.min(92, Math.round(32 + completeness * 24 + alignment * 23 + Math.min(Math.abs(score) * 0.22, 13)));
+  const decision = fourHourTradeDecision(components, score, confidence);
   const marketLabels = components.slice(0, 3).map((component) => (
     `${component.label}${component.signal ? component.signal.label : "待更新"}`
   )).join("、");
   const opinion = components[3].signal;
   const opinionText = opinion ? `最近24小时观点为${opinion.label}` : "最近24小时观点数据不足";
-  const summary = `${marketLabels}；${opinionText}。综合评分 ${score > 0 ? "+" : ""}${score}/100。`;
-  const condition = direction.key === "bullish"
-    ? "策略参考：等待回踩确认，避免追高；只有15分钟与1小时保持同向、且4小时不转弱时，偏强判断才继续有效。"
-    : direction.key === "bearish"
-      ? "策略参考：优先控制风险，避免逆势追多；只有15分钟与1小时先转强、且4小时停止走弱时，才视为修复信号。"
-      : "策略参考：暂不依据单一周期采取动作；等待15分钟与1小时同向，并获得4小时趋势或观点共识确认。";
+  const summary = `当前信号：${decision.label}。${marketLabels}；${opinionText}。综合评分 ${score > 0 ? "+" : ""}${score}/100。`;
 
   panel.classList.remove("loading-block");
-  panel.dataset.direction = direction.key;
+  panel.dataset.direction = decision.key;
+  panel.dataset.action = decision.action;
   const stance = $("four-hour-stance");
-  stance.className = `four-hour-stance ${direction.key}`;
-  stance.textContent = direction.label;
+  stance.className = `four-hour-stance ${decision.key}`;
+  stance.textContent = decision.label;
   setText("four-hour-summary", summary);
-  setText("four-hour-condition", condition);
+  setText("four-hour-condition", decision.condition);
   setText("four-hour-score", `${score > 0 ? "+" : ""}${score}`);
   setText("four-hour-confidence", `置信度 ${confidence}%`);
   $("four-hour-signals").innerHTML = components.map((component) => {

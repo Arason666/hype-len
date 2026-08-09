@@ -1,14 +1,15 @@
 const API_URL = "https://api.hyperliquid.xyz/info";
 const X_POSTS_URL = "./data/x-posts.json";
 const DAY = 24 * 60 * 60 * 1000;
+const MODEL_ROUND_TRIP_COST = 0.001;
 const PERIODS = {
-  "15m": { interval: "15m", lookback: 7 * DAY, label: "最近 7 天" },
-  "1h": { interval: "1h", lookback: 60 * DAY, label: "最近 60 天" },
-  "4h": { interval: "4h", lookback: 90 * DAY, label: "最近 90 天" },
+  "15m": { interval: "15m", lookback: 30 * DAY, label: "最近 30 天" },
+  "1h": { interval: "1h", lookback: 180 * DAY, label: "最近 180 天" },
+  "4h": { interval: "4h", lookback: 365 * DAY, label: "最近 1 年" },
   "1d": { interval: "1d", lookback: 365 * DAY, label: "最近 1 年" },
 };
 const PERIOD_ORDER = ["15m", "1h", "4h", "1d"];
-const CACHE_PREFIX = "hype-lens-v2-";
+const CACHE_PREFIX = "hype-lens-v3-";
 const OPINION_STORAGE_KEY = "hype-lens-opinions-v1";
 const SOCIAL_SOURCES = [
   { handle: "0xMaxs", name: "0xMaxs", role: "交易观点", influence: 72 },
@@ -76,16 +77,21 @@ function ema(values, period) {
 function enrich(rows) {
   const eth = rows.map((row) => row.eth);
   const btc = rows.map((row) => row.btc);
+  const hype = rows.map((row) => row.hype);
   const ethFast = ema(eth, 8);
   const ethSlow = ema(eth, 21);
   const btcFast = ema(btc, 8);
   const btcSlow = ema(btc, 21);
+  const hypeFast = ema(hype, 8);
+  const hypeSlow = ema(hype, 21);
   return rows.map((row, index) => ({
     ...row,
     ethFast: ethFast[index],
     ethSlow: ethSlow[index],
     btcFast: btcFast[index],
     btcSlow: btcSlow[index],
+    hypeFast: hypeFast[index],
+    hypeSlow: hypeSlow[index],
   }));
 }
 
@@ -168,7 +174,15 @@ async function fetchCandles(coin, interval, startTime, endTime, attempt = 0) {
     const payload = await response.json();
     if (!Array.isArray(payload)) throw new Error("行情数据格式异常");
     return payload
-      .map((item) => ({ t: Number(item.t), T: Number(item.T), close: Number(item.c) }))
+      .map((item) => ({
+        t: Number(item.t),
+        T: Number(item.T),
+        open: Number(item.o),
+        high: Number(item.h),
+        low: Number(item.l),
+        close: Number(item.c),
+        volume: Number(item.v),
+      }))
       .filter((item) => Number.isFinite(item.close) && item.T < Date.now() - 3000);
   } catch (error) {
     if (attempt < 1) {
@@ -191,6 +205,10 @@ function alignRatios(ethCandles, btcCandles, hypeCandles) {
       eth: eth.get(item.t) / item.close,
       btc: btc.get(item.t) / item.close,
       hype: item.close,
+      hypeOpen: item.open,
+      hypeHigh: item.high,
+      hypeLow: item.low,
+      hypeVolume: item.volume,
       ethUsd: eth.get(item.t),
       btcUsd: btc.get(item.t),
     }))
@@ -1125,228 +1143,311 @@ function safeLogReturn(current, previous) {
   return Math.log(current / previous);
 }
 
-function modelFeatures(rows, index) {
-  if (index < 24 || index >= rows.length) return null;
+function scaledTrendComponent(value, scale, weight) {
+  if (!Number.isFinite(value) || !scale) return 0;
+  return Math.max(-weight, Math.min(weight, (value / scale) * weight));
+}
+
+function trendScoreAt(rows, index) {
+  if (index < 24 || index >= rows.length) return 0;
   const row = rows[index];
-  const returns = (key, bars) => safeLogReturn(row[key], rows[index - bars][key]);
-  const hourlyReturns = [];
-  for (let offset = 0; offset < 12; offset += 1) {
-    hourlyReturns.push(safeLogReturn(rows[index - offset].hype, rows[index - offset - 1].hype));
-  }
-  const mean = hourlyReturns.reduce((sum, value) => sum + value, 0) / hourlyReturns.length;
-  const volatility = Math.sqrt(hourlyReturns.reduce((sum, value) => sum + ((value - mean) ** 2), 0) / hourlyReturns.length);
-  return [
-    returns("hype", 1),
-    returns("hype", 4),
-    returns("hype", 24),
-    -returns("eth", 1),
-    -returns("eth", 4),
-    -returns("eth", 24),
-    -returns("btc", 1),
-    -returns("btc", 4),
-    -returns("btc", 24),
-    -safeLogReturn(row.ethFast, row.ethSlow),
-    -safeLogReturn(row.btcFast, row.btcSlow),
-    volatility,
-  ];
+  const hype4h = safeLogReturn(row.hype, rows[index - 4].hype);
+  const hype24h = safeLogReturn(row.hype, rows[index - 24].hype);
+  const eth4h = -safeLogReturn(row.eth, rows[index - 4].eth);
+  const btc4h = -safeLogReturn(row.btc, rows[index - 4].btc);
+  const hypeEma = safeLogReturn(row.hypeFast, row.hypeSlow);
+  const ethEma = -safeLogReturn(row.ethFast, row.ethSlow);
+  const btcEma = -safeLogReturn(row.btcFast, row.btcSlow);
+  const recentVolume = rows.slice(index - 23, index + 1).reduce((sum, item) => sum + Number(item.hypeVolume || 0), 0) / 24;
+  const volumeDirection = recentVolume > 0 && row.hypeVolume > recentVolume * 1.35 ? Math.sign(hype4h) * 5 : 0;
+  const score = scaledTrendComponent(hype4h, 0.018, 19)
+    + scaledTrendComponent(hype24h, 0.05, 15)
+    + scaledTrendComponent(eth4h, 0.014, 13)
+    + scaledTrendComponent(btc4h, 0.014, 13)
+    + scaledTrendComponent(hypeEma, 0.016, 18)
+    + scaledTrendComponent(ethEma, 0.01, 8)
+    + scaledTrendComponent(btcEma, 0.01, 8)
+    + volumeDirection;
+  return Math.round(Math.max(-100, Math.min(100, score)));
 }
 
-function buildModelSamples(rows) {
-  const samples = [];
-  for (let index = 24; index < rows.length - 4; index += 1) {
-    const features = modelFeatures(rows, index);
-    const forwardReturn = safeLogReturn(rows[index + 4].hype, rows[index].hype);
-    if (!features || !features.every(Number.isFinite) || !Number.isFinite(forwardReturn)) continue;
-    samples.push({
-      t: rows[index].t,
-      label: forwardReturn > 0 ? 1 : 0,
-      forwardReturn,
-      features,
-    });
+function rollingAtrPercent(rows, index, period = 14) {
+  if (index < 1) return 0.02;
+  const start = Math.max(1, index - period + 1);
+  let total = 0;
+  let count = 0;
+  for (let cursor = start; cursor <= index; cursor += 1) {
+    const row = rows[cursor];
+    const previous = rows[cursor - 1].hype;
+    const high = Number.isFinite(row.hypeHigh) ? row.hypeHigh : Math.max(row.hype, previous);
+    const low = Number.isFinite(row.hypeLow) ? row.hypeLow : Math.min(row.hype, previous);
+    total += Math.max(high - low, Math.abs(high - previous), Math.abs(low - previous));
+    count += 1;
   }
-  return samples;
+  return count && rows[index].hype > 0 ? (total / count) / rows[index].hype : 0.02;
 }
 
-function sigmoid(value) {
-  const bounded = Math.max(-30, Math.min(30, value));
-  return 1 / (1 + Math.exp(-bounded));
-}
-
-function trainDirectionModel(samples) {
-  if (!samples.length) return null;
-  const featureCount = samples[0].features.length;
-  const means = Array(featureCount).fill(0);
-  const deviations = Array(featureCount).fill(0);
-  samples.forEach((sample) => sample.features.forEach((value, index) => { means[index] += value; }));
-  means.forEach((_, index) => { means[index] /= samples.length; });
-  samples.forEach((sample) => sample.features.forEach((value, index) => {
-    deviations[index] += (value - means[index]) ** 2;
-  }));
-  deviations.forEach((_, index) => {
-    deviations[index] = Math.max(Math.sqrt(deviations[index] / samples.length), 1e-8);
-  });
-  const standardize = (features) => features.map((value, index) => (value - means[index]) / deviations[index]);
-  const normalized = samples.map((sample) => ({ ...sample, x: standardize(sample.features) }));
-  const positives = normalized.filter((sample) => sample.label === 1).length;
-  const negatives = normalized.length - positives;
-  const positiveWeight = positives ? normalized.length / (2 * positives) : 1;
-  const negativeWeight = negatives ? normalized.length / (2 * negatives) : 1;
-  const weights = Array(featureCount + 1).fill(0);
-  const learningRate = 0.075;
-  const regularization = 0.004;
-  for (let epoch = 0; epoch < 420; epoch += 1) {
-    const gradient = Array(weights.length).fill(0);
-    normalized.forEach((sample) => {
-      const score = weights[0] + sample.x.reduce((sum, value, index) => sum + value * weights[index + 1], 0);
-      const probability = sigmoid(score);
-      const classWeight = sample.label ? positiveWeight : negativeWeight;
-      const error = (probability - sample.label) * classWeight;
-      gradient[0] += error;
-      sample.x.forEach((value, index) => { gradient[index + 1] += error * value; });
-    });
-    weights.forEach((weight, index) => {
-      const penalty = index === 0 ? 0 : regularization * weight;
-      weights[index] -= learningRate * ((gradient[index] / normalized.length) + penalty);
-    });
-  }
+function closeTrade(active, rows, exitIndex, reason) {
+  const exitPrice = rows[exitIndex].hype;
+  const grossReturn = active.direction * ((exitPrice / active.entryPrice) - 1);
+  const bestGross = active.direction * ((active.extremePrice / active.entryPrice) - 1);
   return {
-    predict(features) {
-      const x = standardize(features);
-      return sigmoid(weights[0] + x.reduce((sum, value, index) => sum + value * weights[index + 1], 0));
-    },
+    ...active,
+    exitIndex,
+    exitTime: rows[exitIndex].t,
+    exitPrice,
+    reason,
+    bars: Math.max(1, exitIndex - active.entryIndex),
+    grossReturn,
+    netReturn: grossReturn - MODEL_ROUND_TRIP_COST,
+    giveback: bestGross > 0 ? Math.max(0, Math.min(1.5, (bestGross - grossReturn) / bestGross)) : 1,
   };
 }
 
-function evaluateDirectionModel(model, samples) {
-  if (!model || !samples.length) return null;
-  let correct = 0;
-  let actionable = 0;
-  let actionableCorrect = 0;
-  let positives = 0;
-  samples.forEach((sample) => {
-    const probability = model.predict(sample.features);
-    const predicted = probability >= 0.5 ? 1 : 0;
-    if (predicted === sample.label) correct += 1;
-    positives += sample.label;
-    if (probability >= 0.58 || probability <= 0.42) {
-      actionable += 1;
-      if (predicted === sample.label) actionableCorrect += 1;
+function simulateTrendStrategy(rows, params, startIndex = 24, endIndex = rows.length, closeAtEnd = true) {
+  const trades = [];
+  let active = null;
+  let equity = 1;
+  let peakEquity = 1;
+  let maxDrawdown = 0;
+  let occupiedBars = 0;
+  for (let index = Math.max(24, startIndex); index < endIndex; index += 1) {
+    const row = rows[index];
+    const score = trendScoreAt(rows, index);
+    const atrPercent = rollingAtrPercent(rows, index);
+    if (active) {
+      occupiedBars += 1;
+      active.extremePrice = active.direction > 0
+        ? Math.max(active.extremePrice, row.hype)
+        : Math.min(active.extremePrice, row.hype);
+      active.latestScore = score;
+      active.latestAtrPercent = atrPercent;
+      const pullback = active.direction > 0
+        ? 1 - (row.hype / active.extremePrice)
+        : (row.hype / active.extremePrice) - 1;
+      const drawdownLimit = Math.max(params.minDrawdown, params.atrMultiplier * atrPercent);
+      const reversal = active.direction > 0 ? score <= -params.exitScore : score >= params.exitScore;
+      const heldLongEnough = index - active.entryIndex >= 3;
+      if (heldLongEnough && (pullback >= drawdownLimit || reversal)) {
+        const trade = closeTrade(active, rows, index, pullback >= drawdownLimit ? "dynamic-stop" : "score-reversal");
+        trades.push(trade);
+        equity *= Math.max(0.01, 1 + trade.netReturn);
+        peakEquity = Math.max(peakEquity, equity);
+        maxDrawdown = Math.min(maxDrawdown, (equity / peakEquity) - 1);
+        active = null;
+      } else {
+        const markReturn = active.direction * ((row.hype / active.entryPrice) - 1) - MODEL_ROUND_TRIP_COST;
+        const markedEquity = equity * Math.max(0.01, 1 + markReturn);
+        peakEquity = Math.max(peakEquity, markedEquity);
+        maxDrawdown = Math.min(maxDrawdown, (markedEquity / peakEquity) - 1);
+      }
+      continue;
     }
-  });
-  const majority = Math.max(positives, samples.length - positives) / samples.length;
+
+    const history = rows.slice(Math.max(0, index - params.breakoutLookback), index);
+    const priorHigh = Math.max(...history.map((item) => item.hype));
+    const priorLow = Math.min(...history.map((item) => item.hype));
+    const longBreakout = row.hype >= priorHigh || score >= params.entryScore + 14;
+    const shortBreakout = row.hype <= priorLow || score <= -(params.entryScore + 14);
+    let direction = 0;
+    if (score >= params.entryScore && longBreakout) direction = 1;
+    else if (score <= -params.entryScore && shortBreakout) direction = -1;
+    if (direction) {
+      active = {
+        direction,
+        entryIndex: index,
+        entryTime: row.t,
+        entryPrice: row.hype,
+        extremePrice: row.hype,
+        latestScore: score,
+        latestAtrPercent: atrPercent,
+      };
+    }
+  }
+
+  if (active && closeAtEnd && endIndex > startIndex) {
+    const trade = closeTrade(active, rows, endIndex - 1, "test-end");
+    trades.push(trade);
+    equity *= Math.max(0.01, 1 + trade.netReturn);
+    peakEquity = Math.max(peakEquity, equity);
+    maxDrawdown = Math.min(maxDrawdown, (equity / peakEquity) - 1);
+    active = null;
+  }
+  const wins = trades.filter((trade) => trade.netReturn > 0).length;
+  const givebacks = trades.filter((trade) => Number.isFinite(trade.giveback));
   return {
-    accuracy: correct / samples.length,
-    baseline: majority,
-    actionableAccuracy: actionable ? actionableCorrect / actionable : null,
-    coverage: actionable / samples.length,
-    actionable,
-    samples: samples.length,
+    trades,
+    active,
+    netReturn: equity - 1,
+    maxDrawdown,
+    winRate: trades.length ? wins / trades.length : 0,
+    averageGiveback: givebacks.length ? givebacks.reduce((sum, trade) => sum + trade.giveback, 0) / givebacks.length : 0,
+    averageHoldBars: trades.length ? trades.reduce((sum, trade) => sum + trade.bars, 0) / trades.length : 0,
+    coverage: Math.max(0, endIndex - startIndex) ? occupiedBars / (endIndex - startIndex) : 0,
   };
 }
 
-function maximumDrawdown(rows) {
-  let peak = 0;
-  let drawdown = 0;
-  rows.forEach((row) => {
-    peak = Math.max(peak, row.hype);
-    if (peak > 0) drawdown = Math.min(drawdown, (row.hype / peak) - 1);
+function referenceTrendSegments(rows, startIndex, endIndex, threshold = 0.05) {
+  const segments = [];
+  let direction = 0;
+  let highIndex = startIndex;
+  let lowIndex = startIndex;
+  let segmentStart = startIndex;
+  for (let index = startIndex + 1; index < endIndex; index += 1) {
+    if (rows[index].hype >= rows[highIndex].hype) highIndex = index;
+    if (rows[index].hype <= rows[lowIndex].hype) lowIndex = index;
+    if (direction === 0) {
+      if ((rows[index].hype / rows[lowIndex].hype) - 1 >= threshold) {
+        direction = 1;
+        segmentStart = lowIndex;
+        highIndex = index;
+      } else if (1 - (rows[index].hype / rows[highIndex].hype) >= threshold) {
+        direction = -1;
+        segmentStart = highIndex;
+        lowIndex = index;
+      }
+    } else if (direction > 0 && 1 - (rows[index].hype / rows[highIndex].hype) >= threshold) {
+      segments.push({ direction, startIndex: segmentStart, endIndex: highIndex });
+      direction = -1;
+      segmentStart = highIndex;
+      lowIndex = index;
+    } else if (direction < 0 && (rows[index].hype / rows[lowIndex].hype) - 1 >= threshold) {
+      segments.push({ direction, startIndex: segmentStart, endIndex: lowIndex });
+      direction = 1;
+      segmentStart = lowIndex;
+      highIndex = index;
+    }
+  }
+  return segments;
+}
+
+function evaluateTrendCapture(rows, trades, trends) {
+  let detected = 0;
+  let capturedMove = 0;
+  let idealMove = 0;
+  trends.forEach((trend) => {
+    const duration = Math.max(1, trend.endIndex - trend.startIndex);
+    const ideal = Math.abs((rows[trend.endIndex].hype / rows[trend.startIndex].hype) - 1);
+    idealMove += ideal;
+    let overlapBars = 0;
+    let segmentCaptured = 0;
+    trades.filter((trade) => trade.direction === trend.direction).forEach((trade) => {
+      const start = Math.max(trade.entryIndex, trend.startIndex);
+      const end = Math.min(trade.exitIndex, trend.endIndex);
+      if (end <= start) return;
+      overlapBars += end - start;
+      segmentCaptured += Math.max(0, trend.direction * ((rows[end].hype / rows[start].hype) - 1));
+    });
+    if (overlapBars / duration >= 0.3) detected += 1;
+    capturedMove += Math.min(ideal, segmentCaptured);
   });
-  return drawdown * 100;
+  return {
+    recall: trends.length ? detected / trends.length : 0,
+    captureRate: idealMove > 0 ? capturedMove / idealMove : 0,
+    detected,
+    idealMove,
+  };
+}
+
+function selectTrendParameters(rows, trainingEnd) {
+  let best = null;
+  [38, 46, 54].forEach((entryScore) => {
+    [0, 10, 20].forEach((exitScore) => {
+      [0.025, 0.035, 0.045].forEach((minDrawdown) => {
+        [1.5, 2, 2.5].forEach((atrMultiplier) => {
+          [12, 24].forEach((breakoutLookback) => {
+            const params = { entryScore, exitScore, minDrawdown, atrMultiplier, breakoutLookback };
+            const simulation = simulateTrendStrategy(rows, params, 24, trainingEnd);
+            if (simulation.trades.length < 6) return;
+            const trends = referenceTrendSegments(rows, 24, trainingEnd);
+            const capture = evaluateTrendCapture(rows, simulation.trades, trends);
+            const objective = simulation.netReturn
+              - Math.abs(simulation.maxDrawdown) * 0.45
+              + capture.captureRate * 0.12
+              + capture.recall * 0.05
+              - Math.max(0, simulation.trades.length - 90) * 0.0004;
+            if (!best || objective > best.objective) best = { params, objective };
+          });
+        });
+      });
+    });
+  });
+  return best?.params || { entryScore: 46, exitScore: 10, minDrawdown: 0.035, atrMultiplier: 2, breakoutLookback: 12 };
 }
 
 function renderWalkForwardModel() {
   const panel = $("model-lab");
   const rows = state.cache.get("1h")?.rows;
-  if (!panel || !rows || rows.length < 900) return;
-  const allSamples = buildModelSamples(rows);
-  const cutoff = rows.at(-1).t - 15 * DAY;
-  const training = allSamples.filter((sample) => sample.t + 4 * 60 * 60 * 1000 < cutoff);
-  const testing = allSamples.filter((sample) => sample.t >= cutoff);
-  if (training.length < 500 || testing.length < 100) return;
-  const model = trainDirectionModel(training);
-  const validation = evaluateDirectionModel(model, testing);
-  const currentFeatures = modelFeatures(rows, rows.length - 1);
-  if (!model || !validation || !currentFeatures) return;
-
-  const rawProbability = model.predict(currentFeatures);
-  const opinion = recentOpinionSignal(allOpinions());
-  const opinionAdjustment = opinion ? Math.max(-0.06, Math.min(0.06, opinion.score * 0.0006)) : 0;
-  const probability = Math.max(0.03, Math.min(0.97, rawProbability + opinionAdjustment));
-  const shortTerm = relativePeriodSignal("15m");
-  const mediumTerm = relativePeriodSignal("4h");
-  const validationEdge = validation.accuracy - validation.baseline;
-  const validated = validation.samples >= 100 && validationEdge >= -0.015;
-  const supportsLong = (!shortTerm || shortTerm.score > -15) && (!mediumTerm || mediumTerm.score > -20);
-  const supportsShort = (!shortTerm || shortTerm.score < 15) && (!mediumTerm || mediumTerm.score < 20);
-  let direction = "neutral";
-  let title = "暂不交易 · 等待确认";
-  if (validated && probability >= 0.6 && supportsLong) {
-    direction = "bullish";
-    title = "开多候选 · 等待突破确认";
-  } else if (validated && probability <= 0.4 && supportsShort) {
-    direction = "bearish";
-    title = "开空候选 · 等待跌破确认";
-  } else if (!validated) {
-    title = "模型优势不足 · 暂不采用";
-  }
-
+  if (!panel || !rows || rows.length < 3000) return;
+  const cutoff = rows.at(-1).t - 30 * DAY;
+  const testingStart = rows.findIndex((row) => row.t >= cutoff);
+  if (testingStart < 2400 || rows.length - testingStart < 600) return;
+  const params = selectTrendParameters(rows, testingStart);
+  const testing = simulateTrendStrategy(rows, params, testingStart, rows.length);
+  const referenceTrends = referenceTrendSegments(rows, testingStart, rows.length);
+  const capture = evaluateTrendCapture(rows, testing.trades, referenceTrends);
+  const live = simulateTrendStrategy(rows, params, 24, rows.length, false);
   const latest = rows.at(-1);
-  const recent4 = rows.slice(-5);
-  const recent12 = rows.slice(-13);
-  const longTrigger = Math.max(...recent4.map((row) => row.hype)) * 1.001;
-  const shortTrigger = Math.min(...recent4.map((row) => row.hype)) * 0.999;
-  const longInvalidation = Math.min(...recent12.map((row) => row.hype));
-  const shortInvalidation = Math.max(...recent12.map((row) => row.hype));
+  const rawScore = trendScoreAt(rows, rows.length - 1);
+  const opinion = recentOpinionSignal(allOpinions());
+  const opinionScore = opinion ? Math.round(opinion.score * 0.1) : 0;
+  const displayScore = Math.max(-100, Math.min(100, rawScore + opinionScore));
+  const active = live.active;
+  let direction = "neutral";
+  let title = "震荡观望 · 等待趋势形成";
+  let summary = `趋势强度 ${displayScore > 0 ? "+" : ""}${displayScore}/100，尚未达到训练期选出的 ±${params.entryScore} 启动门槛。`;
+  let entryPrice = "尚未启动";
+  let trendDrawdown = "--";
+  let invalidation = "等待趋势启动";
+  if (active) {
+    direction = active.direction > 0 ? "bullish" : "bearish";
+    const pullback = active.direction > 0
+      ? Math.max(0, 1 - (latest.hype / active.extremePrice))
+      : Math.max(0, (latest.hype / active.extremePrice) - 1);
+    const drawdownLimit = Math.max(params.minDrawdown, params.atrMultiplier * rollingAtrPercent(rows, rows.length - 1));
+    const weakening = pullback >= drawdownLimit * 0.72 || (active.direction > 0 ? displayScore < 0 : displayScore > 0);
+    title = active.direction > 0
+      ? (weakening ? "上涨趋势减弱 · 保护已有收益" : "上涨趋势持有 · 尚未失效")
+      : (weakening ? "下跌趋势减弱 · 保护已有收益" : "下跌趋势持有 · 尚未失效");
+    const extremeLabel = active.direction > 0 ? "峰值" : "谷值";
+    entryPrice = `$${active.entryPrice.toFixed(3)} · ${formatTime.format(active.entryTime)}`;
+    trendDrawdown = `${extremeLabel} $${active.extremePrice.toFixed(3)} · ${formatPercent(-pullback * 100)}`;
+    const invalidationPrice = active.direction > 0
+      ? active.extremePrice * (1 - drawdownLimit)
+      : active.extremePrice * (1 + drawdownLimit);
+    invalidation = `${active.direction > 0 ? "收盘低于" : "收盘高于"} $${invalidationPrice.toFixed(3)}`;
+    summary = `模型从趋势启动后持续持有，不要求每小时判断正确。当前动态回撤 ${formatPercent(-pullback * 100)}，失效阈值 ${formatPercent(-drawdownLimit * 100)}；${opinion ? `观点修正 ${opinionScore > 0 ? "+" : ""}${opinionScore} 分` : "暂无观点修正"}。`;
+  } else if (displayScore >= params.entryScore - 10) {
+    title = "开多候选 · 等待突破确认";
+    summary = `趋势强度接近开多门槛；需1小时收盘突破最近 ${params.breakoutLookback} 小时高点后才确认。`;
+  } else if (displayScore <= -(params.entryScore - 10)) {
+    title = "开空候选 · 等待跌破确认";
+    summary = `趋势强度接近开空门槛；需1小时收盘跌破最近 ${params.breakoutLookback} 小时低点后才确认。`;
+  }
   const nextReviewTime = latest.t + 60 * 60 * 1000;
-  const evidence = [
-    `模型上涨概率 ${Math.round(probability * 100)}%`,
-    shortTerm ? `15分钟${shortTerm.label}` : "15分钟待更新",
-    mediumTerm ? `4小时${mediumTerm.label}` : "4小时待更新",
-    opinion ? `观点${opinion.label}` : "观点数据不足",
-  ].join("；");
-  const summary = direction === "bullish"
-    ? `${evidence}。候选窗口为下一根 1 小时收盘确认后，观察随后 4 小时；未突破参考价前不视为有效。`
-    : direction === "bearish"
-      ? `${evidence}。候选窗口为下一根 1 小时收盘确认后，观察随后 4 小时；未跌破参考价前不视为有效。`
-      : `${evidence}。多空条件尚未形成足够共振，继续等待下一根 1 小时收盘数据。`;
-
-  const first = rows[0];
-  const return60d = ((latest.hype / first.hype) - 1) * 100;
-  const return7d = percentChange(rows, "hype", Math.min(168, rows.length - 1));
-  const ethRelative = -(((latest.eth / first.eth) - 1) * 100);
-  const btcRelative = -(((latest.btc / first.btc) - 1) * 100);
-  const relativeAverage = (ethRelative + btcRelative) / 2;
-  const trainDays = Math.max(1, Math.round((training.at(-1).t - training[0].t) / DAY));
-  const testDays = Math.max(1, Math.round((testing.at(-1).t - testing[0].t) / DAY));
+  const trainDays = Math.max(1, Math.round((rows[testingStart - 1].t - rows[24].t) / DAY));
+  const testDays = Math.max(1, Math.round((latest.t - rows[testingStart].t) / DAY));
 
   panel.classList.remove("loading-block");
   panel.dataset.direction = direction;
   setText("model-now-title", title);
-  setText("model-probability", `${Math.round(probability * 100)}%`);
+  setText("model-probability", `${displayScore > 0 ? "+" : ""}${displayScore}`);
   setText("model-summary", summary);
-  setText("model-long-trigger", `HYPE > $${longTrigger.toFixed(3)}`);
-  setText("model-short-trigger", `HYPE < $${shortTrigger.toFixed(3)}`);
-  setText("model-invalidation", direction === "bullish"
-    ? `收盘低于 $${longInvalidation.toFixed(3)}`
-    : direction === "bearish"
-      ? `收盘高于 $${shortInvalidation.toFixed(3)}`
-      : "触发后按反向边界失效");
-  setText("model-window", direction === "neutral"
-    ? `${formatTime.format(nextReviewTime)} 后复核`
-    : `${formatTime.format(nextReviewTime)} 确认后4小时`);
+  setText("model-entry-price", entryPrice);
+  setText("model-trend-drawdown", trendDrawdown);
+  setText("model-invalidation", invalidation);
+  setText("model-window", `${formatTime.format(nextReviewTime)} 收盘后`);
   setText("model-split-badge", `${trainDays}日训练 · ${testDays}日测试`);
-  setText("model-samples", `${validation.samples} 个样本`);
-  setText("model-test-accuracy", `${Math.round(validation.accuracy * 100)}%`);
-  setText("model-baseline", `${Math.round(validation.baseline * 100)}%`);
-  setText("model-action-accuracy", validation.actionableAccuracy === null ? "无信号" : `${Math.round(validation.actionableAccuracy * 100)}%`);
-  setText("model-coverage", `${Math.round(validation.coverage * 100)}% · ${validation.actionable}次`);
-  setText("model-validation-note", validationEdge > 0
-    ? `样本外准确率较多数类基准高 ${(validationEdge * 100).toFixed(1)} 个百分点；高置信结果仍未计入手续费、滑点和资金费率。`
-    : `样本外准确率未明显超过多数类基准，当前信号自动降级为谨慎参考；未计入手续费、滑点和资金费率。`);
-  setText("model-trend-60d", formatPercent(return60d));
-  setText("model-drawdown", formatPercent(maximumDrawdown(rows)));
-  setText("model-momentum-7d", formatPercent(return7d));
-  setText("model-relative-60d", `${relativeAverage >= 0 ? "领先" : "落后"} ${Math.abs(relativeAverage).toFixed(1)}%`);
+  setText("model-samples", `${testing.trades.length} 次趋势信号`);
+  setText("model-trend-recall", referenceTrends.length ? `${Math.round(capture.recall * 100)}%` : "事件不足");
+  setText("model-capture-rate", referenceTrends.length ? `${Math.round(capture.captureRate * 100)}%` : "事件不足");
+  setText("model-win-rate", testing.trades.length ? `${Math.round(testing.winRate * 100)}%` : "暂无交易");
+  setText("model-giveback", testing.trades.length ? `${Math.round(testing.averageGiveback * 100)}%` : "--");
+  setText("model-validation-note", `测试期以回撤超过5%的完整趋势作为参照，识别到 ${capture.detected}/${referenceTrends.length} 段；训练区间选择的动态回撤为 max(${(params.minDrawdown * 100).toFixed(1)}%，${params.atrMultiplier}倍ATR)。`);
+  setText("model-net-return", formatPercent(testing.netReturn * 100));
+  setText("model-strategy-drawdown", formatPercent(testing.maxDrawdown * 100));
+  setText("model-hold-time", testing.trades.length ? `${testing.averageHoldBars.toFixed(1)} 小时` : "--");
+  setText("model-reference-trends", `${referenceTrends.length} 段 · ${testing.trades.length} 次信号`);
 }
 
 function renderFourHourBrief() {

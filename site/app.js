@@ -3,6 +3,14 @@ const X_POSTS_URL = "./data/x-posts.json";
 const MARKET_CONTEXT_URL = "./data/market-context.json";
 const DAY = 24 * 60 * 60 * 1000;
 const MODEL_ROUND_TRIP_COST = 0.001;
+const RISK_PROFILE_STORAGE_KEY = "hype-lens-risk-profile-v1";
+const DEFAULT_RISK_PROFILE = Object.freeze({
+  equity: 17_000,
+  marginAllocation: 4,
+  leverage: 100,
+  maxRisk: 2,
+  roundTripCost: 0.1,
+});
 const PERIODS = {
   "15m": { interval: "15m", lookback: 30 * DAY, label: "最近 30 天" },
   "1h": { interval: "1h", lookback: 180 * DAY, label: "最近 180 天" },
@@ -46,6 +54,7 @@ const state = {
   opinionsExpanded: false,
   activeDashboardTab: "market",
   marketContext: null,
+  riskProfile: null,
 };
 
 const $ = (id) => document.getElementById(id);
@@ -1949,6 +1958,137 @@ function fourHourTradeDecision(components, score, confidence) {
   };
 }
 
+function normalizedRiskProfile(profile = {}) {
+  const numberWithin = (value, fallback, minimum, maximum) => {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? Math.max(minimum, Math.min(maximum, parsed)) : fallback;
+  };
+  return {
+    equity: numberWithin(profile.equity, DEFAULT_RISK_PROFILE.equity, 100, 10_000_000),
+    marginAllocation: numberWithin(profile.marginAllocation, DEFAULT_RISK_PROFILE.marginAllocation, 0.1, 100),
+    leverage: numberWithin(profile.leverage, DEFAULT_RISK_PROFILE.leverage, 1, 200),
+    maxRisk: numberWithin(profile.maxRisk, DEFAULT_RISK_PROFILE.maxRisk, 0.1, 100),
+    roundTripCost: numberWithin(profile.roundTripCost, DEFAULT_RISK_PROFILE.roundTripCost, 0, 2),
+  };
+}
+
+function calculateExecutionRisk(profile, price, atrFraction, signalAction = "wait") {
+  const config = normalizedRiskProfile(profile);
+  const marginUsed = config.equity * config.marginAllocation / 100;
+  const notional = marginUsed * config.leverage;
+  const effectiveLeverage = notional / config.equity;
+  const technicalStopFraction = Math.max(0.0035, Number(atrFraction || 0) * 1.25);
+  const costFraction = config.roundTripCost / 100;
+  const estimatedCost = notional * costFraction;
+  const stopLoss = notional * technicalStopFraction;
+  const projectedLoss = estimatedCost + stopLoss;
+  const riskBudget = config.equity * config.maxRisk / 100;
+  const maximumSafeNotional = riskBudget / Math.max(technicalStopFraction + costFraction, 0.000001);
+  const maximumSafeMargin = maximumSafeNotional / config.leverage;
+  const maximumSafeAllocation = maximumSafeMargin / config.equity * 100;
+  const directionConfirmed = signalAction === "long" || signalAction === "short";
+  const riskPassed = projectedLoss <= riskBudget;
+  const quantity = price > 0 ? notional / price : 0;
+  const direction = signalAction === "long" ? 1 : signalAction === "short" ? -1 : 0;
+  const stopPrice = direction ? price * (1 - direction * technicalStopFraction) : null;
+  const targetOne = direction ? price * (1 + direction * technicalStopFraction * 1.5) : null;
+  const targetTwo = direction ? price * (1 + direction * technicalStopFraction * 2) : null;
+  const status = !directionConfirmed ? "wait" : riskPassed ? "ready" : "blocked";
+  return {
+    config,
+    marginUsed,
+    notional,
+    effectiveLeverage,
+    technicalStopFraction,
+    estimatedCost,
+    projectedLoss,
+    projectedRiskPercent: projectedLoss / config.equity * 100,
+    riskBudget,
+    maximumSafeNotional,
+    maximumSafeMargin,
+    maximumSafeAllocation,
+    quantity,
+    price,
+    stopPrice,
+    targetOne,
+    targetTwo,
+    signalAction,
+    status,
+  };
+}
+
+function formatRiskUsd(value) {
+  return `$${Number(value || 0).toLocaleString("zh-CN", { maximumFractionDigits: 0 })}`;
+}
+
+function readRiskProfile() {
+  try {
+    return normalizedRiskProfile(JSON.parse(localStorage.getItem(RISK_PROFILE_STORAGE_KEY) || "{}"));
+  } catch {
+    return normalizedRiskProfile();
+  }
+}
+
+function renderExecutionRisk() {
+  const rows = state.cache.get("15m")?.rows;
+  if (!rows?.length) return;
+  const latest = rows.at(-1);
+  const price = Number(latest.hype || 0);
+  const atrFraction = Number(latest.hypeAtrPercent || rollingAtrPercent(rows, rows.length - 1));
+  const signalAction = $("four-hour-brief")?.dataset.action || "wait";
+  const plan = calculateExecutionRisk(state.riskProfile || DEFAULT_RISK_PROFILE, price, atrFraction, signalAction);
+  const status = $("execution-status");
+  status.className = `execution-status ${plan.status}`;
+  const decision = plan.status === "ready"
+    ? `可以执行${signalAction === "long" ? "开多" : "开空"}`
+    : plan.status === "blocked"
+      ? "暂不执行 · 仓位过大"
+      : "观望 · 等待方向";
+  setText("execution-decision", decision);
+  setText("execution-direction", signalAction === "long" ? "方向允许开多" : signalAction === "short" ? "方向允许开空" : "方向信号尚未确认");
+  setText("risk-margin-used", `${formatRiskUsd(plan.marginUsed)} · ${plan.config.marginAllocation.toFixed(1)}%`);
+  setText("risk-notional", formatRiskUsd(plan.notional));
+  setText("risk-effective-leverage", `${plan.effectiveLeverage.toFixed(1)}×`);
+  setText("risk-quantity", `${plan.quantity.toLocaleString("zh-CN", { maximumFractionDigits: 2 })} HYPE`);
+  setText("risk-stop-distance", `${(plan.technicalStopFraction * 100).toFixed(2)}%`);
+  setText("risk-projected-loss", `${formatRiskUsd(plan.projectedLoss)} · ${plan.projectedRiskPercent.toFixed(2)}%账户`);
+  setText("risk-budget-value", `${formatRiskUsd(plan.riskBudget)} · ${plan.config.maxRisk.toFixed(1)}%`);
+  setText("risk-safe-margin", `${formatRiskUsd(plan.maximumSafeMargin)} · ${plan.maximumSafeAllocation.toFixed(2)}%账户`);
+  setText("risk-entry-price", price ? `$${price.toFixed(3)}` : "--");
+  setText("risk-stop-price", plan.stopPrice ? `$${plan.stopPrice.toFixed(3)}` : "等待方向");
+  setText("risk-target-one", plan.targetOne ? `$${plan.targetOne.toFixed(3)}` : "等待方向");
+  setText("risk-target-two", plan.targetTwo ? `$${plan.targetTwo.toFixed(3)}` : "等待方向");
+
+  const note = plan.status === "blocked"
+    ? `当前计划预计亏损 ${formatRiskUsd(plan.projectedLoss)}，超过 ${formatRiskUsd(plan.riskBudget)} 风险预算。按当前波动，100倍参数下单次保证金建议不超过 ${formatRiskUsd(plan.maximumSafeMargin)}；先缩小仓位，再考虑执行。`
+    : plan.status === "ready"
+      ? `方向与风险预算同时通过。参考止损采用1.25倍15分钟ATR且不低于0.35%；预计损失含 ${plan.config.roundTripCost.toFixed(2)}% 往返成本，未含跳价、额外滑点和资金费率。`
+      : `当前只做观察。按现有参数，技术止损加往返成本预计占账户 ${plan.projectedRiskPercent.toFixed(2)}%；全仓模式下单次保证金不是最大亏损。`;
+  setText("execution-risk-note", note);
+}
+
+function initRiskControls() {
+  state.riskProfile = readRiskProfile();
+  const fields = {
+    equity: $("risk-equity"),
+    marginAllocation: $("risk-margin-allocation"),
+    leverage: $("risk-leverage"),
+    maxRisk: $("risk-budget"),
+    roundTripCost: $("risk-round-trip-cost"),
+  };
+  Object.entries(fields).forEach(([key, element]) => {
+    element.value = state.riskProfile[key];
+    element.addEventListener("input", () => {
+      state.riskProfile = normalizedRiskProfile({
+        ...state.riskProfile,
+        [key]: element.value,
+      });
+      localStorage.setItem(RISK_PROFILE_STORAGE_KEY, JSON.stringify(state.riskProfile));
+      renderExecutionRisk();
+    });
+  });
+}
+
 function renderFourHourBrief() {
   const panel = $("four-hour-brief");
   if (!panel) return;
@@ -1993,6 +2133,7 @@ function renderFourHourBrief() {
     const signal = component.signal || { key: "neutral", label: "待更新", score: 0 };
     return `<span class="${signal.key}"><small>${component.label}</small><strong>${escapeHtml(signal.label)}</strong></span>`;
   }).join("");
+  renderExecutionRisk();
 }
 
 function horizonBucket(horizon = "") {
@@ -2450,6 +2591,7 @@ window.addEventListener("offline", () => setConnection("error", "网络离线"))
 
 initSocial();
 initDashboardTabs();
+initRiskControls();
 loadMarketContext();
 refreshAll();
 window.setInterval(() => refreshAll(true), 5 * 60 * 1000);

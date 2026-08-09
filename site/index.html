@@ -10,7 +10,7 @@
     />
     <title>HYPE 趋势分析</title>
     <link rel="manifest" href="./manifest.webmanifest" />
-    <link rel="stylesheet" href="./styles.css?v=20260809-16" />
+    <link rel="stylesheet" href="./styles.css?v=20260809-17" />
   </head>
   <body>
     <div class="ambient ambient-one" aria-hidden="true"></div>
@@ -73,6 +73,72 @@
           <strong id="four-hour-score">--</strong>
           <span id="four-hour-confidence">置信度 --</span>
         </div>
+      </section>
+
+      <section class="execution-risk" id="execution-risk" aria-labelledby="execution-risk-title">
+        <div class="execution-risk-head">
+          <div>
+            <p class="section-kicker">CROSS-MARGIN RISK CHECK</p>
+            <h2 id="execution-risk-title">仓位与风险检查</h2>
+            <p>行情源使用 Hyperliquid；执行参数按你的全仓账户单独测算。</p>
+          </div>
+          <div class="execution-status wait" id="execution-status" role="status" aria-live="polite">
+            <small>执行结论</small>
+            <strong id="execution-decision">等待行情</strong>
+            <span id="execution-direction">方向信号尚未生成</span>
+          </div>
+        </div>
+
+        <div class="risk-profile" aria-label="仓位参数">
+          <label>
+            <span>账户总权益（USDC）</span>
+            <input id="risk-equity" type="number" min="100" step="100" value="17000" inputmode="decimal" />
+          </label>
+          <label>
+            <span>单次保证金</span>
+            <select id="risk-margin-allocation">
+              <option value="3">3%</option>
+              <option value="4" selected>4%</option>
+              <option value="5">5%</option>
+            </select>
+          </label>
+          <label>
+            <span>名义杠杆</span>
+            <input id="risk-leverage" type="number" min="1" max="200" step="1" value="100" inputmode="numeric" />
+          </label>
+          <label>
+            <span>最大账户风险</span>
+            <select id="risk-budget">
+              <option value="1">1%</option>
+              <option value="2" selected>2%</option>
+              <option value="3">3%</option>
+            </select>
+          </label>
+          <label>
+            <span>预估往返成本</span>
+            <input id="risk-round-trip-cost" type="number" min="0" max="2" step="0.01" value="0.10" inputmode="decimal" />
+            <small>% · 手续费与基础滑点</small>
+          </label>
+        </div>
+
+        <div class="risk-metric-grid" aria-label="风险测算结果">
+          <span><small>投入保证金</small><strong id="risk-margin-used">--</strong></span>
+          <span><small>名义仓位</small><strong id="risk-notional">--</strong></span>
+          <span><small>账户有效杠杆 <button class="stat-help" type="button" aria-label="解释账户有效杠杆" data-help="名义仓位除以账户总权益。100倍是单笔名义杠杆；当只投入账户4%的保证金时，账户有效杠杆约为4倍。">!</button></small><strong id="risk-effective-leverage">--</strong></span>
+          <span><small>预计持仓数量</small><strong id="risk-quantity">--</strong></span>
+          <span><small>技术止损距离 <button class="stat-help" type="button" aria-label="解释技术止损距离" data-help="按1.25倍15分钟ATR估算，且最低为0.35%。它用于衡量近期正常波动，不代表强平距离。">!</button></small><strong id="risk-stop-distance">--</strong></span>
+          <span><small>预计最大亏损 <button class="stat-help" type="button" aria-label="解释预计最大亏损" data-help="名义仓位乘以技术止损距离，再加预估往返成本。未包含跳空、止损滑点和资金费率。">!</button></small><strong id="risk-projected-loss">--</strong></span>
+          <span><small>风险预算</small><strong id="risk-budget-value">--</strong></span>
+          <span><small>预算内最大保证金</small><strong id="risk-safe-margin">--</strong></span>
+        </div>
+
+        <div class="execution-price-plan" aria-label="价格执行参考">
+          <span><small>参考入场价</small><strong id="risk-entry-price">--</strong></span>
+          <span><small>参考止损价</small><strong id="risk-stop-price">--</strong></span>
+          <span><small>第一目标 · 1.5R</small><strong id="risk-target-one">--</strong></span>
+          <span><small>第二目标 · 2R</small><strong id="risk-target-two">--</strong></span>
+        </div>
+        <p class="execution-risk-note" id="execution-risk-note">全仓模式下，单次投入保证金不是最大亏损；实际止损与强平价格以执行交易所为准。</p>
       </section>
       </section>
 
@@ -489,6 +555,6 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
     <script async src="https://platform.x.com/widgets.js" charset="utf-8"></script>
-    <script type="module" src="./app.js?v=20260809-16"></script>
+    <script type="module" src="./app.js?v=20260809-17"></script>
   </body>
 </html>

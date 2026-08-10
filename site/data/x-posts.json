@@ -3,9 +3,85 @@
     "cost_usd": 0.15,
     "posts": 20
   },
-  "generated_at": "2026-08-09T16:59:02Z",
+  "generated_at": "2026-08-10T00:37:52Z",
   "mode": "x-api-paid",
   "posts": [
+    {
+      "analysis": {
+        "confidence": 46,
+        "direction": "neutral",
+        "direction_label": "中性 / 信息型",
+        "direction_score": 0,
+        "engine": "rules-v1-server",
+        "event_type": "监管 / 上市事件",
+        "factors": [
+          "监管 / 上市事件",
+          "自动采集",
+          "方向词不足"
+        ],
+        "horizon": "1 天至数周",
+        "impact": "高",
+        "impact_score": 95,
+        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“监管 / 上市事件”，主要影响窗口预计为1 天至数周；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "2040391464761413633",
+      "author_name": "Louis",
+      "conversation_id": "2086606325426049254",
+      "created_at": "2026-08-10T00:11:29.000Z",
+      "fetched_at": "2026-08-10T00:37:52Z",
+      "id": "2086606325426049254",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 1,
+        "impression_count": 212,
+        "like_count": 8,
+        "quote_count": 0,
+        "reply_count": 1,
+        "retweet_count": 1
+      },
+      "source_role": "研究 / 数据",
+      "text": "Hyperliquid is the BEST perp dex.\nThere is no second best.\n\nBut there’s one perp dex whose journey looks like Hyperliquid in its early days. It's @pacifica_fi .\n\nKeep in mind, this is just my personal opinion.\n\nHyperliquid: big community airdrop, no VCs (self-funded), a very",
+      "url": "https://x.com/louisdives/status/2086606325426049254",
+      "username": "louisdives"
+    },
+    {
+      "analysis": {
+        "confidence": 45,
+        "direction": "neutral",
+        "direction_label": "中性 / 信息型",
+        "direction_score": 0,
+        "engine": "rules-v1-server",
+        "event_type": "一般市场观点",
+        "factors": [
+          "一般市场观点",
+          "自动采集",
+          "方向词不足"
+        ],
+        "horizon": "数小时至 3 天",
+        "impact": "中等",
+        "impact_score": 72,
+        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "897099896108404738",
+      "author_name": "0xMaxs",
+      "conversation_id": "2086606169867772303",
+      "created_at": "2026-08-10T00:10:52.000Z",
+      "fetched_at": "2026-08-10T00:37:52Z",
+      "id": "2086606169867772303",
+      "lang": "zh",
+      "public_metrics": {
+        "bookmark_count": 1,
+        "impression_count": 103,
+        "like_count": 3,
+        "quote_count": 0,
+        "reply_count": 4,
+        "retweet_count": 0
+      },
+      "source_role": "交易观点",
+      "text": "各位Hyperliquid疯人院病友早上好，周末期间我们休息、但@tradexyz 没有休息，让我们回顾下周末Spacex在xyz的亮眼表现吧～\n\n伊隆的太空叉刚刚经历上市以来波动最剧烈的一周：\n\nQ2营收$7.81B，同比增长92%；调整后EBITDA $3.54B，同比增长191%。 https://t.co/WdOvJxzvqG",
+      "url": "https://x.com/0xMaxs/status/2086606169867772303",
+      "username": "0xMaxs"
+    },
     {
       "analysis": {
         "confidence": 64,
@@ -1721,7 +1797,7 @@
     {
       "handle": "0xMaxs",
       "influence": 72,
-      "last_seen_id": "2086408838656180612",
+      "last_seen_id": "2086606169867772303",
       "name": "0xMaxs",
       "role": "交易观点",
       "user_id": "897099896108404738"
@@ -1729,7 +1805,7 @@
     {
       "handle": "louisdives",
       "influence": 78,
-      "last_seen_id": "2086488652738380284",
+      "last_seen_id": "2086606325426049254",
       "name": "Louis",
       "role": "研究 / 数据",
       "user_id": "2040391464761413633"
@@ -1761,10 +1837,10 @@
   ],
   "timezone": "Asia/Shanghai",
   "usage_today": {
-    "analyses": 9,
+    "analyses": 11,
     "date": "2026-08-10",
-    "estimated_cost_usd": 0.045,
-    "post_reads": 9,
+    "estimated_cost_usd": 0.055,
+    "post_reads": 11,
     "user_reads": 0
   },
   "version": 1

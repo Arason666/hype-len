@@ -3,9 +3,85 @@
     "cost_usd": 0.15,
     "posts": 20
   },
-  "generated_at": "2026-08-10T04:47:04Z",
+  "generated_at": "2026-08-10T06:03:30Z",
   "mode": "x-api-paid",
   "posts": [
+    {
+      "analysis": {
+        "confidence": 43,
+        "direction": "neutral",
+        "direction_label": "中性 / 信息型",
+        "direction_score": 0,
+        "engine": "rules-v1-server",
+        "event_type": "一般市场观点",
+        "factors": [
+          "一般市场观点",
+          "自动采集",
+          "方向词不足"
+        ],
+        "horizon": "数小时至 3 天",
+        "impact": "中等",
+        "impact_score": 72,
+        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "897099896108404738",
+      "author_name": "0xMaxs",
+      "conversation_id": "2086676795005476985",
+      "created_at": "2026-08-10T04:51:32.000Z",
+      "fetched_at": "2026-08-10T06:03:30Z",
+      "id": "2086676799464120588",
+      "lang": "ja",
+      "public_metrics": {
+        "bookmark_count": 0,
+        "impression_count": 48,
+        "like_count": 2,
+        "quote_count": 0,
+        "reply_count": 0,
+        "retweet_count": 0
+      },
+      "source_role": "交易观点",
+      "text": "原文：\nhttps://t.co/BNoI964NoW",
+      "url": "https://x.com/0xMaxs/status/2086676799464120588",
+      "username": "0xMaxs"
+    },
+    {
+      "analysis": {
+        "confidence": 64,
+        "direction": "bullish",
+        "direction_label": "偏多",
+        "direction_score": 22,
+        "engine": "rules-v1-server",
+        "event_type": "基本面 / 生态事件",
+        "factors": [
+          "偏多词 1 个",
+          "基本面 / 生态事件",
+          "自动采集"
+        ],
+        "horizon": "数日至数月",
+        "impact": "高",
+        "impact_score": 88,
+        "summary": "识别到的正向措辞更多，整体判断为偏多。事件类型更接近“基本面 / 生态事件”，主要影响窗口预计为数日至数月；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "897099896108404738",
+      "author_name": "0xMaxs",
+      "conversation_id": "2086676795005476985",
+      "created_at": "2026-08-10T04:51:31.000Z",
+      "fetched_at": "2026-08-10T06:03:30Z",
+      "id": "2086676795005476985",
+      "lang": "zh",
+      "public_metrics": {
+        "bookmark_count": 1,
+        "impression_count": 208,
+        "like_count": 2,
+        "quote_count": 0,
+        "reply_count": 2,
+        "retweet_count": 1
+      },
+      "source_role": "交易观点",
+      "text": "Hyperliquid正在经历一个很有意思的变化：交易规模继续创新高，但HYPE的价值捕获效率正在下降👀\n\n这一点我感受还是很明显的，现在的回购力度确实弱于年初币价20+那会，但这个现象背后却非常复杂\n\nCoinDesk今天专门讨论了这个问题，Hyperliquid协议收入从2025 Q3的$357M连续下降：\n\nQ3 2025：$356.7M\nQ4 https://t.co/UHw61Eo4Rw",
+      "url": "https://x.com/0xMaxs/status/2086676795005476985",
+      "username": "0xMaxs"
+    },
     {
       "analysis": {
         "confidence": 46,
@@ -1911,7 +1987,7 @@
     {
       "handle": "0xMaxs",
       "influence": 72,
-      "last_seen_id": "2086620277157634524",
+      "last_seen_id": "2086676799464120588",
       "name": "0xMaxs",
       "role": "交易观点",
       "user_id": "897099896108404738"
@@ -1951,10 +2027,10 @@
   ],
   "timezone": "Asia/Shanghai",
   "usage_today": {
-    "analyses": 14,
+    "analyses": 16,
     "date": "2026-08-10",
-    "estimated_cost_usd": 0.07,
-    "post_reads": 14,
+    "estimated_cost_usd": 0.08,
+    "post_reads": 16,
     "user_reads": 0
   },
   "version": 1

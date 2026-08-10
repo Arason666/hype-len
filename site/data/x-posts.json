@@ -3,9 +3,47 @@
     "cost_usd": 0.15,
     "posts": 20
   },
-  "generated_at": "2026-08-10T00:37:52Z",
+  "generated_at": "2026-08-10T03:01:14Z",
   "mode": "x-api-paid",
   "posts": [
+    {
+      "analysis": {
+        "confidence": 92,
+        "direction": "bullish",
+        "direction_label": "偏多",
+        "direction_score": 88,
+        "engine": "rules-v1-server",
+        "event_type": "基本面 / 生态事件",
+        "factors": [
+          "偏多词 4 个",
+          "基本面 / 生态事件",
+          "自动采集"
+        ],
+        "horizon": "数日至数月",
+        "impact": "高",
+        "impact_score": 91,
+        "summary": "识别到的正向措辞更多，整体判断为偏多。事件类型更接近“基本面 / 生态事件”，主要影响窗口预计为数日至数月；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "897099896108404738",
+      "author_name": "0xMaxs",
+      "conversation_id": "2086620277157634524",
+      "created_at": "2026-08-10T01:06:56.000Z",
+      "fetched_at": "2026-08-10T03:01:14Z",
+      "id": "2086620277157634524",
+      "lang": "zh",
+      "public_metrics": {
+        "bookmark_count": 1,
+        "impression_count": 286,
+        "like_count": 4,
+        "quote_count": 0,
+        "reply_count": 3,
+        "retweet_count": 0
+      },
+      "source_role": "交易观点",
+      "text": "‼️Hype 日报 #222｜数据截至：2026-8-9\n\n回购：HYPE现价$53.86，昨日销毁$528.36K/9681.39枚（均价$54.57），累计销毁4630.66万枚\n\n✅注：周六销毁量回落至$300k看来只是短期交易缩量因素叠加的结果，周日反而回弹到$500k。今年初类似情况也偶有发生，现在咱们还好好的，大家不必过于担心～ https://t.co/tVGzJw9RZJ https://t.co/zpUKCLzp9X",
+      "url": "https://x.com/0xMaxs/status/2086620277157634524",
+      "username": "0xMaxs"
+    },
     {
       "analysis": {
         "confidence": 46,
@@ -1797,7 +1835,7 @@
     {
       "handle": "0xMaxs",
       "influence": 72,
-      "last_seen_id": "2086606169867772303",
+      "last_seen_id": "2086620277157634524",
       "name": "0xMaxs",
       "role": "交易观点",
       "user_id": "897099896108404738"
@@ -1837,10 +1875,10 @@
   ],
   "timezone": "Asia/Shanghai",
   "usage_today": {
-    "analyses": 11,
+    "analyses": 12,
     "date": "2026-08-10",
-    "estimated_cost_usd": 0.055,
-    "post_reads": 11,
+    "estimated_cost_usd": 0.06,
+    "post_reads": 12,
     "user_reads": 0
   },
   "version": 1

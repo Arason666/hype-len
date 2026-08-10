@@ -3,15 +3,15 @@
   "since_ids": {
     "0xmaxs": "2086817963399958683",
     "hypeconomist": "2086820285550841862",
-    "hyperliquid_hub": "2086707380482621442",
+    "hyperliquid_hub": "2086862549807743414",
     "hyperliquidx": "2084192309185278286",
     "louisdives": "2086836782222770584"
   },
-  "source_cursor": 1,
+  "source_cursor": 4,
   "usage": {
-    "analyses": 12,
-    "estimated_cost_micros": 60000,
-    "post_reads": 12,
+    "analyses": 17,
+    "estimated_cost_micros": 85000,
+    "post_reads": 17,
     "user_reads": 0
   },
   "user_ids": {

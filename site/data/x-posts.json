@@ -3,9 +3,199 @@
     "cost_usd": 0.15,
     "posts": 20
   },
-  "generated_at": "2026-08-10T16:11:44Z",
+  "generated_at": "2026-08-10T17:12:55Z",
   "mode": "x-api-paid",
   "posts": [
+    {
+      "analysis": {
+        "confidence": 46,
+        "direction": "neutral",
+        "direction_label": "中性 / 信息型",
+        "direction_score": 0,
+        "engine": "rules-v1-server",
+        "event_type": "基本面 / 生态事件",
+        "factors": [
+          "基本面 / 生态事件",
+          "自动采集",
+          "方向词不足"
+        ],
+        "horizon": "数日至数月",
+        "impact": "中等",
+        "impact_score": 77,
+        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“基本面 / 生态事件”，主要影响窗口预计为数日至数月；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "1821500190312087552",
+      "author_name": "HL Hub",
+      "conversation_id": "2086862516777582623",
+      "created_at": "2026-08-10T17:09:38.000Z",
+      "fetched_at": "2026-08-10T17:12:55Z",
+      "id": "2086862549807743414",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 0,
+        "impression_count": 29,
+        "like_count": 0,
+        "quote_count": 0,
+        "reply_count": 0,
+        "retweet_count": 0
+      },
+      "source_role": "生态资讯",
+      "text": "10/10 OG Highlight #10: @Trextxxy\nHyperliquid ecosystem printed serious fees in 24h.\nTop 10 fee earners generated ~$1.88M.\nHyper Foundation $720K • Hyperliquid Perps $606K • Anchorage $101K\n(More than other top 3 L1s combined.) https://t.co/4a3Gvaqh6B",
+      "url": "https://x.com/Hyperliquid_Hub/status/2086862549807743414",
+      "username": "Hyperliquid_Hub"
+    },
+    {
+      "analysis": {
+        "confidence": 64,
+        "direction": "bullish",
+        "direction_label": "偏多",
+        "direction_score": 22,
+        "engine": "rules-v1-server",
+        "event_type": "基本面 / 生态事件",
+        "factors": [
+          "偏多词 1 个",
+          "基本面 / 生态事件",
+          "自动采集"
+        ],
+        "horizon": "数日至数月",
+        "impact": "中等",
+        "impact_score": 83,
+        "summary": "识别到的正向措辞更多，整体判断为偏多。事件类型更接近“基本面 / 生态事件”，主要影响窗口预计为数日至数月；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "1821500190312087552",
+      "author_name": "HL Hub",
+      "conversation_id": "2086862516777582623",
+      "created_at": "2026-08-10T17:09:37.000Z",
+      "fetched_at": "2026-08-10T17:12:55Z",
+      "id": "2086862546653642766",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 0,
+        "impression_count": 43,
+        "like_count": 0,
+        "quote_count": 0,
+        "reply_count": 1,
+        "retweet_count": 0
+      },
+      "source_role": "生态资讯",
+      "text": "9/10 OG Highlight #9: @Havochl_\nPriority fees are more game-changing than most realize.\n$6.3M $HYPE already burned since April. Peak day $199.7K.\nPriority monetizes competition for execution — can scale faster than volume itself. $200K/day peak becoming normal = $73M+ annual https://t.co/U8W9GwSk9q",
+      "url": "https://x.com/Hyperliquid_Hub/status/2086862546653642766",
+      "username": "Hyperliquid_Hub"
+    },
+    {
+      "analysis": {
+        "confidence": 64,
+        "direction": "bullish",
+        "direction_label": "偏多",
+        "direction_score": 22,
+        "engine": "rules-v1-server",
+        "event_type": "基本面 / 生态事件",
+        "factors": [
+          "偏多词 1 个",
+          "基本面 / 生态事件",
+          "自动采集"
+        ],
+        "horizon": "数日至数月",
+        "impact": "中等",
+        "impact_score": 83,
+        "summary": "识别到的正向措辞更多，整体判断为偏多。事件类型更接近“基本面 / 生态事件”，主要影响窗口预计为数日至数月；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "1821500190312087552",
+      "author_name": "HL Hub",
+      "conversation_id": "2086862516777582623",
+      "created_at": "2026-08-10T17:09:37.000Z",
+      "fetched_at": "2026-08-10T17:12:55Z",
+      "id": "2086862543361110474",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 0,
+        "impression_count": 25,
+        "like_count": 1,
+        "quote_count": 0,
+        "reply_count": 1,
+        "retweet_count": 1
+      },
+      "source_role": "生态资讯",
+      "text": "8/10 OG Highlight #8: @Tajudeen\nWeekly Hyperliquid recap:\nHIP-3 crossed $502B cumulative volume &amp; $4B+ OI (TradeXYZ ~93.6% of volume).\nNew markets, direct fiat onboarding via Swapped, TradeXYZ buying HYPE with fees, priority fee burns at $6M+, and regulatory discussions heating https://t.co/zDVpCUWSAR",
+      "url": "https://x.com/Hyperliquid_Hub/status/2086862543361110474",
+      "username": "Hyperliquid_Hub"
+    },
+    {
+      "analysis": {
+        "confidence": 64,
+        "direction": "bullish",
+        "direction_label": "偏多",
+        "direction_score": 22,
+        "engine": "rules-v1-server",
+        "event_type": "基本面 / 生态事件",
+        "factors": [
+          "偏多词 1 个",
+          "基本面 / 生态事件",
+          "自动采集"
+        ],
+        "horizon": "数日至数月",
+        "impact": "中等",
+        "impact_score": 83,
+        "summary": "识别到的正向措辞更多，整体判断为偏多。事件类型更接近“基本面 / 生态事件”，主要影响窗口预计为数日至数月；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "1821500190312087552",
+      "author_name": "HL Hub",
+      "conversation_id": "2086862516777582623",
+      "created_at": "2026-08-10T17:09:36.000Z",
+      "fetched_at": "2026-08-10T17:12:55Z",
+      "id": "2086862539833684136",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 0,
+        "impression_count": 15,
+        "like_count": 0,
+        "quote_count": 0,
+        "reply_count": 1,
+        "retweet_count": 0
+      },
+      "source_role": "生态资讯",
+      "text": "7/10 OG Highlight #7: @louisdives\nRecent updates:\n• Labs + VCs unstaking (some rotation, some shorting)\n• RWA volume often exceeding all crypto volume\n• HIP-3 fee flexibility live, HIP-4 testing\n• Active perp traders hit ATH\nDip is healthy rotation. Long-term still very https://t.co/11uaQG0IVl",
+      "url": "https://x.com/Hyperliquid_Hub/status/2086862539833684136",
+      "username": "Hyperliquid_Hub"
+    },
+    {
+      "analysis": {
+        "confidence": 46,
+        "direction": "neutral",
+        "direction_label": "中性 / 信息型",
+        "direction_score": 0,
+        "engine": "rules-v1-server",
+        "event_type": "一般市场观点",
+        "factors": [
+          "一般市场观点",
+          "自动采集",
+          "方向词不足"
+        ],
+        "horizon": "数小时至 3 天",
+        "impact": "中等",
+        "impact_score": 64,
+        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "1821500190312087552",
+      "author_name": "HL Hub",
+      "conversation_id": "2086862516777582623",
+      "created_at": "2026-08-10T17:09:35.000Z",
+      "fetched_at": "2026-08-10T17:12:55Z",
+      "id": "2086862536763404556",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 0,
+        "impression_count": 14,
+        "like_count": 0,
+        "quote_count": 0,
+        "reply_count": 1,
+        "retweet_count": 0
+      },
+      "source_role": "生态资讯",
+      "text": "6/10 OG Highlight #6: @0xKmafia\nTrader dilemma: a year ago Hyperliquid was the clear choice.\nToday competitors offer comparable execution + clearer near-term airdrop EV.\nNot releasing (or announcing a framework for) S3 creates a hidden cost. Still believes S3 is coming. https://t.co/Xvm1sTP9gh",
+      "url": "https://x.com/Hyperliquid_Hub/status/2086862536763404556",
+      "username": "Hyperliquid_Hub"
+    },
     {
       "analysis": {
         "confidence": 44,
@@ -2468,7 +2658,7 @@
     {
       "handle": "Hyperliquid_Hub",
       "influence": 64,
-      "last_seen_id": "2086707380482621442",
+      "last_seen_id": "2086862549807743414",
       "name": "HL Hub",
       "role": "生态资讯",
       "user_id": "1821500190312087552"
@@ -2484,10 +2674,10 @@
   ],
   "timezone": "Asia/Shanghai",
   "usage_today": {
-    "analyses": 12,
+    "analyses": 17,
     "date": "2026-08-11",
-    "estimated_cost_usd": 0.06,
-    "post_reads": 12,
+    "estimated_cost_usd": 0.085,
+    "post_reads": 17,
     "user_reads": 0
   },
   "version": 1

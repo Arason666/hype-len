@@ -3,9 +3,85 @@
     "cost_usd": 0.15,
     "posts": 20
   },
-  "generated_at": "2026-08-10T03:01:14Z",
+  "generated_at": "2026-08-10T04:47:04Z",
   "mode": "x-api-paid",
   "posts": [
+    {
+      "analysis": {
+        "confidence": 46,
+        "direction": "neutral",
+        "direction_label": "中性 / 信息型",
+        "direction_score": 0,
+        "engine": "rules-v1-server",
+        "event_type": "一般市场观点",
+        "factors": [
+          "一般市场观点",
+          "自动采集",
+          "方向词不足"
+        ],
+        "horizon": "数小时至 3 天",
+        "impact": "中等",
+        "impact_score": 78,
+        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "2040391464761413633",
+      "author_name": "Louis",
+      "conversation_id": "2086660488075919486",
+      "created_at": "2026-08-10T03:46:43.000Z",
+      "fetched_at": "2026-08-10T04:47:04Z",
+      "id": "2086660488075919486",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 0,
+        "impression_count": 598,
+        "like_count": 15,
+        "quote_count": 0,
+        "reply_count": 3,
+        "retweet_count": 0
+      },
+      "source_role": "研究 / 数据",
+      "text": "A few Hyperliquid updates from the past few weeks:\n\n1. On short-term $HYPE price:\n\n-&gt; HyperLabs unstaked HYPE, sent it to a set of fresh wallets, then pushed it out to OKX, Bybit, and Flowdesk.\n\n-&gt; Two big VCs, Multicoin and Selini Capital, unstaked a lot of HYPE. Some read it as",
+      "url": "https://x.com/louisdives/status/2086660488075919486",
+      "username": "louisdives"
+    },
+    {
+      "analysis": {
+        "confidence": 44,
+        "direction": "neutral",
+        "direction_label": "中性 / 信息型",
+        "direction_score": 0,
+        "engine": "rules-v1-server",
+        "event_type": "一般市场观点",
+        "factors": [
+          "一般市场观点",
+          "自动采集",
+          "方向词不足"
+        ],
+        "horizon": "数小时至 3 天",
+        "impact": "中等",
+        "impact_score": 64,
+        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "1821500190312087552",
+      "author_name": "HL Hub",
+      "conversation_id": "2086649939019608168",
+      "created_at": "2026-08-10T03:04:48.000Z",
+      "fetched_at": "2026-08-10T04:47:03Z",
+      "id": "2086649939019608168",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 0,
+        "impression_count": 378,
+        "like_count": 4,
+        "quote_count": 1,
+        "reply_count": 1,
+        "retweet_count": 0
+      },
+      "source_role": "生态资讯",
+      "text": "gHYPURR,\n\nThe flow is simple: \nSignal → Verify → Track Performance → Copy Trade https://t.co/K4sHyB9H17 https://t.co/n3Eoy6TVbO",
+      "url": "https://x.com/Hyperliquid_Hub/status/2086649939019608168",
+      "username": "Hyperliquid_Hub"
+    },
     {
       "analysis": {
         "confidence": 92,
@@ -1843,7 +1919,7 @@
     {
       "handle": "louisdives",
       "influence": 78,
-      "last_seen_id": "2086606325426049254",
+      "last_seen_id": "2086660488075919486",
       "name": "Louis",
       "role": "研究 / 数据",
       "user_id": "2040391464761413633"
@@ -1859,7 +1935,7 @@
     {
       "handle": "Hyperliquid_Hub",
       "influence": 64,
-      "last_seen_id": "2086283660681236606",
+      "last_seen_id": "2086649939019608168",
       "name": "HL Hub",
       "role": "生态资讯",
       "user_id": "1821500190312087552"
@@ -1875,10 +1951,10 @@
   ],
   "timezone": "Asia/Shanghai",
   "usage_today": {
-    "analyses": 12,
+    "analyses": 14,
     "date": "2026-08-10",
-    "estimated_cost_usd": 0.06,
-    "post_reads": 12,
+    "estimated_cost_usd": 0.07,
+    "post_reads": 14,
     "user_reads": 0
   },
   "version": 1

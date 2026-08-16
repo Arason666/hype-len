@@ -3,9 +3,47 @@
     "cost_usd": 0.15,
     "posts": 20
   },
-  "generated_at": "2026-08-16T16:08:40Z",
+  "generated_at": "2026-08-16T16:44:37Z",
   "mode": "x-api-paid",
   "posts": [
+    {
+      "analysis": {
+        "confidence": 46,
+        "direction": "neutral",
+        "direction_label": "中性 / 信息型",
+        "direction_score": 0,
+        "engine": "rules-v1-server",
+        "event_type": "基本面 / 生态事件",
+        "factors": [
+          "基本面 / 生态事件",
+          "自动采集",
+          "方向词不足"
+        ],
+        "horizon": "数日至数月",
+        "impact": "中等",
+        "impact_score": 73,
+        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“基本面 / 生态事件”，主要影响窗口预计为数日至数月；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "1903429012535525376",
+      "author_name": "HYPEconomist",
+      "conversation_id": "2089022459252998285",
+      "created_at": "2026-08-16T16:12:21.000Z",
+      "fetched_at": "2026-08-16T16:44:37Z",
+      "id": "2089022459252998285",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 1,
+        "impression_count": 980,
+        "like_count": 27,
+        "quote_count": 0,
+        "reply_count": 6,
+        "retweet_count": 0
+      },
+      "source_role": "市场观察",
+      "text": "bitcoin’s volatility index just hit an all-time low\n\nprice is compressing hard with low volatility\n\nwe should get a major move soon\n\nthe only question is up or down\n\neither way the return of volatility will be huge for hyperliquid volume https://t.co/ggsJhqlIFD",
+      "url": "https://x.com/HYPEconomist/status/2089022459252998285",
+      "username": "HYPEconomist"
+    },
     {
       "analysis": {
         "confidence": 44,
@@ -6657,7 +6695,7 @@
     {
       "handle": "HYPEconomist",
       "influence": 60,
-      "last_seen_id": "2088949334033228108",
+      "last_seen_id": "2089022459252998285",
       "name": "HYPEconomist",
       "role": "市场观察",
       "user_id": "1903429012535525376"
@@ -6665,10 +6703,10 @@
   ],
   "timezone": "Asia/Shanghai",
   "usage_today": {
-    "analyses": 13,
+    "analyses": 14,
     "date": "2026-08-17",
-    "estimated_cost_usd": 0.065,
-    "post_reads": 13,
+    "estimated_cost_usd": 0.07,
+    "post_reads": 14,
     "user_reads": 0
   },
   "version": 1

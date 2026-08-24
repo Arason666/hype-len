@@ -3,9 +3,693 @@
     "cost_usd": 0.15,
     "posts": 20
   },
-  "generated_at": "2026-08-23T16:36:31Z",
+  "generated_at": "2026-08-24T16:49:11Z",
   "mode": "x-api-paid",
   "posts": [
+    {
+      "analysis": {
+        "confidence": 44,
+        "direction": "neutral",
+        "direction_label": "中性 / 信息型",
+        "direction_score": 0,
+        "engine": "rules-v1-server",
+        "event_type": "一般市场观点",
+        "factors": [
+          "一般市场观点",
+          "自动采集",
+          "方向词不足"
+        ],
+        "horizon": "数小时至 3 天",
+        "impact": "有限",
+        "impact_score": 60,
+        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "1903429012535525376",
+      "author_name": "HYPEconomist",
+      "conversation_id": "2091929779599814746",
+      "created_at": "2026-08-24T16:45:00.000Z",
+      "fetched_at": "2026-08-24T16:49:11Z",
+      "id": "2091929779599814746",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 0,
+        "impression_count": 334,
+        "like_count": 10,
+        "quote_count": 0,
+        "reply_count": 6,
+        "retweet_count": 0
+      },
+      "source_role": "市场观察",
+      "text": "POV: you made it into the @fomo newsletter https://t.co/t9E1NVXcdk",
+      "url": "https://x.com/HYPEconomist/status/2091929779599814746",
+      "username": "HYPEconomist"
+    },
+    {
+      "analysis": {
+        "confidence": 47,
+        "direction": "neutral",
+        "direction_label": "中性 / 信息型",
+        "direction_score": 0,
+        "engine": "rules-v1-server",
+        "event_type": "一般市场观点",
+        "factors": [
+          "一般市场观点",
+          "自动采集",
+          "方向词不足"
+        ],
+        "horizon": "数小时至 3 天",
+        "impact": "中等",
+        "impact_score": 78,
+        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "2040391464761413633",
+      "author_name": "Louis",
+      "conversation_id": "2091903053108834500",
+      "created_at": "2026-08-24T14:58:48.000Z",
+      "fetched_at": "2026-08-24T16:49:11Z",
+      "id": "2091903053108834500",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 1,
+        "impression_count": 600,
+        "like_count": 13,
+        "quote_count": 0,
+        "reply_count": 3,
+        "retweet_count": 0
+      },
+      "source_role": "研究 / 数据",
+      "text": "My Prop Firm Trading Challenge on @HypernovaX just got liquidated, closed!\n\nPreviously, it almost hit 10% profit before mini 10/10 comes then I got liquidated.\n\nBut tbh my experience really good to try Hypernova.\n\nYou must experience it!\n\nIt's very fun since it will train our https://t.co/UCDVwMUTzg https://t.co/0iNzNsDdJX",
+      "url": "https://x.com/louisdives/status/2091903053108834500",
+      "username": "louisdives"
+    },
+    {
+      "analysis": {
+        "confidence": 45,
+        "direction": "neutral",
+        "direction_label": "中性 / 信息型",
+        "direction_score": 0,
+        "engine": "rules-v1-server",
+        "event_type": "基本面 / 生态事件",
+        "factors": [
+          "基本面 / 生态事件",
+          "自动采集",
+          "方向词不足"
+        ],
+        "horizon": "数日至数月",
+        "impact": "中等",
+        "impact_score": 73,
+        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“基本面 / 生态事件”，主要影响窗口预计为数日至数月；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "1903429012535525376",
+      "author_name": "HYPEconomist",
+      "conversation_id": "2091901350728601748",
+      "created_at": "2026-08-24T14:52:02.000Z",
+      "fetched_at": "2026-08-24T16:49:11Z",
+      "id": "2091901350728601748",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 11,
+        "impression_count": 4471,
+        "like_count": 85,
+        "quote_count": 1,
+        "reply_count": 12,
+        "retweet_count": 6
+      },
+      "source_role": "市场观察",
+      "text": "i own a meaningful share of a project generating $200K per week\n\nthat’s 1% of hyperliquid’s revenue\n\nif nest had 1% of hyperliquid’s FDV it would be $680M, $NEST at $0.38 https://t.co/rzBAZWkueh",
+      "url": "https://x.com/HYPEconomist/status/2091901350728601748",
+      "username": "HYPEconomist"
+    },
+    {
+      "analysis": {
+        "confidence": 43,
+        "direction": "neutral",
+        "direction_label": "中性 / 信息型",
+        "direction_score": 0,
+        "engine": "rules-v1-server",
+        "event_type": "一般市场观点",
+        "factors": [
+          "一般市场观点",
+          "自动采集",
+          "方向词不足"
+        ],
+        "horizon": "数小时至 3 天",
+        "impact": "中等",
+        "impact_score": 72,
+        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "897099896108404738",
+      "author_name": "0xMaxs",
+      "conversation_id": "2091899823318540581",
+      "created_at": "2026-08-24T14:46:36.000Z",
+      "fetched_at": "2026-08-24T16:49:11Z",
+      "id": "2091899982152622182",
+      "lang": "ja",
+      "public_metrics": {
+        "bookmark_count": 1,
+        "impression_count": 132,
+        "like_count": 3,
+        "quote_count": 0,
+        "reply_count": 0,
+        "retweet_count": 0
+      },
+      "source_role": "交易观点",
+      "text": "原帖：\n\nhttps://t.co/17c1Uk6211",
+      "url": "https://x.com/0xMaxs/status/2091899982152622182",
+      "username": "0xMaxs"
+    },
+    {
+      "analysis": {
+        "confidence": 44,
+        "direction": "neutral",
+        "direction_label": "中性 / 信息型",
+        "direction_score": 0,
+        "engine": "rules-v1-server",
+        "event_type": "一般市场观点",
+        "factors": [
+          "一般市场观点",
+          "自动采集",
+          "方向词不足"
+        ],
+        "horizon": "数小时至 3 天",
+        "impact": "中等",
+        "impact_score": 78,
+        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "2040391464761413633",
+      "author_name": "Louis",
+      "conversation_id": "2091888685558251945",
+      "created_at": "2026-08-24T14:46:27.000Z",
+      "fetched_at": "2026-08-24T16:49:11Z",
+      "id": "2091899945867743261",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 0,
+        "impression_count": 48,
+        "like_count": 0,
+        "quote_count": 0,
+        "reply_count": 0,
+        "retweet_count": 0
+      },
+      "source_role": "研究 / 数据",
+      "text": "Someone said this telegram channel is \"SCAM\" so be careful everyone.",
+      "url": "https://x.com/louisdives/status/2091899945867743261",
+      "username": "louisdives"
+    },
+    {
+      "analysis": {
+        "confidence": 46,
+        "direction": "neutral",
+        "direction_label": "中性 / 信息型",
+        "direction_score": 0,
+        "engine": "rules-v1-server",
+        "event_type": "一般市场观点",
+        "factors": [
+          "一般市场观点",
+          "自动采集",
+          "方向词不足"
+        ],
+        "horizon": "数小时至 3 天",
+        "impact": "中等",
+        "impact_score": 72,
+        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "897099896108404738",
+      "author_name": "0xMaxs",
+      "conversation_id": "2091899823318540581",
+      "created_at": "2026-08-24T14:45:58.000Z",
+      "fetched_at": "2026-08-24T16:49:11Z",
+      "id": "2091899823318540581",
+      "lang": "zh",
+      "public_metrics": {
+        "bookmark_count": 3,
+        "impression_count": 867,
+        "like_count": 7,
+        "quote_count": 0,
+        "reply_count": 1,
+        "retweet_count": 0
+      },
+      "source_role": "交易观点",
+      "text": "Kinetiq 刚刚官宣Elysium：一条以 HYPE 为 Gas、紧贴 HyperCore 的高性能 L2👺\n\nKinetiq 当前 TVL 约 $1.23B，占 Hyperliquid L1 DeFi TVL 约 81%，属于HyperEVM的核心玩家之一。\n\n1.建造L2的理由\n\nKinetiq 表示，HyperEVM 的双区块架构、吞吐量及 Core 组合体验已难以承接交易需求，拥堵时一次简单 https://t.co/YHYZBrlY4J https://t.co/R6ZRZQYl5D",
+      "url": "https://x.com/0xMaxs/status/2091899823318540581",
+      "username": "0xMaxs"
+    },
+    {
+      "analysis": {
+        "confidence": 45,
+        "direction": "neutral",
+        "direction_label": "中性 / 信息型",
+        "direction_score": 0,
+        "engine": "rules-v1-server",
+        "event_type": "监管 / 上市事件",
+        "factors": [
+          "监管 / 上市事件",
+          "自动采集",
+          "方向词不足"
+        ],
+        "horizon": "1 天至数周",
+        "impact": "高",
+        "impact_score": 95,
+        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“监管 / 上市事件”，主要影响窗口预计为1 天至数周；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "897099896108404738",
+      "author_name": "0xMaxs",
+      "conversation_id": "2091896640370323810",
+      "created_at": "2026-08-24T14:33:19.000Z",
+      "fetched_at": "2026-08-24T16:49:11Z",
+      "id": "2091896640370323810",
+      "lang": "zh",
+      "public_metrics": {
+        "bookmark_count": 2,
+        "impression_count": 1384,
+        "like_count": 10,
+        "quote_count": 1,
+        "reply_count": 5,
+        "retweet_count": 1
+      },
+      "source_role": "交易观点",
+      "text": "北京时间8月24日20:00，在SEC与CFTC联合征询截止日，Hyperliquid Policy Center提交了一份15页正式意见函，回应监管机构亲自提出的问题🪶\n\n现金结算、跟踪单只股票的永续合约，能否按证券期货（Security Futures）监管？\n\nHPC给出的答案：具备传统期货特征的股票永续，可以。\n\n1/4｜先把分类逻辑讲清楚 https://t.co/L0lV2YK3Hf https://t.co/bpf0DApIpR",
+      "url": "https://x.com/0xMaxs/status/2091896640370323810",
+      "username": "0xMaxs"
+    },
+    {
+      "analysis": {
+        "confidence": 44,
+        "direction": "neutral",
+        "direction_label": "中性 / 信息型",
+        "direction_score": 0,
+        "engine": "rules-v1-server",
+        "event_type": "一般市场观点",
+        "factors": [
+          "一般市场观点",
+          "自动采集",
+          "方向词不足"
+        ],
+        "horizon": "数小时至 3 天",
+        "impact": "中等",
+        "impact_score": 64,
+        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "1821500190312087552",
+      "author_name": "HL Hub",
+      "conversation_id": "2091889691658481847",
+      "created_at": "2026-08-24T14:06:12.000Z",
+      "fetched_at": "2026-08-24T16:49:11Z",
+      "id": "2091889815826629037",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 0,
+        "impression_count": 146,
+        "like_count": 3,
+        "quote_count": 0,
+        "reply_count": 0,
+        "retweet_count": 0
+      },
+      "source_role": "生态资讯",
+      "text": "Source:\nKinetiq to launch Elysium, a high-performance L2 for Hyperliquid.\n\nhttps://t.co/ITcI2lgFqi",
+      "url": "https://x.com/Hyperliquid_Hub/status/2091889815826629037",
+      "username": "Hyperliquid_Hub"
+    },
+    {
+      "analysis": {
+        "confidence": 44,
+        "direction": "neutral",
+        "direction_label": "中性 / 信息型",
+        "direction_score": 0,
+        "engine": "rules-v1-server",
+        "event_type": "一般市场观点",
+        "factors": [
+          "一般市场观点",
+          "自动采集",
+          "方向词不足"
+        ],
+        "horizon": "数小时至 3 天",
+        "impact": "中等",
+        "impact_score": 64,
+        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "1821500190312087552",
+      "author_name": "HL Hub",
+      "conversation_id": "2091889691658481847",
+      "created_at": "2026-08-24T14:05:42.000Z",
+      "fetched_at": "2026-08-24T16:49:11Z",
+      "id": "2091889691658481847",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 0,
+        "impression_count": 550,
+        "like_count": 11,
+        "quote_count": 0,
+        "reply_count": 2,
+        "retweet_count": 0
+      },
+      "source_role": "生态资讯",
+      "text": "gHypurr,\n\nKinetiq to launch Elysium, a high-performance L2 for Hyperliquid. https://t.co/tnq8LTdrJW",
+      "url": "https://x.com/Hyperliquid_Hub/status/2091889691658481847",
+      "username": "Hyperliquid_Hub"
+    },
+    {
+      "analysis": {
+        "confidence": 46,
+        "direction": "neutral",
+        "direction_label": "中性 / 信息型",
+        "direction_score": 0,
+        "engine": "rules-v1-server",
+        "event_type": "基本面 / 生态事件",
+        "factors": [
+          "基本面 / 生态事件",
+          "自动采集",
+          "方向词不足"
+        ],
+        "horizon": "数日至数月",
+        "impact": "中等",
+        "impact_score": 77,
+        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“基本面 / 生态事件”，主要影响窗口预计为数日至数月；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "1821500190312087552",
+      "author_name": "HL Hub",
+      "conversation_id": "2091866539016536510",
+      "created_at": "2026-08-24T12:33:42.000Z",
+      "fetched_at": "2026-08-24T16:49:11Z",
+      "id": "2091866539016536510",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 2,
+        "impression_count": 1695,
+        "like_count": 28,
+        "quote_count": 0,
+        "reply_count": 7,
+        "retweet_count": 4
+      },
+      "source_role": "生态资讯",
+      "text": "Top App Revenue 24h on #Hyperliquid\n\n1. Hyperliquid @HyperliquidX\n2. GMGN @gmgnai\n3. Trust Wallet @TrustWallet\n4. Based @BasedOneX\n5. fomo @fomo\n6. Blockchain @blockchain\n7. Phantom @phantom\n8. MetaMask @MetaMask\n9. nest @NestExchange\n10. tradeXYZ @tradexyz https://t.co/CzVALrZuXH",
+      "url": "https://x.com/Hyperliquid_Hub/status/2091866539016536510",
+      "username": "Hyperliquid_Hub"
+    },
+    {
+      "analysis": {
+        "confidence": 46,
+        "direction": "neutral",
+        "direction_label": "中性 / 信息型",
+        "direction_score": 0,
+        "engine": "rules-v1-server",
+        "event_type": "一般市场观点",
+        "factors": [
+          "一般市场观点",
+          "自动采集",
+          "方向词不足"
+        ],
+        "horizon": "数小时至 3 天",
+        "impact": "中等",
+        "impact_score": 78,
+        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "2040391464761413633",
+      "author_name": "Louis",
+      "conversation_id": "2091844552915309054",
+      "created_at": "2026-08-24T11:06:20.000Z",
+      "fetched_at": "2026-08-24T16:49:11Z",
+      "id": "2091844552915309054",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 3,
+        "impression_count": 2246,
+        "like_count": 40,
+        "quote_count": 0,
+        "reply_count": 10,
+        "retweet_count": 0
+      },
+      "source_role": "研究 / 数据",
+      "text": "Extended promised a TGE in H1 2026. It got delayed. The community's disappointment was real, and it still lingers.\n\nNow look what's next in line.\n\nNado's points convert to $INK at the Ink Chain TGE, expected on September 8, 2026. I hope this one doesn't turn into another",
+      "url": "https://x.com/louisdives/status/2091844552915309054",
+      "username": "louisdives"
+    },
+    {
+      "analysis": {
+        "confidence": 64,
+        "direction": "bullish",
+        "direction_label": "偏多",
+        "direction_score": 22,
+        "engine": "rules-v1-server",
+        "event_type": "基本面 / 生态事件",
+        "factors": [
+          "偏多词 1 个",
+          "基本面 / 生态事件",
+          "自动采集"
+        ],
+        "horizon": "数日至数月",
+        "impact": "中等",
+        "impact_score": 73,
+        "summary": "识别到的正向措辞更多，整体判断为偏多。事件类型更接近“基本面 / 生态事件”，主要影响窗口预计为数日至数月；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "1903429012535525376",
+      "author_name": "HYPEconomist",
+      "conversation_id": "2091834273120633183",
+      "created_at": "2026-08-24T10:25:29.000Z",
+      "fetched_at": "2026-08-24T16:49:11Z",
+      "id": "2091834273120633183",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 4,
+        "impression_count": 12056,
+        "like_count": 224,
+        "quote_count": 4,
+        "reply_count": 29,
+        "retweet_count": 14
+      },
+      "source_role": "市场观察",
+      "text": "hyperEVM reached a new weekly revenue ATH of over $1 million https://t.co/bXlR8AMAgd",
+      "url": "https://x.com/HYPEconomist/status/2091834273120633183",
+      "username": "HYPEconomist"
+    },
+    {
+      "analysis": {
+        "confidence": 43,
+        "direction": "neutral",
+        "direction_label": "中性 / 信息型",
+        "direction_score": 0,
+        "engine": "rules-v1-server",
+        "event_type": "一般市场观点",
+        "factors": [
+          "一般市场观点",
+          "自动采集",
+          "方向词不足"
+        ],
+        "horizon": "数小时至 3 天",
+        "impact": "中等",
+        "impact_score": 64,
+        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "1821500190312087552",
+      "author_name": "HL Hub",
+      "conversation_id": "2091833189983719450",
+      "created_at": "2026-08-24T10:21:58.000Z",
+      "fetched_at": "2026-08-24T16:49:11Z",
+      "id": "2091833388089184288",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 0,
+        "impression_count": 151,
+        "like_count": 0,
+        "quote_count": 0,
+        "reply_count": 0,
+        "retweet_count": 0
+      },
+      "source_role": "生态资讯",
+      "text": "Source: #ASXN",
+      "url": "https://x.com/Hyperliquid_Hub/status/2091833388089184288",
+      "username": "Hyperliquid_Hub"
+    },
+    {
+      "analysis": {
+        "confidence": 44,
+        "direction": "neutral",
+        "direction_label": "中性 / 信息型",
+        "direction_score": 0,
+        "engine": "rules-v1-server",
+        "event_type": "基本面 / 生态事件",
+        "factors": [
+          "基本面 / 生态事件",
+          "自动采集",
+          "方向词不足"
+        ],
+        "horizon": "数日至数月",
+        "impact": "中等",
+        "impact_score": 77,
+        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“基本面 / 生态事件”，主要影响窗口预计为数日至数月；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "1821500190312087552",
+      "author_name": "HL Hub",
+      "conversation_id": "2091833189983719450",
+      "created_at": "2026-08-24T10:21:11.000Z",
+      "fetched_at": "2026-08-24T16:49:11Z",
+      "id": "2091833189983719450",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 0,
+        "impression_count": 647,
+        "like_count": 18,
+        "quote_count": 0,
+        "reply_count": 7,
+        "retweet_count": 0
+      },
+      "source_role": "生态资讯",
+      "text": "gHypurr,\n\nHyperEVM network fees on Aug 23 hit $525.72K 🔥 Solid daily print for the network. https://t.co/bJKMaICu0e",
+      "url": "https://x.com/Hyperliquid_Hub/status/2091833189983719450",
+      "username": "Hyperliquid_Hub"
+    },
+    {
+      "analysis": {
+        "confidence": 45,
+        "direction": "neutral",
+        "direction_label": "中性 / 信息型",
+        "direction_score": 0,
+        "engine": "rules-v1-server",
+        "event_type": "一般市场观点",
+        "factors": [
+          "一般市场观点",
+          "自动采集",
+          "方向词不足"
+        ],
+        "horizon": "数小时至 3 天",
+        "impact": "中等",
+        "impact_score": 72,
+        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "897099896108404738",
+      "author_name": "0xMaxs",
+      "conversation_id": "2091793496281870755",
+      "created_at": "2026-08-24T07:43:27.000Z",
+      "fetched_at": "2026-08-24T16:49:11Z",
+      "id": "2091793496281870755",
+      "lang": "zh",
+      "public_metrics": {
+        "bookmark_count": 5,
+        "impression_count": 3822,
+        "like_count": 33,
+        "quote_count": 1,
+        "reply_count": 16,
+        "retweet_count": 3
+      },
+      "source_role": "交易观点",
+      "text": "两周前的这条推文，小九曾经给团队提出建议：\n\n“在Ticker 旁显示发行方，同时增加披露底层资产、托管机构等信息。”\n\n刚刚@chameleon_jeff 在沉寂了一周的discord发布更新公告，上面的两个建议全部落实！📣\n\n• https://t.co/eMspcqNIyH https://t.co/dwoLl7uE8i",
+      "url": "https://x.com/0xMaxs/status/2091793496281870755",
+      "username": "0xMaxs"
+    },
+    {
+      "analysis": {
+        "confidence": 64,
+        "direction": "bearish",
+        "direction_label": "偏空",
+        "direction_score": -22,
+        "engine": "rules-v1-server",
+        "event_type": "一般市场观点",
+        "factors": [
+          "偏空词 1 个",
+          "一般市场观点",
+          "自动采集"
+        ],
+        "horizon": "数小时至 3 天",
+        "impact": "有限",
+        "impact_score": 60,
+        "summary": "识别到的负向措辞更多，整体判断为偏空。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "1903429012535525376",
+      "author_name": "HYPEconomist",
+      "conversation_id": "2091784179847491863",
+      "created_at": "2026-08-24T07:06:26.000Z",
+      "fetched_at": "2026-08-24T16:49:11Z",
+      "id": "2091784179847491863",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 0,
+        "impression_count": 7177,
+        "like_count": 181,
+        "quote_count": 1,
+        "reply_count": 53,
+        "retweet_count": 3
+      },
+      "source_role": "市场观察",
+      "text": "let’s just each buy 0.1% of a hyperEVM meme and shill it until every pumpfun trader has bought in, then dump it on them to buy more hyperliquid:native",
+      "url": "https://x.com/HYPEconomist/status/2091784179847491863",
+      "username": "HYPEconomist"
+    },
+    {
+      "analysis": {
+        "confidence": 45,
+        "direction": "neutral",
+        "direction_label": "中性 / 信息型",
+        "direction_score": 0,
+        "engine": "rules-v1-server",
+        "event_type": "一般市场观点",
+        "factors": [
+          "一般市场观点",
+          "自动采集",
+          "方向词不足"
+        ],
+        "horizon": "数小时至 3 天",
+        "impact": "中等",
+        "impact_score": 72,
+        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "897099896108404738",
+      "author_name": "0xMaxs",
+      "conversation_id": "2091752591722250375",
+      "created_at": "2026-08-24T05:00:55.000Z",
+      "fetched_at": "2026-08-24T16:49:11Z",
+      "id": "2091752591722250375",
+      "lang": "zh",
+      "public_metrics": {
+        "bookmark_count": 2,
+        "impression_count": 4220,
+        "like_count": 19,
+        "quote_count": 1,
+        "reply_count": 17,
+        "retweet_count": 2
+      },
+      "source_role": "交易观点",
+      "text": "Trade[XYZ] 很可能已在悄悄测试HIP‑4✅\n\n8月20日，同一母钱包向 txyz、tyzz、tzxy 各转入100 HYPE；三个新钱包几分钟内完成质押并开始批量部署。\n\ntxyz、tyzz、tzxy三个钱包部署的市场数量在10:21:22达到186，10:23:21增至218。按原帖母钱包已有77个计算，四个地址累计至少295个。 https://t.co/CHuHkf2MGl https://t.co/4Qz8ktgNs2",
+      "url": "https://x.com/0xMaxs/status/2091752591722250375",
+      "username": "0xMaxs"
+    },
+    {
+      "analysis": {
+        "confidence": 45,
+        "direction": "neutral",
+        "direction_label": "中性 / 信息型",
+        "direction_score": 0,
+        "engine": "rules-v1-server",
+        "event_type": "一般市场观点",
+        "factors": [
+          "一般市场观点",
+          "自动采集",
+          "方向词不足"
+        ],
+        "horizon": "数小时至 3 天",
+        "impact": "中等",
+        "impact_score": 78,
+        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "2040391464761413633",
+      "author_name": "Louis",
+      "conversation_id": "2091730340520091875",
+      "created_at": "2026-08-24T03:32:30.000Z",
+      "fetched_at": "2026-08-24T16:49:11Z",
+      "id": "2091730340520091875",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 4,
+        "impression_count": 4612,
+        "like_count": 72,
+        "quote_count": 1,
+        "reply_count": 14,
+        "retweet_count": 1
+      },
+      "source_role": "研究 / 数据",
+      "text": "Will we see $HYPE down to $75.456 before hitting $100?\n\n$15.1M will be liquidated if $HYPE drops -5%.\n\nWhile if $HYPE goes up +5%, the no position will be liquidated there.\n\nInteresting. https://t.co/P4mPM826sc",
+      "url": "https://x.com/louisdives/status/2091730340520091875",
+      "username": "louisdives"
+    },
     {
       "analysis": {
         "confidence": 46,
@@ -10725,659 +11409,13 @@
       "text": "Farming USDC Rewards in Phoenix is ​​still one of the best alternatives right now.\n\nBy the way, this $296 total comes from 5 days, not 1.\n\nPlus, still few users farming on Phoenix Perp Dex, making it a good option.\n\nMy strategy?\nOpen Interest + Holding Time, and also maintain my https://t.co/O7yW3J4jHd",
       "url": "https://x.com/louisdives/status/2085924901924597948",
       "username": "louisdives"
-    },
-    {
-      "analysis": {
-        "confidence": 92,
-        "direction": "bullish",
-        "direction_label": "偏多",
-        "direction_score": 88,
-        "engine": "rules-v1-server",
-        "event_type": "基本面 / 生态事件",
-        "factors": [
-          "偏多词 4 个",
-          "基本面 / 生态事件",
-          "自动采集"
-        ],
-        "horizon": "数日至数月",
-        "impact": "高",
-        "impact_score": 91,
-        "summary": "识别到的正向措辞更多，整体判断为偏多。事件类型更接近“基本面 / 生态事件”，主要影响窗口预计为数日至数月；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
-      },
-      "author_id": "897099896108404738",
-      "author_name": "0xMaxs",
-      "conversation_id": "2085910832450285743",
-      "created_at": "2026-08-08T02:07:51.000Z",
-      "fetched_at": "2026-08-08T10:39:29Z",
-      "id": "2085910832450285743",
-      "lang": "zh",
-      "public_metrics": {
-        "bookmark_count": 2,
-        "impression_count": 402,
-        "like_count": 6,
-        "quote_count": 0,
-        "reply_count": 2,
-        "retweet_count": 0
-      },
-      "source_role": "交易观点",
-      "text": "‼️Hype 日报 #220｜数据截至：2026-8-7\n\n回购：HYPE现价$53.88，昨日销毁$1.16M/20771.16枚（均价$55.77），累计销毁4628.91万枚\n\n估值：年回购金额$7.24亿，成交量(24h)$30.22亿，OI=$6.60B；最大供应9.54亿枚，FDV=$51.38B，PE=71，分位87.9% https://t.co/x7SXrq1SdL https://t.co/zJoEgvERQ8",
-      "url": "https://x.com/0xMaxs/status/2085910832450285743",
-      "username": "0xMaxs"
-    },
-    {
-      "analysis": {
-        "confidence": 45,
-        "direction": "neutral",
-        "direction_label": "中性 / 信息型",
-        "direction_score": 0,
-        "engine": "rules-v1-server",
-        "event_type": "基本面 / 生态事件",
-        "factors": [
-          "基本面 / 生态事件",
-          "自动采集",
-          "方向词不足"
-        ],
-        "horizon": "数日至数月",
-        "impact": "高",
-        "impact_score": 88,
-        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“基本面 / 生态事件”，主要影响窗口预计为数日至数月；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
-      },
-      "author_id": "897099896108404738",
-      "author_name": "0xMaxs",
-      "conversation_id": "2085901533741477935",
-      "created_at": "2026-08-08T01:30:54.000Z",
-      "fetched_at": "2026-08-08T10:39:29Z",
-      "id": "2085901533741477935",
-      "lang": "zh",
-      "public_metrics": {
-        "bookmark_count": 3,
-        "impression_count": 720,
-        "like_count": 8,
-        "quote_count": 0,
-        "reply_count": 2,
-        "retweet_count": 0
-      },
-      "source_role": "交易观点",
-      "text": "最新一轮 HIP-3 拍卖中，Paragon（para）以 589.98 HYPE 拿下 $TENCENT，对应港股腾讯控股 0700HK\n\n其实腾讯此前已经上过 HIP-3。\n\n今年 4 月，Markets by Kinetiq 曾同时上线 TENCENT、XIAOMI，最高 10x 杠杆；到了 6 月，由于稳定币迁移，统一结算下线。 https://t.co/NV9d6VUn8O https://t.co/QZCVxjefgN",
-      "url": "https://x.com/0xMaxs/status/2085901533741477935",
-      "username": "0xMaxs"
-    },
-    {
-      "analysis": {
-        "confidence": 64,
-        "direction": "bullish",
-        "direction_label": "偏多",
-        "direction_score": 22,
-        "engine": "rules-v1-server",
-        "event_type": "一般市场观点",
-        "factors": [
-          "偏多词 1 个",
-          "一般市场观点",
-          "自动采集"
-        ],
-        "horizon": "数小时至 3 天",
-        "impact": "中等",
-        "impact_score": 78,
-        "summary": "识别到的正向措辞更多，整体判断为偏多。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
-      },
-      "author_id": "2040391464761413633",
-      "author_name": "Louis",
-      "conversation_id": "2085875566725763361",
-      "created_at": "2026-08-07T23:47:43.000Z",
-      "fetched_at": "2026-08-08T10:39:30Z",
-      "id": "2085875566725763361",
-      "lang": "en",
-      "public_metrics": {
-        "bookmark_count": 3,
-        "impression_count": 2538,
-        "like_count": 53,
-        "quote_count": 2,
-        "reply_count": 9,
-        "retweet_count": 2
-      },
-      "source_role": "研究 / 数据",
-      "text": "My $HYPE is looking sad, or rather, \"in the red candle.\"\n\nWhy? It’s likely because Loracle unstaked 336K Hyperliquid tokens.\n\nOn top of that, he has an open short position on Hyperliquid with an average entry around $52.\n\nMaybe he will sell Hyperliquid so he can take profit not https://t.co/t7l1pL2eff",
-      "url": "https://x.com/louisdives/status/2085875566725763361",
-      "username": "louisdives"
-    },
-    {
-      "analysis": {
-        "confidence": 64,
-        "direction": "bearish",
-        "direction_label": "偏空",
-        "direction_score": -22,
-        "engine": "rules-v1-server",
-        "event_type": "一般市场观点",
-        "factors": [
-          "偏空词 1 个",
-          "一般市场观点",
-          "自动采集"
-        ],
-        "horizon": "数小时至 3 天",
-        "impact": "有限",
-        "impact_score": 60,
-        "summary": "识别到的负向措辞更多，整体判断为偏空。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
-      },
-      "author_id": "1903429012535525376",
-      "author_name": "HYPEconomist",
-      "conversation_id": "2085817951760810129",
-      "created_at": "2026-08-07T19:58:46.000Z",
-      "fetched_at": "2026-08-08T16:15:01Z",
-      "id": "2085817951760810129",
-      "lang": "en",
-      "public_metrics": {
-        "bookmark_count": 7,
-        "impression_count": 5551,
-        "like_count": 135,
-        "quote_count": 0,
-        "reply_count": 41,
-        "retweet_count": 2
-      },
-      "source_role": "市场观察",
-      "text": "excited to join @DinariGlobal as an advisor\n\nreal 1:1 backed tokenized U.S. equities (dShares) now live on hyperliquid, starting with $SPCXD\n\ni believe spot equities together with portfolio margin will be the next big unlock for hyperliquid to become the house of all finance https://t.co/Q7cgVFwev1",
-      "url": "https://x.com/HYPEconomist/status/2085817951760810129",
-      "username": "HYPEconomist"
-    },
-    {
-      "analysis": {
-        "confidence": 45,
-        "direction": "neutral",
-        "direction_label": "中性 / 信息型",
-        "direction_score": 0,
-        "engine": "rules-v1-server",
-        "event_type": "一般市场观点",
-        "factors": [
-          "一般市场观点",
-          "自动采集",
-          "方向词不足"
-        ],
-        "horizon": "数小时至 3 天",
-        "impact": "中等",
-        "impact_score": 72,
-        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
-      },
-      "author_id": "897099896108404738",
-      "author_name": "0xMaxs",
-      "conversation_id": "2085757392751677465",
-      "created_at": "2026-08-07T15:58:08.000Z",
-      "fetched_at": "2026-08-08T10:39:29Z",
-      "id": "2085757392751677465",
-      "lang": "zh",
-      "public_metrics": {
-        "bookmark_count": 15,
-        "impression_count": 3465,
-        "like_count": 25,
-        "quote_count": 0,
-        "reply_count": 22,
-        "retweet_count": 2
-      },
-      "source_role": "交易观点",
-      "text": "简直太他jeff的酷了！\n\nHyperliquid的流动性深度现在可以直接和全球头部交易所硬碰硬比较了👀\n\nASXN刚上线 Liquidity Comparison Dashboard，把Hyperliquid、Binance、Coinbase、Lighter、OKX、Bybit的实时订单簿放在一起比较。\n\n我看了一下目前的快照，有几个数据很有意思： https://t.co/aFjLtcd1N6 https://t.co/DnYj9d8BGN",
-      "url": "https://x.com/0xMaxs/status/2085757392751677465",
-      "username": "0xMaxs"
-    },
-    {
-      "analysis": {
-        "confidence": 64,
-        "direction": "bearish",
-        "direction_label": "偏空",
-        "direction_score": -22,
-        "engine": "rules-v1-server",
-        "event_type": "技术面 / 仓位观点",
-        "factors": [
-          "偏空词 1 个",
-          "技术面 / 仓位观点",
-          "自动采集"
-        ],
-        "horizon": "数小时至 3 天",
-        "impact": "高",
-        "impact_score": 85,
-        "summary": "识别到的负向措辞更多，整体判断为偏空。事件类型更接近“技术面 / 仓位观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
-      },
-      "author_id": "2040391464761413633",
-      "author_name": "Louis",
-      "conversation_id": "2085736312997613910",
-      "created_at": "2026-08-07T14:34:22.000Z",
-      "fetched_at": "2026-08-08T10:39:30Z",
-      "id": "2085736312997613910",
-      "lang": "en",
-      "public_metrics": {
-        "bookmark_count": 4,
-        "impression_count": 3084,
-        "like_count": 47,
-        "quote_count": 0,
-        "reply_count": 9,
-        "retweet_count": 1
-      },
-      "source_role": "研究 / 数据",
-      "text": "Breaking News Unstaked 336.62K $HYPE.\n\nLoracle just unstaked 336.62K $HYPE, worth $18.85M\n\nAnother selling pressure might come again in the next 7 days.\n\nWill he open a short position and sell $HYPE on the spot market? I think so.\n\nHe might repeat what he did before.\n\nMy target https://t.co/iRffU2EWZA",
-      "url": "https://x.com/louisdives/status/2085736312997613910",
-      "username": "louisdives"
-    },
-    {
-      "analysis": {
-        "confidence": 46,
-        "direction": "neutral",
-        "direction_label": "中性 / 信息型",
-        "direction_score": 0,
-        "engine": "rules-v1-server",
-        "event_type": "技术面 / 仓位观点",
-        "factors": [
-          "技术面 / 仓位观点",
-          "自动采集",
-          "方向词不足"
-        ],
-        "horizon": "数小时至 3 天",
-        "impact": "中等",
-        "impact_score": 71,
-        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“技术面 / 仓位观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
-      },
-      "author_id": "1821500190312087552",
-      "author_name": "HL Hub",
-      "conversation_id": "2085721531750248872",
-      "created_at": "2026-08-07T13:35:38.000Z",
-      "fetched_at": "2026-08-08T10:39:30Z",
-      "id": "2085721531750248872",
-      "lang": "en",
-      "public_metrics": {
-        "bookmark_count": 5,
-        "impression_count": 1682,
-        "like_count": 32,
-        "quote_count": 2,
-        "reply_count": 7,
-        "retweet_count": 0
-      },
-      "source_role": "生态资讯",
-      "text": "Hyperliquid Ecosystem 48H Recap #22\n\n✅HPC (@HyperliquidPC): HPC Files Statement in Connection with CFTC Agricultural Advisory Committee Meeting.\n\n✅Swapped (@swappedcom): Swapped now supports Hyperliquid, bringing seamless fiat deposits directly to Hyperliquid.\n\n✅Felix https://t.co/f0nQ5zuHLl",
-      "url": "https://x.com/Hyperliquid_Hub/status/2085721531750248872",
-      "username": "Hyperliquid_Hub"
-    },
-    {
-      "analysis": {
-        "confidence": 45,
-        "direction": "neutral",
-        "direction_label": "中性 / 信息型",
-        "direction_score": 0,
-        "engine": "rules-v1-server",
-        "event_type": "一般市场观点",
-        "factors": [
-          "一般市场观点",
-          "自动采集",
-          "方向词不足"
-        ],
-        "horizon": "数小时至 3 天",
-        "impact": "中等",
-        "impact_score": 64,
-        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
-      },
-      "author_id": "1821500190312087552",
-      "author_name": "HL Hub",
-      "conversation_id": "2085712212380000668",
-      "created_at": "2026-08-07T12:58:43.000Z",
-      "fetched_at": "2026-08-08T10:39:30Z",
-      "id": "2085712240528003108",
-      "lang": "en",
-      "public_metrics": {
-        "bookmark_count": 0,
-        "impression_count": 155,
-        "like_count": 1,
-        "quote_count": 0,
-        "reply_count": 0,
-        "retweet_count": 0
-      },
-      "source_role": "生态资讯",
-      "text": "10/10 OG Highlight #10: @iiamjeph\nHyperliquid L1 just flipped Arbitrum for TVL.\nOne spent years on grants, incentives, and farming campaigns.\nOne was built organically. https://t.co/CUzwUmUtg9",
-      "url": "https://x.com/Hyperliquid_Hub/status/2085712240528003108",
-      "username": "Hyperliquid_Hub"
-    },
-    {
-      "analysis": {
-        "confidence": 45,
-        "direction": "neutral",
-        "direction_label": "中性 / 信息型",
-        "direction_score": 0,
-        "engine": "rules-v1-server",
-        "event_type": "一般市场观点",
-        "factors": [
-          "一般市场观点",
-          "自动采集",
-          "方向词不足"
-        ],
-        "horizon": "数小时至 3 天",
-        "impact": "中等",
-        "impact_score": 64,
-        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
-      },
-      "author_id": "1821500190312087552",
-      "author_name": "HL Hub",
-      "conversation_id": "2085712212380000668",
-      "created_at": "2026-08-07T12:58:42.000Z",
-      "fetched_at": "2026-08-08T10:39:30Z",
-      "id": "2085712238099542173",
-      "lang": "en",
-      "public_metrics": {
-        "bookmark_count": 0,
-        "impression_count": 175,
-        "like_count": 1,
-        "quote_count": 0,
-        "reply_count": 1,
-        "retweet_count": 0
-      },
-      "source_role": "生态资讯",
-      "text": "9/10 OG Highlight #9: @SageWhale\nNot buying $HYPE is a bigger risk than actually buying it.\nAF eats supply either way — you either ride it or watch it from the sidelines. https://t.co/IY2sBzwz4p",
-      "url": "https://x.com/Hyperliquid_Hub/status/2085712238099542173",
-      "username": "Hyperliquid_Hub"
-    },
-    {
-      "analysis": {
-        "confidence": 46,
-        "direction": "neutral",
-        "direction_label": "中性 / 信息型",
-        "direction_score": 0,
-        "engine": "rules-v1-server",
-        "event_type": "一般市场观点",
-        "factors": [
-          "一般市场观点",
-          "自动采集",
-          "方向词不足"
-        ],
-        "horizon": "数小时至 3 天",
-        "impact": "中等",
-        "impact_score": 64,
-        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
-      },
-      "author_id": "1821500190312087552",
-      "author_name": "HL Hub",
-      "conversation_id": "2085712212380000668",
-      "created_at": "2026-08-07T12:58:42.000Z",
-      "fetched_at": "2026-08-08T10:39:30Z",
-      "id": "2085712235549388838",
-      "lang": "en",
-      "public_metrics": {
-        "bookmark_count": 0,
-        "impression_count": 87,
-        "like_count": 2,
-        "quote_count": 0,
-        "reply_count": 1,
-        "retweet_count": 1
-      },
-      "source_role": "生态资讯",
-      "text": "8/10 OG Highlight #8: @Dmyonhl\nThree times traders tried to break Hyperliquid’s own vault (JELLYJELLY, POPCAT, Fartcoin).\nThose same two weeks account for ~41% of the vault’s all-time profit.\nA system built to absorb chaos doesn’t need to avoid attacks — it needs the attacks to https://t.co/wGWqAiKxJA",
-      "url": "https://x.com/Hyperliquid_Hub/status/2085712235549388838",
-      "username": "Hyperliquid_Hub"
-    },
-    {
-      "analysis": {
-        "confidence": 46,
-        "direction": "neutral",
-        "direction_label": "中性 / 信息型",
-        "direction_score": 0,
-        "engine": "rules-v1-server",
-        "event_type": "一般市场观点",
-        "factors": [
-          "一般市场观点",
-          "自动采集",
-          "方向词不足"
-        ],
-        "horizon": "数小时至 3 天",
-        "impact": "中等",
-        "impact_score": 64,
-        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
-      },
-      "author_id": "1821500190312087552",
-      "author_name": "HL Hub",
-      "conversation_id": "2085712212380000668",
-      "created_at": "2026-08-07T12:58:41.000Z",
-      "fetched_at": "2026-08-08T10:39:30Z",
-      "id": "2085712232680509897",
-      "lang": "en",
-      "public_metrics": {
-        "bookmark_count": 0,
-        "impression_count": 86,
-        "like_count": 1,
-        "quote_count": 0,
-        "reply_count": 1,
-        "retweet_count": 0
-      },
-      "source_role": "生态资讯",
-      "text": "7/10 OG Highlight #7: @Beliukh_\nAbsolute Cinema: Loracle keeps adding to his $HYPE short (now ~$29M, ~-$1.8M unrealized).\nAlso placing apparent spoof orders from another wallet.\nStill believe local bottom was ~$51.5 and next key level is reclaiming $60. https://t.co/mUoSb5qNIT",
-      "url": "https://x.com/Hyperliquid_Hub/status/2085712232680509897",
-      "username": "Hyperliquid_Hub"
-    },
-    {
-      "analysis": {
-        "confidence": 45,
-        "direction": "neutral",
-        "direction_label": "中性 / 信息型",
-        "direction_score": 0,
-        "engine": "rules-v1-server",
-        "event_type": "监管 / 上市事件",
-        "factors": [
-          "监管 / 上市事件",
-          "自动采集",
-          "方向词不足"
-        ],
-        "horizon": "1 天至数周",
-        "impact": "高",
-        "impact_score": 89,
-        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“监管 / 上市事件”，主要影响窗口预计为1 天至数周；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
-      },
-      "author_id": "897099896108404738",
-      "author_name": "0xMaxs",
-      "conversation_id": "2085711888600453568",
-      "created_at": "2026-08-07T12:57:19.000Z",
-      "fetched_at": "2026-08-08T10:39:29Z",
-      "id": "2085711888600453568",
-      "lang": "zh",
-      "public_metrics": {
-        "bookmark_count": 2,
-        "impression_count": 1340,
-        "like_count": 10,
-        "quote_count": 0,
-        "reply_count": 12,
-        "retweet_count": 2
-      },
-      "source_role": "交易观点",
-      "text": "今天，Hyperliquid Policy Center 向 CFTC 农业咨询委员会正式提交声明💁\n\nHyperliquid 的美国合规路线，正在进一步向传统衍生品市场延伸。\n\n7 月 29 日，HPC 已线下参加该委员会两年多来首次会议，其中专门讨论了 24/7 交易、永续合约与新兴市场。\n\nHPC 提出三点：\n\n• https://t.co/LmFx1ls2nS",
-      "url": "https://x.com/0xMaxs/status/2085711888600453568",
-      "username": "0xMaxs"
-    },
-    {
-      "analysis": {
-        "confidence": 46,
-        "direction": "neutral",
-        "direction_label": "中性 / 信息型",
-        "direction_score": 0,
-        "engine": "rules-v1-server",
-        "event_type": "技术面 / 仓位观点",
-        "factors": [
-          "技术面 / 仓位观点",
-          "自动采集",
-          "方向词不足"
-        ],
-        "horizon": "数小时至 3 天",
-        "impact": "高",
-        "impact_score": 97,
-        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“技术面 / 仓位观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
-      },
-      "author_id": "1527020295059648513",
-      "author_name": "Hyperliquid",
-      "conversation_id": "2084192309185278286",
-      "created_at": "2026-08-03T08:19:03.000Z",
-      "fetched_at": "2026-08-08T10:39:30Z",
-      "id": "2084192309185278286",
-      "lang": "en",
-      "public_metrics": {
-        "bookmark_count": 67,
-        "impression_count": 88175,
-        "like_count": 975,
-        "quote_count": 27,
-        "reply_count": 155,
-        "retweet_count": 161
-      },
-      "source_role": "官方动态",
-      "text": "TWAP orders now support the following features, fully onchain:\n+ Trigger price: TWAP order activates when mark price reaches your set level\n+ Max/min price: TWAP order terminates when mark price crosses your max price (for buys/longs) or min price (for sells/shorts)\n+ Longer",
-      "url": "https://x.com/HyperliquidX/status/2084192309185278286",
-      "username": "HyperliquidX"
-    },
-    {
-      "analysis": {
-        "confidence": 76,
-        "direction": "bullish",
-        "direction_label": "偏多",
-        "direction_score": 44,
-        "engine": "rules-v1-server",
-        "event_type": "基本面 / 生态事件",
-        "factors": [
-          "偏多词 2 个",
-          "基本面 / 生态事件",
-          "自动采集"
-        ],
-        "horizon": "数日至数月",
-        "impact": "高",
-        "impact_score": 100,
-        "summary": "识别到的正向措辞更多，整体判断为偏多。事件类型更接近“基本面 / 生态事件”，主要影响窗口预计为数日至数月；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
-      },
-      "author_id": "1527020295059648513",
-      "author_name": "Hyperliquid",
-      "conversation_id": "2076573023973642282",
-      "created_at": "2026-07-13T07:42:44.000Z",
-      "fetched_at": "2026-08-08T10:39:30Z",
-      "id": "2076573023973642282",
-      "lang": "en",
-      "public_metrics": {
-        "bookmark_count": 59,
-        "impression_count": 215396,
-        "like_count": 2048,
-        "quote_count": 88,
-        "reply_count": 271,
-        "retweet_count": 583
-      },
-      "source_role": "官方动态",
-      "text": "Real-world asset (RWA) open interest on Hyperliquid reached a new ATH of $3.6B\n\nTotal OI reached a new high for 2026 of $11B https://t.co/FJyeuUq0ya",
-      "url": "https://x.com/HyperliquidX/status/2076573023973642282",
-      "username": "HyperliquidX"
-    },
-    {
-      "analysis": {
-        "confidence": 46,
-        "direction": "neutral",
-        "direction_label": "中性 / 信息型",
-        "direction_score": 0,
-        "engine": "rules-v1-server",
-        "event_type": "监管 / 上市事件",
-        "factors": [
-          "监管 / 上市事件",
-          "自动采集",
-          "方向词不足"
-        ],
-        "horizon": "1 天至数周",
-        "impact": "高",
-        "impact_score": 100,
-        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“监管 / 上市事件”，主要影响窗口预计为1 天至数周；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
-      },
-      "author_id": "1527020295059648513",
-      "author_name": "Hyperliquid",
-      "conversation_id": "2075805547207746034",
-      "created_at": "2026-07-11T04:53:04.000Z",
-      "fetched_at": "2026-08-08T10:39:30Z",
-      "id": "2075805549170717090",
-      "lang": "en",
-      "public_metrics": {
-        "bookmark_count": 8,
-        "impression_count": 33448,
-        "like_count": 151,
-        "quote_count": 0,
-        "reply_count": 11,
-        "retweet_count": 9
-      },
-      "source_role": "官方动态",
-      "text": "Trading is on low leverage and isolated margin only. Listing is not an endorsement of the project. Past performance does not guarantee future results. Do not trade assets you are unfamiliar with and do not understand the risks for. Exercise control. NFA.\n\nhttps://t.co/0SPRfivsnn",
-      "url": "https://x.com/HyperliquidX/status/2075805549170717090",
-      "username": "HyperliquidX"
-    },
-    {
-      "analysis": {
-        "confidence": 44,
-        "direction": "neutral",
-        "direction_label": "中性 / 信息型",
-        "direction_score": 0,
-        "engine": "rules-v1-server",
-        "event_type": "一般市场观点",
-        "factors": [
-          "一般市场观点",
-          "自动采集",
-          "方向词不足"
-        ],
-        "horizon": "数小时至 3 天",
-        "impact": "高",
-        "impact_score": 90,
-        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
-      },
-      "author_id": "1527020295059648513",
-      "author_name": "Hyperliquid",
-      "conversation_id": "2075805547207746034",
-      "created_at": "2026-07-11T04:53:03.000Z",
-      "fetched_at": "2026-08-08T10:39:30Z",
-      "id": "2075805547207746034",
-      "lang": "en",
-      "public_metrics": {
-        "bookmark_count": 97,
-        "impression_count": 966471,
-        "like_count": 2766,
-        "quote_count": 183,
-        "reply_count": 357,
-        "retweet_count": 422
-      },
-      "source_role": "官方动态",
-      "text": "By community request, you can now long or short $CASHCAT perps with up to 3x leverage. https://t.co/A2ZQMonwHF",
-      "url": "https://x.com/HyperliquidX/status/2075805547207746034",
-      "username": "HyperliquidX"
-    },
-    {
-      "analysis": {
-        "confidence": 46,
-        "direction": "neutral",
-        "direction_label": "中性 / 信息型",
-        "direction_score": 0,
-        "engine": "rules-v1-server",
-        "event_type": "基本面 / 生态事件",
-        "factors": [
-          "基本面 / 生态事件",
-          "自动采集",
-          "方向词不足"
-        ],
-        "horizon": "数日至数月",
-        "impact": "高",
-        "impact_score": 100,
-        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“基本面 / 生态事件”，主要影响窗口预计为数日至数月；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
-      },
-      "author_id": "1527020295059648513",
-      "author_name": "Hyperliquid",
-      "conversation_id": "2072721677524644255",
-      "created_at": "2026-07-02T16:38:51.000Z",
-      "fetched_at": "2026-08-08T10:39:30Z",
-      "id": "2072721677524644255",
-      "lang": "en",
-      "public_metrics": {
-        "bookmark_count": 130,
-        "impression_count": 422260,
-        "like_count": 2323,
-        "quote_count": 97,
-        "reply_count": 252,
-        "retweet_count": 759
-      },
-      "source_role": "官方动态",
-      "text": "VALR, Africa's largest crypto exchange by trading volume, is using Hyperliquid as the onchain infrastructure layer to bring perpetuals to its users.\n\nThis marks the first time a centralized exchange has integrated Hyperliquid directly. By building on Hyperliquid, VALR can focus https://t.co/WkXn7PHMR2",
-      "url": "https://x.com/HyperliquidX/status/2072721677524644255",
-      "username": "HyperliquidX"
     }
   ],
   "sources": [
     {
       "handle": "0xMaxs",
       "influence": 72,
-      "last_seen_id": "2091552901621842249",
+      "last_seen_id": "2091899982152622182",
       "name": "0xMaxs",
       "role": "交易观点",
       "user_id": "897099896108404738"
@@ -11385,7 +11423,7 @@
     {
       "handle": "louisdives",
       "influence": 78,
-      "last_seen_id": "2091559654363222478",
+      "last_seen_id": "2091903053108834500",
       "name": "Louis",
       "role": "研究 / 数据",
       "user_id": "2040391464761413633"
@@ -11401,7 +11439,7 @@
     {
       "handle": "Hyperliquid_Hub",
       "influence": 64,
-      "last_seen_id": "2091536174506819659",
+      "last_seen_id": "2091889815826629037",
       "name": "HL Hub",
       "role": "生态资讯",
       "user_id": "1821500190312087552"
@@ -11409,7 +11447,7 @@
     {
       "handle": "HYPEconomist",
       "influence": 60,
-      "last_seen_id": "2091485602537419115",
+      "last_seen_id": "2091929779599814746",
       "name": "HYPEconomist",
       "role": "市场观察",
       "user_id": "1903429012535525376"
@@ -11418,7 +11456,7 @@
   "timezone": "Asia/Shanghai",
   "usage_today": {
     "analyses": 18,
-    "date": "2026-08-24",
+    "date": "2026-08-25",
     "estimated_cost_usd": 0.09,
     "post_reads": 18,
     "user_reads": 0

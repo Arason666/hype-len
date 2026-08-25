@@ -21602,7 +21602,7 @@
     }
   ],
   "funding_retention_days": 180,
-  "generated_at": "2026-08-25T15:01:59Z",
+  "generated_at": "2026-08-25T15:57:46Z",
   "snapshot_interval_minutes": 15,
   "snapshot_retention_days": 60,
   "snapshots": [
@@ -34405,6 +34405,31 @@
         "trade_count": 10
       },
       "time": 1787670000000
+    },
+    {
+      "day_notional_volume": 785899456.3663715,
+      "funding": 1.25e-05,
+      "impact_ask": 81.357,
+      "impact_bid": 81.324,
+      "mark_price": 81.325,
+      "mid_price": 81.3245,
+      "open_interest": 24794467.679999985,
+      "oracle_price": 81.3075,
+      "order_book": {
+        "ask_notional_top10": 24011.54,
+        "bid_notional_top10": 105720.94,
+        "imbalance": 0.62983,
+        "spread_bps": 0.6146
+      },
+      "premium": 0.0002029333,
+      "recent_flow": {
+        "buy_notional": 971.31,
+        "buy_share": 0.945384,
+        "latest_trade_time": 1787673467009,
+        "sell_notional": 56.11,
+        "trade_count": 10
+      },
+      "time": 1787672700000
     }
   ],
   "source": "Hyperliquid public info API",

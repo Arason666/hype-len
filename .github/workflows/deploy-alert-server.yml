@@ -62,6 +62,7 @@ jobs:
             printf 'ALERT_BIND_HOST=127.0.0.1\n'
             printf 'ALERT_PORT=8787\n'
             printf 'ALERT_POLL_SECONDS=3\n'
+            printf 'ALERT_SESSION_SECONDS=2592000\n'
             printf 'NTFY_URL=https://ntfy.sh\n'
             printf 'NTFY_TOPIC=%s\n' "$NTFY_TOPIC"
             printf 'DASHBOARD_URL=%s\n' "$DASHBOARD_URL"

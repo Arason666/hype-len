@@ -95,16 +95,17 @@ python3 -m unittest discover -s tests -v
 
 ```bash
 export ALERT_API_TOKEN="请替换为至少16位的随机密钥"
-export ALERT_ALLOWED_ORIGIN="https://arason666.github.io"
+export ALERT_ALLOWED_ORIGIN="https://northinterval.com"
 export ALERT_STATE_PATH="/var/lib/hype-lens/price-alert-state.json"
 export ALERT_BIND_HOST="127.0.0.1"
 export ALERT_PORT="8787"
 export ALERT_POLL_SECONDS="3"
+export ALERT_SESSION_SECONDS="2592000"
 
 export NTFY_URL="https://ntfy.sh"
 export NTFY_TOPIC="请替换为你的私有主题"
 export NTFY_ACCESS_TOKEN="可选；使用受保护主题时填写"
-export DASHBOARD_URL="https://arason666.github.io/hype-len/"
+export DASHBOARD_URL="https://northinterval.com/"
 
 python3 scripts/price_alert_service.py
 ```
@@ -128,14 +129,16 @@ export TENCENTCLOUD_REGION="ap-guangzhou"
 
 打开 `价格预警` 页签：
 
-1. 填写 HTTPS 告警服务地址和 `ALERT_API_TOKEN`，点击“连接服务”。
+1. 看板默认连接 `https://alerts.northinterval.com`。每台设备首次使用时填写一次 `ALERT_API_TOKEN` 并点击“配对此设备”；服务会签发 30 天有效的 `HttpOnly + Secure` Cookie，网页不会永久保存原始密钥。
 2. 选择“下跌至或低于”或“上涨至或高于”，输入 HYPE 目标价格。
 3. 勾选 `ntfy 强推`；确认腾讯云策略测试成功后再勾选“未确认后电话升级”。
 4. 默认保留连续确认 `3` 次、电话延迟 `45` 秒、冷却 `15` 分钟、重新布防缓冲 `0.25%`。
 5. 点击“保存并启用”。规则必须显示“已布防”才算真正运行。
 6. 分别点击“测试强推”和“测试电话”。测试电话可能产生语音通知费用。
 
-日志会保留最近 300 条事件，包括触发时间、阈值、实际价格、各渠道结果、确认时间和重新布防时间。访问密钥仅写入浏览器 `sessionStorage`；关闭当前浏览会话后需重新输入，但服务器上的规则仍持续运行。
+关闭网页、电脑或手机屏幕后，已经保存的规则仍由腾讯云服务器持续执行。重新打开看板时会自动使用设备配对 Cookie 连接；可以随时点击“断开 / 重新配对”，该操作不会停止或删除服务器上的规则。
+
+日志会保留最近 300 条事件，包括触发时间、阈值、实际价格、各渠道结果、确认时间和重新布防时间。访问密钥只在首次配对请求中使用，不写入 `localStorage` 或 `sessionStorage`；服务器上的规则始终独立运行。
 
 ## 配置付费 X 自动采集
 

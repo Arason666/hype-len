@@ -13,6 +13,7 @@ import hashlib
 import hmac
 import json
 import os
+import secrets
 import signal
 import tempfile
 import threading
@@ -24,6 +25,7 @@ import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from http import HTTPStatus
+from http.cookies import SimpleCookie
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Callable
@@ -34,6 +36,7 @@ TENCENT_MONITOR_HOST = "monitor.tencentcloudapi.com"
 TENCENT_MONITOR_VERSION = "2018-07-24"
 MAX_RULES = 30
 MAX_EVENTS = 300
+ALERT_SESSION_COOKIE = "__Host-hype_alert_session"
 
 
 def utc_now_iso(timestamp: float | None = None) -> str:
@@ -51,7 +54,7 @@ def post_json(url: str, payload: object, headers: dict[str, str] | None = None, 
     request_headers.update(headers or {})
     request = urllib.request.Request(
         url,
-        data=json.dumps(payload, separators=(",", ":")).encode("utf-8"),
+        data=json.dumps(payload, ensure_ascii=False, separators=(",", ":")).encode("utf-8"),
         headers=request_headers,
         method="POST",
     )
@@ -310,6 +313,7 @@ class ServiceConfig:
     bind_host: str
     port: int
     poll_seconds: float
+    session_seconds: int
     ntfy_url: str
     ntfy_topic: str
     ntfy_token: str
@@ -331,6 +335,7 @@ class ServiceConfig:
             bind_host=os.environ.get("ALERT_BIND_HOST", "127.0.0.1").strip(),
             port=int(os.environ.get("ALERT_PORT", "8787")),
             poll_seconds=max(1.0, float(os.environ.get("ALERT_POLL_SECONDS", "3"))),
+            session_seconds=max(3_600, int(os.environ.get("ALERT_SESSION_SECONDS", str(30 * 24 * 60 * 60)))),
             ntfy_url=os.environ.get("NTFY_URL", "https://ntfy.sh").rstrip("/"),
             ntfy_topic=os.environ.get("NTFY_TOPIC", "").strip(),
             ntfy_token=os.environ.get("NTFY_ACCESS_TOKEN", "").strip(),
@@ -350,28 +355,23 @@ class NotificationSender:
         if not self.config.ntfy_topic:
             raise RuntimeError("NTFY_TOPIC is not configured")
         direction = "上涨至" if event["direction"] == "above" else "下跌至"
-        headers = {
-            "Title": "HYPE 到价预警",
-            "Priority": "urgent",
-            "Tags": "rotating_light,chart_with_upwards_trend",
-        }
+        headers = {}
         if self.config.ntfy_token:
             headers["Authorization"] = f"Bearer {self.config.ntfy_token}"
-        if self.config.dashboard_url:
-            headers["Click"] = self.config.dashboard_url.rstrip("/") + "/#alert"
         message = (
             f"{event['rule_name']}：HYPE 已{direction} ${event['threshold']:g}，"
             f"触发价 ${event['trigger_price']:g}。请检查仓位和交易所止损。"
         )
-        request = urllib.request.Request(
-            f"{self.config.ntfy_url}/{urllib.parse.quote(self.config.ntfy_topic)}",
-            data=message.encode("utf-8"),
-            headers=headers,
-            method="POST",
-        )
-        with urllib.request.urlopen(request, timeout=15) as response:
-            if response.status >= 300:
-                raise RuntimeError(f"ntfy returned HTTP {response.status}")
+        payload = {
+            "topic": self.config.ntfy_topic,
+            "title": "HYPE 到价预警",
+            "message": message,
+            "priority": 5,
+            "tags": ["rotating_light", "chart_with_upwards_trend"],
+        }
+        if self.config.dashboard_url:
+            payload["click"] = self.config.dashboard_url.rstrip("/") + "/#alert"
+        post_json(self.config.ntfy_url, payload, headers=headers)
 
     def send_phone(self, event: dict) -> None:
         if not all((self.config.tencent_secret_id, self.config.tencent_secret_key, self.config.tencent_policy_id)):
@@ -429,7 +429,27 @@ class PriceAlertApplication:
         self.fetch_price = fetch_price
         self.stop_event = threading.Event()
         self.last_error = ""
+        self.last_delivery: dict[str, dict] = {}
         self.started_at = utc_now_iso()
+
+    def issue_session(self, now: float | None = None) -> tuple[str, int]:
+        issued_at = int(now or time.time())
+        expires_at = issued_at + self.config.session_seconds
+        unsigned = f"v1.{expires_at}.{secrets.token_urlsafe(18)}"
+        signature = hmac.new(self.config.api_token.encode(), unsigned.encode(), hashlib.sha256).hexdigest()
+        return f"{unsigned}.{signature}", expires_at
+
+    def verify_session(self, token: str, now: float | None = None) -> bool:
+        try:
+            version, expires_at, nonce, supplied_signature = token.split(".", 3)
+            expiry = int(expires_at)
+        except (AttributeError, TypeError, ValueError):
+            return False
+        if version != "v1" or not nonce or expiry <= int(now or time.time()):
+            return False
+        unsigned = f"{version}.{expires_at}.{nonce}"
+        expected_signature = hmac.new(self.config.api_token.encode(), unsigned.encode(), hashlib.sha256).hexdigest()
+        return hmac.compare_digest(supplied_signature, expected_signature)
 
     def monitor_forever(self) -> None:
         while not self.stop_event.is_set():
@@ -455,6 +475,7 @@ class PriceAlertApplication:
             "latest_price": snapshot.get("latest_price"),
             "latest_price_at": snapshot.get("latest_price_at"),
             "last_error": self.last_error,
+            "last_delivery": json.loads(json.dumps(self.last_delivery)),
             "channels": {
                 "ntfy": bool(self.config.ntfy_topic),
                 "phone": bool(self.config.tencent_policy_id and self.config.tencent_secret_id),
@@ -466,8 +487,24 @@ class PriceAlertApplication:
             callback(event)
         except Exception as exc:
             self.engine.mark_delivery(event["id"], channel, "failed", str(exc))
+            self.last_delivery[channel] = {"status": "failed", "detail": str(exc)[:300], "updated_at": utc_now_iso()}
         else:
             self.engine.mark_delivery(event["id"], channel, "sent")
+            self.last_delivery[channel] = {"status": "sent", "detail": "", "updated_at": utc_now_iso()}
+
+    def test_delivery(self, channel: str, event: dict) -> dict:
+        callback = self.sender.send_ntfy if channel == "ntfy" else self.sender.send_phone if channel == "phone" else None
+        if not callback:
+            raise ValueError("channel must be ntfy or phone")
+        try:
+            callback(event)
+        except Exception as exc:
+            result = {"status": "failed", "detail": str(exc)[:300], "updated_at": utc_now_iso()}
+            self.last_delivery[channel] = result
+            raise
+        result = {"status": "sent", "detail": "", "updated_at": utc_now_iso()}
+        self.last_delivery[channel] = result
+        return json.loads(json.dumps(result))
 
 
 def make_handler(application: PriceAlertApplication) -> type[BaseHTTPRequestHandler]:
@@ -492,9 +529,36 @@ def make_handler(application: PriceAlertApplication) -> type[BaseHTTPRequestHand
             self._json(HTTPStatus.NOT_FOUND, {"error": "not found"})
 
         def do_POST(self) -> None:  # noqa: N802
+            path = urllib.parse.urlparse(self.path).path
+            if path == "/api/pair":
+                if not self._pairing_authorized():
+                    return
+                session_token, expires_at = application.issue_session()
+                cookie = (
+                    f"{ALERT_SESSION_COOKIE}={session_token}; Path=/; Max-Age={application.config.session_seconds}; "
+                    "HttpOnly; Secure; SameSite=Strict"
+                )
+                self._json(
+                    HTTPStatus.OK,
+                    {"ok": True, "paired_until": utc_now_iso(expires_at)},
+                    authenticated=False,
+                    extra_headers={"Set-Cookie": cookie},
+                )
+                return
+            if path == "/api/logout":
+                if not self._origin_authorized():
+                    self._json(HTTPStatus.FORBIDDEN, {"error": "request origin is not allowed"}, authenticated=False)
+                    return
+                expired_cookie = f"{ALERT_SESSION_COOKIE}=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Strict"
+                self._json(
+                    HTTPStatus.OK,
+                    {"ok": True},
+                    authenticated=False,
+                    extra_headers={"Set-Cookie": expired_cookie},
+                )
+                return
             if not self._authorized():
                 return
-            path = urllib.parse.urlparse(self.path).path
             try:
                 payload = self._read_json()
                 if path == "/api/rules":
@@ -509,11 +573,8 @@ def make_handler(application: PriceAlertApplication) -> type[BaseHTTPRequestHand
                         "threshold": float(application.engine.snapshot().get("latest_price") or 0),
                         "trigger_price": float(application.engine.snapshot().get("latest_price") or 0),
                     }
-                    callback = application.sender.send_ntfy if channel == "ntfy" else application.sender.send_phone if channel == "phone" else None
-                    if not callback:
-                        raise ValueError("channel must be ntfy or phone")
-                    callback(event)
-                    self._json(HTTPStatus.OK, {"ok": True, "channel": channel})
+                    delivery = application.test_delivery(channel, event)
+                    self._json(HTTPStatus.OK, {"ok": True, "channel": channel, "delivery": delivery})
                     return
                 parts = path.strip("/").split("/")
                 if len(parts) == 4 and parts[:2] == ["api", "events"] and parts[3] == "ack":
@@ -560,8 +621,36 @@ def make_handler(application: PriceAlertApplication) -> type[BaseHTTPRequestHand
             expected = f"Bearer {application.config.api_token}"
             if hmac.compare_digest(supplied, expected):
                 return True
+            cookie_header = self.headers.get("Cookie", "")
+            if cookie_header:
+                try:
+                    cookies = SimpleCookie(cookie_header)
+                    session_cookie = cookies.get(ALERT_SESSION_COOKIE)
+                except Exception:
+                    session_cookie = None
+                if session_cookie and application.verify_session(session_cookie.value):
+                    if self._origin_authorized():
+                        return True
+                    self._json(HTTPStatus.FORBIDDEN, {"error": "request origin is not allowed"}, authenticated=False)
+                    return False
             self._json(HTTPStatus.UNAUTHORIZED, {"error": "invalid alert API token"}, authenticated=False)
             return False
+
+        def _pairing_authorized(self) -> bool:
+            if not self._origin_authorized():
+                self._json(HTTPStatus.FORBIDDEN, {"error": "request origin is not allowed"}, authenticated=False)
+                return False
+            supplied = self.headers.get("Authorization", "")
+            expected = f"Bearer {application.config.api_token}"
+            if hmac.compare_digest(supplied, expected):
+                return True
+            self._json(HTTPStatus.UNAUTHORIZED, {"error": "invalid alert API token"}, authenticated=False)
+            return False
+
+        def _origin_authorized(self) -> bool:
+            allowed = application.config.allowed_origin.rstrip("/")
+            origin = self.headers.get("Origin", "").rstrip("/")
+            return bool(origin and allowed != "*" and hmac.compare_digest(origin, allowed))
 
         def _read_json(self) -> dict:
             length = int(self.headers.get("Content-Length", "0"))
@@ -575,19 +664,30 @@ def make_handler(application: PriceAlertApplication) -> type[BaseHTTPRequestHand
         def _cors_headers(self) -> None:
             origin = self.headers.get("Origin", "")
             allowed = application.config.allowed_origin
-            if allowed == "*" or origin == allowed:
-                self.send_header("Access-Control-Allow-Origin", "*" if allowed == "*" else origin)
+            if origin == allowed:
+                self.send_header("Access-Control-Allow-Origin", origin)
                 self.send_header("Vary", "Origin")
+                self.send_header("Access-Control-Allow-Credentials", "true")
+            elif allowed == "*":
+                self.send_header("Access-Control-Allow-Origin", "*")
             self.send_header("Access-Control-Allow-Headers", "Authorization, Content-Type")
             self.send_header("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE, OPTIONS")
 
-        def _json(self, status: HTTPStatus, payload: object, authenticated: bool = True) -> None:
+        def _json(
+            self,
+            status: HTTPStatus,
+            payload: object,
+            authenticated: bool = True,
+            extra_headers: dict[str, str] | None = None,
+        ) -> None:
             body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
             self.send_response(status)
             self._cors_headers()
             self.send_header("Content-Type", "application/json; charset=utf-8")
             self.send_header("Cache-Control", "no-store")
             self.send_header("Content-Length", str(len(body)))
+            for name, value in (extra_headers or {}).items():
+                self.send_header(name, value)
             self.end_headers()
             self.wfile.write(body)
 

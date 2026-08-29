@@ -2829,7 +2829,7 @@ footer p { margin: 0; }
 
 .alert-service-config {
   display: grid;
-  grid-template-columns: minmax(220px, 1.25fr) minmax(200px, 1fr) auto;
+  grid-template-columns: minmax(220px, 1.25fr) minmax(200px, 1fr) auto auto;
   gap: 12px;
   align-items: end;
   margin-top: 22px;
@@ -2878,6 +2878,7 @@ footer p { margin: 0; }
 }
 
 .alert-connect-button,
+.alert-disconnect-button,
 .alert-form-actions button,
 .alert-rule-actions button,
 .alert-log-row > button,
@@ -2902,11 +2903,27 @@ footer p { margin: 0; }
 }
 
 .alert-connect-button:disabled,
+.alert-disconnect-button:disabled,
 .alert-form-actions button:disabled,
 .alert-log-refresh:disabled {
   cursor: not-allowed;
   filter: grayscale(0.55);
   opacity: 0.45;
+}
+
+.alert-disconnect-button {
+  color: var(--muted-strong);
+  background: rgba(183, 205, 194, 0.06);
+}
+
+.alert-service-config input[readonly] {
+  color: var(--muted-strong);
+  cursor: default;
+  opacity: 0.82;
+}
+
+.alert-service-config [hidden] {
+  display: none;
 }
 
 .alert-service-config > p {

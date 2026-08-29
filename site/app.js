@@ -4,8 +4,7 @@ const MARKET_CONTEXT_URL = "./data/market-context.json";
 const DAY = 24 * 60 * 60 * 1000;
 const MODEL_ROUND_TRIP_COST = 0.001;
 const RISK_PROFILE_STORAGE_KEY = "hype-lens-risk-profile-v1";
-const ALERT_API_URL_STORAGE_KEY = "hype-lens-alert-api-url-v1";
-const ALERT_API_TOKEN_SESSION_KEY = "hype-lens-alert-api-token-v1";
+const ALERT_DEFAULT_API_URL = "https://alerts.northinterval.com";
 const DEFAULT_RISK_PROFILE = Object.freeze({
   equity: 17_000,
   marginAllocation: 4,
@@ -1036,35 +1035,58 @@ function escapeRegExp(value) {
 }
 
 function alertCredentials() {
-  const url = $("alert-api-url")?.value.trim().replace(/\/+$/, "") || "";
+  const url = $("alert-api-url")?.value.trim().replace(/\/+$/, "") || ALERT_DEFAULT_API_URL;
   const token = $("alert-api-token")?.value.trim() || "";
   return { url, token };
 }
 
 async function alertApiRequest(path, options = {}) {
-  const { url, token } = alertCredentials();
-  if (!url || !token) throw new Error("请先填写告警服务地址和访问密钥");
+  const { url } = alertCredentials();
+  const { alertToken = "", ...requestOptions } = options;
+  if (!url) throw new Error("告警服务地址未配置");
   const controller = new AbortController();
   const timer = window.setTimeout(() => controller.abort(), 10_000);
   try {
     const response = await fetch(`${url}${path}`, {
-      ...options,
+      ...requestOptions,
+      credentials: "include",
       headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-        ...(options.headers || {}),
+        ...(requestOptions.body ? { "Content-Type": "application/json" } : {}),
+        ...(alertToken ? { Authorization: `Bearer ${alertToken}` } : {}),
+        ...(requestOptions.headers || {}),
       },
       signal: controller.signal,
     });
     const payload = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(payload.error || `告警服务返回 ${response.status}`);
+    if (!response.ok) {
+      const serverMessage = String(payload.error || "");
+      if (response.status === 401) throw new Error("访问密钥错误，或本设备配对已过期");
+      if (response.status === 403) throw new Error("当前网页来源未获告警服务授权");
+      if (response.status === 502 && serverMessage.includes("latin-1")) throw new Error("通知中文编码失败，请重新部署最新服务端");
+      if (response.status === 502 && /ntfy/i.test(serverMessage)) throw new Error(`ntfy 推送失败：${serverMessage}`);
+      throw new Error(serverMessage || `告警服务返回 ${response.status}`);
+    }
     return payload;
   } catch (error) {
     if (error.name === "AbortError") throw new Error("告警服务连接超时");
+    if (error instanceof TypeError) throw new Error("无法连接告警服务，请检查网络、域名或服务器状态");
     throw error;
   } finally {
     window.clearTimeout(timer);
   }
+}
+
+function setAlertRuntimeNote(message) {
+  const note = $("alert-runtime-note");
+  if (!note) return;
+  note.replaceChildren(document.createElement("i"), document.createTextNode(` ${message}`));
+}
+
+function alertServerError(message) {
+  if (!message) return "";
+  if (message.includes("latin-1")) return "通知中文编码失败，请重新部署最新服务端";
+  if (/timed? out/i.test(message)) return "行情接口连接超时，服务会自动重试";
+  return message;
 }
 
 function setAlertServiceState(kind, title, detail) {
@@ -1101,19 +1123,32 @@ function formatAlertTimestamp(value) {
 
 function renderAlertSnapshot(snapshot) {
   state.alertSnapshot = snapshot;
+  const rules = Array.isArray(snapshot.rules) ? snapshot.rules : [];
+  const events = Array.isArray(snapshot.events) ? snapshot.events : [];
   const fresh = snapshot.latest_price_at && Date.now() - new Date(snapshot.latest_price_at).getTime() < 30_000;
-  const serviceKind = snapshot.ok && fresh ? "online" : "degraded";
-  const channelText = `ntfy ${snapshot.channels?.ntfy ? "已配置" : "未配置"} · 电话 ${snapshot.channels?.phone ? "已配置" : "未配置"}`;
+  const latestNtfyEvent = events.find((event) => event.channels?.includes("ntfy"));
+  const latestNtfyDelivery = snapshot.last_delivery?.ntfy;
+  const latestPushStatus = latestNtfyDelivery?.status || latestNtfyEvent?.ntfy_status;
+  const latestPushDetail = latestNtfyDelivery?.detail || latestNtfyEvent?.ntfy_detail;
+  const latestPushFailed = latestPushStatus === "failed";
+  const serviceKind = snapshot.ok && fresh && !latestPushFailed ? "online" : "degraded";
+  const latestTime = snapshot.latest_price_at ? formatAlertTimestamp(snapshot.latest_price_at) : "尚未取得价格";
+  const pushText = !latestPushStatus
+    ? "暂无推送记录"
+    : latestPushFailed
+      ? `最近推送失败：${alertServerError(latestPushDetail || "未知错误")}`
+      : latestPushStatus === "sent" ? "最近强推成功" : "最近强推等待发送";
+  const runtimeError = alertServerError(snapshot.last_error);
   setAlertServiceState(
     serviceKind,
-    snapshot.ok ? "告警服务在线" : "告警服务异常",
-    snapshot.last_error ? `最近错误：${snapshot.last_error}` : channelText,
+    serviceKind === "online" ? "告警服务在线" : "告警服务需要检查",
+    runtimeError ? `最近错误：${runtimeError}` : `${rules.length} 条规则 · ${pushText}`,
   );
+  setAlertRuntimeNote(`服务器独立运行，关闭网页或电脑不影响预警 · 最新价格更新：${latestTime} · ${pushText}`);
   setText("alert-latest-price", Number.isFinite(Number(snapshot.latest_price))
     ? `$${Number(snapshot.latest_price).toFixed(3)}`
     : "等待价格");
 
-  const rules = Array.isArray(snapshot.rules) ? snapshot.rules : [];
   setText("alert-rule-count", `${rules.length} 条规则`);
   $("alert-rule-list").innerHTML = rules.length ? rules.map((rule) => {
     const status = alertRuleState(rule);
@@ -1140,7 +1175,6 @@ function renderAlertSnapshot(snapshot) {
       </div>`;
   }).join("") : '<div class="alert-empty"><strong>还没有价格规则</strong><span>在左侧填写目标价格并保存，服务会立即开始监控。</span></div>';
 
-  const events = Array.isArray(snapshot.events) ? snapshot.events : [];
   $("alert-log-list").innerHTML = events.length ? events.slice(0, 100).map((event) => {
     const acknowledged = Boolean(event.acknowledged_at);
     const rearmed = event.rearmed_at ? `重新布防 ${formatAlertTimestamp(event.rearmed_at)}` : "等待价格离开阈值后重新布防";
@@ -1154,39 +1188,62 @@ function renderAlertSnapshot(snapshot) {
       </div>`;
   }).join("") : '<div class="alert-empty"><strong>还没有触发记录</strong><span>日志将记录触发时间、价格、通知渠道、确认和重新布防状态。</span></div>';
 
-  const enabled = state.alertConnected;
-  document.querySelectorAll(".alert-form-actions button, #alert-log-refresh").forEach((button) => { button.disabled = !enabled; });
+  $("alert-rule-form").querySelector("button[type=submit]").disabled = !state.alertConnected;
+  $("alert-log-refresh").disabled = !state.alertConnected;
+  document.querySelector('[data-alert-test="ntfy"]').disabled = !state.alertConnected || !snapshot.channels?.ntfy;
+  document.querySelector('[data-alert-test="phone"]').disabled = !state.alertConnected || !snapshot.channels?.phone;
 }
 
-function setAlertDisconnected(message = "当前规则不会在后台执行") {
+function setAlertConnectionControls(connected) {
+  const tokenInput = $("alert-api-token");
+  tokenInput.disabled = connected;
+  tokenInput.placeholder = connected ? "本设备已安全配对" : "每台设备只需输入一次";
+  $("alert-connect-button").textContent = connected ? "刷新状态" : "配对此设备";
+  $("alert-disconnect-button").hidden = !connected;
+}
+
+function setAlertDisconnected(message = "网页尚未连接；服务器上已保存的规则仍会继续执行") {
   state.alertConnected = false;
   state.alertSnapshot = null;
   setAlertServiceState("offline", "告警服务未连接", message);
+  setAlertRuntimeNote("首次使用请填写访问密钥完成配对；断开网页不会删除或停止服务器规则。");
+  setAlertConnectionControls(false);
   document.querySelectorAll(".alert-form-actions button, #alert-log-refresh").forEach((button) => { button.disabled = true; });
 }
 
 async function connectAlertService(announce = true) {
   const button = $("alert-connect-button");
-  const credentials = alertCredentials();
-  if (!credentials.url || !credentials.token) {
-    setAlertDisconnected("请填写服务地址和访问密钥");
-    if (announce) showToast("请填写服务地址和访问密钥");
-    return;
-  }
+  const { token } = alertCredentials();
   button.disabled = true;
-  button.textContent = "连接中…";
+  button.textContent = token ? "正在配对…" : "正在连接…";
   try {
+    if (token) {
+      await alertApiRequest("/api/pair", { method: "POST", alertToken: token });
+      $("alert-api-token").value = "";
+    }
     const snapshot = await alertApiRequest("/api/alerts");
     state.alertConnected = true;
-    localStorage.setItem(ALERT_API_URL_STORAGE_KEY, credentials.url);
-    sessionStorage.setItem(ALERT_API_TOKEN_SESSION_KEY, credentials.token);
     renderAlertSnapshot(snapshot);
-    button.textContent = "重新连接";
-    if (announce) showToast("告警服务已连接");
+    setAlertConnectionControls(true);
+    if (announce) showToast(token ? "本设备已配对，今后将自动连接" : "告警服务已连接");
   } catch (error) {
     setAlertDisconnected(error.message || "连接失败");
-    button.textContent = "连接服务";
     if (announce) showToast(error.message || "无法连接告警服务", 5000);
+  } finally {
+    button.disabled = false;
+  }
+}
+
+async function disconnectAlertDevice() {
+  if (!window.confirm("仅断开当前浏览器；服务器上的预警规则会继续运行。确定断开吗？")) return;
+  const button = $("alert-disconnect-button");
+  button.disabled = true;
+  try {
+    await alertApiRequest("/api/logout", { method: "POST" });
+    setAlertDisconnected("当前设备已断开；服务器上的预警规则仍会继续执行");
+    showToast("当前设备已断开，可使用访问密钥重新配对");
+  } catch (error) {
+    showToast(error.message || "断开失败", 5000);
   } finally {
     button.disabled = false;
   }
@@ -1263,20 +1320,30 @@ async function changeAlertRule(ruleId, payload, successMessage) {
 
 async function testAlertChannel(channel) {
   if (channel === "phone" && !window.confirm("测试电话可能产生腾讯云语音通知费用，确定现在拨打吗？")) return;
+  const button = document.querySelector(`[data-alert-test="${channel}"]`);
+  button.disabled = true;
+  const originalText = button.textContent;
+  button.textContent = "发送中…";
   try {
     await alertApiRequest("/api/test", { method: "POST", body: JSON.stringify({ channel }) });
     showToast(channel === "phone" ? "测试电话已提交" : "测试强推已发送");
+    await refreshAlertSnapshot(true);
   } catch (error) {
     showToast(error.message || "测试通知失败", 5000);
+  } finally {
+    button.textContent = originalText;
+    button.disabled = !state.alertConnected || !state.alertSnapshot?.channels?.[channel];
   }
 }
 
 function initPriceAlerts() {
-  const savedUrl = localStorage.getItem(ALERT_API_URL_STORAGE_KEY) || "";
-  const savedToken = sessionStorage.getItem(ALERT_API_TOKEN_SESSION_KEY) || "";
-  $("alert-api-url").value = savedUrl;
-  $("alert-api-token").value = savedToken;
+  $("alert-api-url").value = ALERT_DEFAULT_API_URL;
+  $("alert-api-token").value = "";
+  localStorage.removeItem("hype-lens-alert-api-url-v1");
+  sessionStorage.removeItem("hype-lens-alert-api-token-v1");
+  setAlertConnectionControls(false);
   $("alert-connect-button").addEventListener("click", () => connectAlertService(true));
+  $("alert-disconnect-button").addEventListener("click", disconnectAlertDevice);
   $("alert-rule-form").addEventListener("submit", saveAlertRule);
   $("alert-log-refresh").addEventListener("click", () => refreshAlertSnapshot(false));
   document.querySelectorAll("[data-alert-test]").forEach((button) => {
@@ -1312,7 +1379,7 @@ function initPriceAlerts() {
       showToast(error.message || "确认失败", 5000);
     }
   });
-  if (savedUrl && savedToken) connectAlertService(false);
+  connectAlertService(false);
   state.alertPollTimer = window.setInterval(() => refreshAlertSnapshot(true), 15_000);
 }
 

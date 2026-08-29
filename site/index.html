@@ -413,21 +413,22 @@
           </div>
           <div class="alert-service-state offline" id="alert-service-state" role="status" aria-live="polite">
             <i></i>
-            <div><strong>告警服务未连接</strong><span>当前规则不会在后台执行</span></div>
+            <div><strong>正在检查告警服务</strong><span>已保存的规则始终由腾讯云服务器执行</span></div>
           </div>
         </div>
 
         <div class="alert-service-config" aria-label="告警服务连接设置">
           <label>
             <span>告警服务地址</span>
-            <input id="alert-api-url" type="url" inputmode="url" autocomplete="url" placeholder="https://alerts.example.com" />
+            <input id="alert-api-url" type="url" inputmode="url" autocomplete="url" value="https://alerts.northinterval.com" readonly aria-readonly="true" />
           </label>
           <label>
-            <span>访问密钥</span>
-            <input id="alert-api-token" type="password" autocomplete="off" placeholder="仅保留在当前浏览会话" />
+            <span>首次配对密钥</span>
+            <input id="alert-api-token" type="password" autocomplete="new-password" placeholder="每台设备只需输入一次" />
           </label>
-          <button class="alert-connect-button" id="alert-connect-button" type="button">连接服务</button>
-          <p id="alert-runtime-note"><i></i> 服务地址保存在本机；访问密钥只保留到关闭当前浏览会话，不会提交到 GitHub。</p>
+          <button class="alert-connect-button" id="alert-connect-button" type="button">配对此设备</button>
+          <button class="alert-disconnect-button" id="alert-disconnect-button" type="button" hidden>断开 / 重新配对</button>
+          <p id="alert-runtime-note"><i></i> 密钥仅在首次配对时提交；随后由安全 Cookie 自动连接，关闭网页或电脑不会停止服务器预警。</p>
         </div>
 
         <div class="alert-workspace">
@@ -454,7 +455,7 @@
               </label>
               <label>
                 <span>目标价格（USDC）</span>
-                <input id="alert-threshold" type="number" min="0.0001" step="0.001" inputmode="decimal" placeholder="例如 52.50" required />
+                <input id="alert-threshold" type="number" min="0.001" step="0.001" inputmode="decimal" placeholder="例如 83 或 82.999" required />
               </label>
 
               <fieldset class="alert-channels">

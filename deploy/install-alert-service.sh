@@ -6,6 +6,11 @@ STAGED_SERVICE="/tmp/hype-lens-alert.service"
 STAGED_APP="/tmp/price_alert_service.py"
 STAGED_ENV="/tmp/hype-lens-alert.env"
 
+cleanup() {
+  rm -f "$STAGED_SERVICE" "$STAGED_APP" "$STAGED_ENV" /tmp/install-alert-service.sh
+}
+trap cleanup EXIT
+
 for staged_file in "$STAGED_SERVICE" "$STAGED_APP" "$STAGED_ENV"; do
   if [[ ! -s "$staged_file" ]]; then
     echo "Missing staged deployment file: $staged_file" >&2
@@ -28,6 +33,15 @@ install -m 0755 "$STAGED_APP" /opt/hype-lens/price_alert_service.py
 install -m 0600 "$STAGED_ENV" /etc/hype-lens/alert.env
 install -m 0644 "$STAGED_SERVICE" /etc/systemd/system/hype-lens-alert.service
 
+install -d -m 0755 /etc/ssh/sshd_config.d
+cat >/etc/ssh/sshd_config.d/60-hype-lens-hardening.conf <<'SSH_CONFIG'
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+PermitRootLogin no
+PubkeyAuthentication yes
+SSH_CONFIG
+/usr/sbin/sshd -t
+
 cat >/etc/caddy/Caddyfile <<CADDY
 ${ALERT_HOST} {
     encode zstd gzip
@@ -42,11 +56,13 @@ ${ALERT_HOST} {
 CADDY
 
 caddy validate --config /etc/caddy/Caddyfile
+caddy fmt --overwrite /etc/caddy/Caddyfile
 systemctl daemon-reload
 systemctl enable --now hype-lens-alert.service
 systemctl enable --now caddy.service
 systemctl restart hype-lens-alert.service
 systemctl reload caddy.service
+systemctl reload ssh.service
 
 for attempt in {1..20}; do
   if curl --fail --silent http://127.0.0.1:8787/health >/dev/null; then

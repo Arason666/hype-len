@@ -81,10 +81,17 @@ jobs:
           ssh "$SERVER_USER@$SERVER_HOST" "sudo ALERT_HOST='$ALERT_HOST' bash /tmp/install-alert-service.sh"
 
       - name: Verify public HTTPS endpoint
+        env:
+          ALERT_API_TOKEN: ${{ secrets.ALERT_API_TOKEN }}
         run: |
           set -euo pipefail
           for attempt in {1..24}; do
-            if curl --fail --silent --show-error "https://$ALERT_HOST/health"; then
+            if curl --fail --silent --show-error "https://$ALERT_HOST/health" >/tmp/health.json; then
+              cat /tmp/health.json
+              curl --fail --silent --show-error \
+                -H "Authorization: Bearer $ALERT_API_TOKEN" \
+                "https://$ALERT_HOST/api/alerts" >/tmp/alerts.json
+              python3 -c 'import json; data=json.load(open("/tmp/alerts.json")); assert "rules" in data and "events" in data'
               exit 0
             fi
             sleep 5

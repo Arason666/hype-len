@@ -1,21 +1,6 @@
 {
   "funding_history": [
     {
-      "funding_rate": 1.25e-05,
-      "premium": -0.0003965007,
-      "time": 1772478000044
-    },
-    {
-      "funding_rate": -1.68156e-05,
-      "premium": -0.0006345247,
-      "time": 1772481600120
-    },
-    {
-      "funding_rate": 4.0362e-06,
-      "premium": -0.0004677103,
-      "time": 1772485200038
-    },
-    {
       "funding_rate": -7.9333e-06,
       "premium": -0.0005634668,
       "time": 1772488800033
@@ -21599,10 +21584,25 @@
       "funding_rate": -2.0981e-06,
       "premium": -0.0005167846,
       "time": 1788026400034
+    },
+    {
+      "funding_rate": -5.2595e-06,
+      "premium": -0.0005420757,
+      "time": 1788030000041
+    },
+    {
+      "funding_rate": -6.5035e-06,
+      "premium": -0.0005520283,
+      "time": 1788033600019
+    },
+    {
+      "funding_rate": 3.8815e-06,
+      "premium": -0.0004689481,
+      "time": 1788037200076
     }
   ],
   "funding_retention_days": 180,
-  "generated_at": "2026-08-29T18:29:04Z",
+  "generated_at": "2026-08-29T21:12:22Z",
   "snapshot_interval_minutes": 15,
   "snapshot_retention_days": 60,
   "snapshots": [
@@ -35505,6 +35505,31 @@
         "trade_count": 10
       },
       "time": 1788027300000
+    },
+    {
+      "day_notional_volume": 340792208.50133944,
+      "funding": 3.719e-06,
+      "impact_ask": 82.953,
+      "impact_bid": 82.952,
+      "mark_price": 82.952,
+      "mid_price": 82.9525,
+      "open_interest": 24024844.639999997,
+      "oracle_price": 83.0025,
+      "order_book": {
+        "ask_notional_top10": 1754154.21,
+        "bid_notional_top10": 40407.55,
+        "imbalance": -0.954967,
+        "spread_bps": 0.1206
+      },
+      "premium": -0.0005963676,
+      "recent_flow": {
+        "buy_notional": 557.44,
+        "buy_share": 0.753365,
+        "latest_trade_time": 1788037942079,
+        "sell_notional": 182.49,
+        "trade_count": 10
+      },
+      "time": 1788037200000
     }
   ],
   "source": "Hyperliquid public info API",

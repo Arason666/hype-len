@@ -1,0 +1,92 @@
+name: Deploy price alert server
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: price-alert-server
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SERVER_HOST: ${{ vars.ALERT_SERVER_HOST }}
+      SERVER_USER: ${{ vars.ALERT_SERVER_USER }}
+      ALERT_HOST: ${{ vars.ALERT_PUBLIC_HOST }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Validate deployment configuration
+        env:
+          SSH_PRIVATE_KEY_B64: ${{ secrets.ALERT_SERVER_SSH_KEY_B64 }}
+          ALERT_API_TOKEN: ${{ secrets.ALERT_API_TOKEN }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: |
+          set -euo pipefail
+          test -n "$SERVER_HOST"
+          test -n "$SERVER_USER"
+          test -n "$ALERT_HOST"
+          test -n "$SSH_PRIVATE_KEY_B64"
+          test "${#ALERT_API_TOKEN}" -ge 16
+          test -n "$NTFY_TOPIC"
+
+      - name: Configure SSH
+        env:
+          SSH_PRIVATE_KEY_B64: ${{ secrets.ALERT_SERVER_SSH_KEY_B64 }}
+        run: |
+          set -euo pipefail
+          install -d -m 700 ~/.ssh
+          printf '%s' "$SSH_PRIVATE_KEY_B64" | base64 --decode > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -T 15 -H "$SERVER_HOST" >> ~/.ssh/known_hosts
+
+      - name: Prepare protected service configuration
+        env:
+          ALERT_API_TOKEN: ${{ secrets.ALERT_API_TOKEN }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          ALERT_ALLOWED_ORIGIN: ${{ vars.ALERT_ALLOWED_ORIGIN }}
+          DASHBOARD_URL: ${{ vars.DASHBOARD_URL }}
+        run: |
+          set -euo pipefail
+          umask 077
+          {
+            printf 'ALERT_API_TOKEN=%s\n' "$ALERT_API_TOKEN"
+            printf 'ALERT_ALLOWED_ORIGIN=%s\n' "$ALERT_ALLOWED_ORIGIN"
+            printf 'ALERT_STATE_PATH=/var/lib/hype-lens/price-alert-state.json\n'
+            printf 'ALERT_BIND_HOST=127.0.0.1\n'
+            printf 'ALERT_PORT=8787\n'
+            printf 'ALERT_POLL_SECONDS=3\n'
+            printf 'NTFY_URL=https://ntfy.sh\n'
+            printf 'NTFY_TOPIC=%s\n' "$NTFY_TOPIC"
+            printf 'DASHBOARD_URL=%s\n' "$DASHBOARD_URL"
+          } > /tmp/hype-lens-alert.env
+
+      - name: Upload release
+        run: |
+          set -euo pipefail
+          scp scripts/price_alert_service.py "$SERVER_USER@$SERVER_HOST:/tmp/price_alert_service.py"
+          scp deploy/hype-lens-alert.service "$SERVER_USER@$SERVER_HOST:/tmp/hype-lens-alert.service"
+          scp deploy/install-alert-service.sh "$SERVER_USER@$SERVER_HOST:/tmp/install-alert-service.sh"
+          scp /tmp/hype-lens-alert.env "$SERVER_USER@$SERVER_HOST:/tmp/hype-lens-alert.env"
+
+      - name: Install and restart service
+        run: |
+          set -euo pipefail
+          ssh "$SERVER_USER@$SERVER_HOST" "sudo ALERT_HOST='$ALERT_HOST' bash /tmp/install-alert-service.sh"
+
+      - name: Verify public HTTPS endpoint
+        run: |
+          set -euo pipefail
+          for attempt in {1..24}; do
+            if curl --fail --silent --show-error "https://$ALERT_HOST/health"; then
+              exit 0
+            fi
+            sleep 5
+          done
+          exit 1

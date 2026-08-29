@@ -3,3 +3,4 @@ __pycache__/
 *.py[cod]
 .idea/
 .vscode/
+data/price-alert-state.json

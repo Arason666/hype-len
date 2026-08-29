@@ -10,7 +10,7 @@
     />
     <title>HYPE 趋势分析</title>
     <link rel="manifest" href="./manifest.webmanifest" />
-    <link rel="stylesheet" href="./styles.css?v=20260809-15" />
+    <link rel="stylesheet" href="./styles.css?v=20260829-1" />
   </head>
   <body>
     <div class="ambient ambient-one" aria-hidden="true"></div>
@@ -60,8 +60,8 @@
       <section class="four-hour-brief loading-block" id="four-hour-brief" aria-labelledby="four-hour-title">
         <div class="four-hour-heading">
           <p class="section-kicker">4H STRATEGY BRIEF</p>
-          <h2 id="four-hour-title">未来4小时策略参考</h2>
-          <span class="four-hour-stance neutral" id="four-hour-stance">等待数据</span>
+          <h2 id="four-hour-title">未来4小时行动信号</h2>
+          <span class="four-hour-stance neutral" id="four-hour-stance" aria-live="polite">等待数据</span>
         </div>
         <div class="four-hour-content">
           <p id="four-hour-summary">正在汇总 15分钟、1小时、4小时行情与观点数据…</p>
@@ -73,6 +73,72 @@
           <strong id="four-hour-score">--</strong>
           <span id="four-hour-confidence">置信度 --</span>
         </div>
+      </section>
+
+      <section class="execution-risk" id="execution-risk" aria-labelledby="execution-risk-title">
+        <div class="execution-risk-head">
+          <div>
+            <p class="section-kicker">CROSS-MARGIN RISK CHECK</p>
+            <h2 id="execution-risk-title">仓位与风险检查</h2>
+            <p>行情源使用 Hyperliquid；执行参数按你的全仓账户单独测算。</p>
+          </div>
+          <div class="execution-status wait" id="execution-status" role="status" aria-live="polite">
+            <small>执行结论</small>
+            <strong id="execution-decision">等待行情</strong>
+            <span id="execution-direction">方向信号尚未生成</span>
+          </div>
+        </div>
+
+        <div class="risk-profile" aria-label="仓位参数">
+          <label>
+            <span>账户总权益（USDC）</span>
+            <input id="risk-equity" type="number" min="100" step="100" value="17000" inputmode="decimal" />
+          </label>
+          <label>
+            <span>单次保证金</span>
+            <select id="risk-margin-allocation">
+              <option value="3">3%</option>
+              <option value="4" selected>4%</option>
+              <option value="5">5%</option>
+            </select>
+          </label>
+          <label>
+            <span>名义杠杆</span>
+            <input id="risk-leverage" type="number" min="1" max="200" step="1" value="100" inputmode="numeric" />
+          </label>
+          <label>
+            <span>最大账户风险</span>
+            <select id="risk-budget">
+              <option value="1">1%</option>
+              <option value="2" selected>2%</option>
+              <option value="3">3%</option>
+            </select>
+          </label>
+          <label>
+            <span>预估往返成本</span>
+            <input id="risk-round-trip-cost" type="number" min="0" max="2" step="0.01" value="0.10" inputmode="decimal" />
+            <small>% · 手续费与基础滑点</small>
+          </label>
+        </div>
+
+        <div class="risk-metric-grid" aria-label="风险测算结果">
+          <span><small>投入保证金</small><strong id="risk-margin-used">--</strong></span>
+          <span><small>名义仓位</small><strong id="risk-notional">--</strong></span>
+          <span><small>账户有效杠杆 <button class="stat-help" type="button" aria-label="解释账户有效杠杆" data-help="名义仓位除以账户总权益。100倍是单笔名义杠杆；当只投入账户4%的保证金时，账户有效杠杆约为4倍。">!</button></small><strong id="risk-effective-leverage">--</strong></span>
+          <span><small>预计持仓数量</small><strong id="risk-quantity">--</strong></span>
+          <span><small>技术止损距离 <button class="stat-help" type="button" aria-label="解释技术止损距离" data-help="按1.25倍15分钟ATR估算，且最低为0.35%。它用于衡量近期正常波动，不代表强平距离。">!</button></small><strong id="risk-stop-distance">--</strong></span>
+          <span><small>预计最大亏损 <button class="stat-help" type="button" aria-label="解释预计最大亏损" data-help="名义仓位乘以技术止损距离，再加预估往返成本。未包含跳空、止损滑点和资金费率。">!</button></small><strong id="risk-projected-loss">--</strong></span>
+          <span><small>风险预算</small><strong id="risk-budget-value">--</strong></span>
+          <span><small>预算内最大保证金</small><strong id="risk-safe-margin">--</strong></span>
+        </div>
+
+        <div class="execution-price-plan" aria-label="价格执行参考">
+          <span><small>参考入场价</small><strong id="risk-entry-price">--</strong></span>
+          <span><small>参考止损价</small><strong id="risk-stop-price">--</strong></span>
+          <span><small>第一目标 · 1.5R</small><strong id="risk-target-one">--</strong></span>
+          <span><small>第二目标 · 2R</small><strong id="risk-target-two">--</strong></span>
+        </div>
+        <p class="execution-risk-note" id="execution-risk-note">全仓模式下，单次投入保证金不是最大亏损；实际止损与强平价格以执行交易所为准。</p>
       </section>
       </section>
 
@@ -86,6 +152,9 @@
         <button id="dashboard-tab-social" type="button" role="tab" aria-selected="false" aria-controls="social-intel" data-dashboard-tab="social">
           <span>观点情报</span><small>汇总、帖子与验证</small>
         </button>
+        <button id="dashboard-tab-alert" type="button" role="tab" aria-selected="false" aria-controls="price-alerts" data-dashboard-tab="alert">
+          <span>价格预警</span><small>规则、渠道与日志</small>
+        </button>
       </nav>
 
       <section class="model-lab dashboard-panel loading-block" id="model-lab" role="tabpanel" aria-labelledby="dashboard-tab-model" data-dashboard-panel="model" hidden>
@@ -95,7 +164,10 @@
             <h2 id="model-lab-title">180日趋势捕获与模型验证</h2>
             <p>前约 150 天滚动选择趋势参数，最后 30 天做样本外验证；模型仅在趋势状态变化时给出提示。</p>
           </div>
-          <span class="model-split-badge" id="model-split-badge">150日训练 · 30日测试</span>
+          <div class="model-head-badges">
+            <span class="model-version-badge" id="model-version-badge">正式模型 · 基线</span>
+            <span class="model-split-badge" id="model-split-badge">150日训练 · 30日测试</span>
+          </div>
         </div>
 
         <div class="model-dashboard">
@@ -105,16 +177,25 @@
                 <small>当前趋势状态</small>
                 <h3 id="model-now-title">等待 180 日数据</h3>
               </div>
-              <strong class="model-probability" id="model-probability">--/100</strong>
+              <div class="model-score">
+                <span>当前动量评分 <button class="stat-help" type="button" aria-label="解释当前动量评分" data-help="范围 -100 至 +100。正数代表 HYPE 偏强，负数代表偏弱；它不是涨跌概率、预期收益率或模型准确率。">!</button></span>
+                <strong class="model-probability" id="model-probability">--/100</strong>
+                <small id="model-score-meaning">等待方向证据</small>
+              </div>
             </div>
             <p class="model-summary" id="model-summary">模型会先识别完整趋势，并用动态回撤线判断趋势是否减弱或失效。</p>
+            <div class="model-decision-grid" aria-label="当前模型结论">
+              <span><small>已有趋势</small><strong id="model-existing-trend">等待数据</strong></span>
+              <span><small>新开仓状态</small><strong id="model-new-entry">等待数据</strong></span>
+              <span><small>下一触发条件</small><strong id="model-next-trigger">等待数据</strong></span>
+            </div>
             <div class="model-evidence-grid" aria-label="当前技术指标判断依据">
-              <span><small>ADX 趋势强度</small><strong id="model-adx">--</strong></span>
-              <span><small>ATR 波动尺度</small><strong id="model-atr">--</strong></span>
-              <span><small>4小时 ROC 动量</small><strong id="model-roc">--</strong></span>
-              <span><small>成交量 Z 分数</small><strong id="model-volume-z">--</strong></span>
-              <span><small>相对强弱确认</small><strong id="model-relative-strength">--</strong></span>
-              <span><small>合约市场结构</small><strong id="model-contract-structure">--</strong></span>
+              <span><small>ADX 趋势强度 <button class="stat-help" type="button" aria-label="解释ADX" data-help="ADX只衡量趋势强度，不判断上涨或下跌。低于18通常按震荡处理，高于30代表趋势较强。">!</button></small><strong id="model-adx">--</strong></span>
+              <span><small>ATR 波动尺度 <button class="stat-help" type="button" aria-label="解释ATR" data-help="ATR%衡量近期真实波动幅度，用于设置动态失效线和风险距离，不直接判断方向。">!</button></small><strong id="model-atr">--</strong></span>
+              <span><small>4小时 ROC 动量 <button class="stat-help" type="button" aria-label="解释ROC" data-help="ROC表示HYPE过去4小时的价格变化率。正数为向上动量，负数为向下动量。">!</button></small><strong id="model-roc">--</strong></span>
+              <span><small>成交量 Z 分数 <button class="stat-help" type="button" aria-label="解释成交量Z分数" data-help="表示当前成交量偏离过去24小时均值的程度。大于+1偏放量，小于-1偏缩量。">!</button></small><strong id="model-volume-z">--</strong></span>
+              <span><small>相对强弱确认 <button class="stat-help" type="button" aria-label="解释相对强弱" data-help="综合HYPE相对BTC与ETH的4小时变化和EMA结构。正数为HYPE相对偏强，负数为相对偏弱。">!</button></small><strong id="model-relative-strength">--</strong></span>
+              <span><small>合约市场结构 <button class="stat-help" type="button" aria-label="解释合约市场结构" data-help="综合资金费率、持仓量、订单簿与主动买卖流。仅作实时修正，不参与缺少历史快照的回测。">!</button></small><strong id="model-contract-structure">--</strong></span>
             </div>
             <div class="model-trigger-grid">
               <span><small>趋势启动价</small><strong id="model-entry-price">--</strong></span>
@@ -133,10 +214,10 @@
               <span id="model-samples">-- 次趋势信号</span>
             </div>
             <div class="model-stat-grid">
-              <span><small>趋势识别率</small><strong id="model-trend-recall">--</strong></span>
-              <span><small>趋势收益捕获率</small><strong id="model-capture-rate">--</strong></span>
-              <span><small>策略最大回撤</small><strong id="model-strategy-drawdown">--</strong></span>
-              <span><small>提前退出率</small><strong id="model-early-exit">--</strong></span>
+              <span><small>趋势识别率 <button class="stat-help" type="button" aria-label="解释趋势识别率" data-help="测试期真实趋势中，被模型持有覆盖至少30%的比例。衡量有没有发现趋势，不等于交易胜率。">!</button></small><strong id="model-trend-recall">--</strong></span>
+              <span><small>趋势收益捕获率 <button class="stat-help" type="button" aria-label="解释趋势收益捕获率" data-help="模型实际捕获的顺势价格变化，占测试期完整趋势总变化的比例。">!</button></small><strong id="model-capture-rate">--</strong></span>
+              <span><small>策略最大回撤 <button class="stat-help" type="button" aria-label="解释策略最大回撤" data-help="样本外策略净值从历史高点到低点的最大跌幅。越接近0通常代表风险越低。">!</button></small><strong id="model-strategy-drawdown">--</strong></span>
+              <span><small>提前退出率 <button class="stat-help" type="button" aria-label="解释提前退出率" data-help="模型退出后，原方向仍继续运行至少3%的信号占比。越低表示越少过早离场。">!</button></small><strong id="model-early-exit">--</strong></span>
             </div>
             <p id="model-validation-note">测试按完整趋势事件统计，不要求准确抓住最高点和最低点。</p>
           </article>
@@ -323,6 +404,114 @@
       </details>
       </section>
 
+      <section class="alert-section dashboard-panel" id="price-alerts" role="tabpanel" aria-labelledby="dashboard-tab-alert" data-dashboard-panel="alert" hidden>
+        <div class="section-head alert-section-head">
+          <div>
+            <p class="section-kicker">ALWAYS-ON PRICE ALERTS</p>
+            <h2>HYPE 到价预警</h2>
+            <p class="alert-intro">由常驻服务持续读取 Hyperliquid 标记价格；网页关闭、手机锁屏后仍可触发。</p>
+          </div>
+          <div class="alert-service-state offline" id="alert-service-state" role="status" aria-live="polite">
+            <i></i>
+            <div><strong>告警服务未连接</strong><span>当前规则不会在后台执行</span></div>
+          </div>
+        </div>
+
+        <div class="alert-service-config" aria-label="告警服务连接设置">
+          <label>
+            <span>告警服务地址</span>
+            <input id="alert-api-url" type="url" inputmode="url" autocomplete="url" placeholder="https://alerts.example.com" />
+          </label>
+          <label>
+            <span>访问密钥</span>
+            <input id="alert-api-token" type="password" autocomplete="off" placeholder="仅保留在当前浏览会话" />
+          </label>
+          <button class="alert-connect-button" id="alert-connect-button" type="button">连接服务</button>
+          <p id="alert-runtime-note"><i></i> 服务地址保存在本机；访问密钥只保留到关闭当前浏览会话，不会提交到 GitHub。</p>
+        </div>
+
+        <div class="alert-workspace">
+          <article class="alert-rule-panel" aria-labelledby="alert-rule-title">
+            <div class="alert-panel-heading">
+              <div>
+                <p class="section-kicker">TRIGGER RULE</p>
+                <h3 id="alert-rule-title">新增价格预警</h3>
+              </div>
+              <span class="alert-live-price"><small>HYPE 标记价格</small><strong id="alert-latest-price">--</strong></span>
+            </div>
+
+            <form class="alert-rule-form" id="alert-rule-form">
+              <label class="alert-rule-name">
+                <span>规则名称</span>
+                <input id="alert-rule-name" type="text" maxlength="80" placeholder="例如：跌破防守位" />
+              </label>
+              <label>
+                <span>触发方向</span>
+                <select id="alert-direction">
+                  <option value="below">下跌至或低于</option>
+                  <option value="above">上涨至或高于</option>
+                </select>
+              </label>
+              <label>
+                <span>目标价格（USDC）</span>
+                <input id="alert-threshold" type="number" min="0.0001" step="0.001" inputmode="decimal" placeholder="例如 52.50" required />
+              </label>
+
+              <fieldset class="alert-channels">
+                <legend>通知渠道</legend>
+                <label><input id="alert-channel-ntfy" type="checkbox" value="ntfy" checked /><span>ntfy 强推</span></label>
+                <label><input id="alert-channel-phone" type="checkbox" value="phone" /><span>未确认后电话升级</span></label>
+              </fieldset>
+
+              <details class="alert-advanced">
+                <summary>防抖与重新布防设置</summary>
+                <div>
+                  <label><span>连续确认次数</span><input id="alert-confirm-ticks" type="number" min="1" max="20" step="1" value="3" /></label>
+                  <label><span>电话延迟（秒）</span><input id="alert-phone-delay" type="number" min="0" max="3600" step="5" value="45" /></label>
+                  <label><span>冷却时间（分钟）</span><input id="alert-cooldown" type="number" min="1" max="1440" step="1" value="15" /></label>
+                  <label><span>重新布防缓冲（%）</span><input id="alert-rearm" type="number" min="0.01" max="10" step="0.01" value="0.25" /></label>
+                </div>
+                <p>默认连续 3 次满足条件才触发；价格离开阈值 0.25% 且冷却结束后，规则才会重新布防。</p>
+              </details>
+
+              <div class="alert-form-actions">
+                <button class="alert-save-button" type="submit" disabled>保存并启用</button>
+                <button type="button" data-alert-test="ntfy" disabled>测试强推</button>
+                <button type="button" data-alert-test="phone" disabled>测试电话</button>
+              </div>
+            </form>
+          </article>
+
+          <article class="alert-rules-panel" aria-labelledby="alert-rules-title">
+            <div class="alert-panel-heading">
+              <div>
+                <p class="section-kicker">ARMED RULES</p>
+                <h3 id="alert-rules-title">正在监控</h3>
+              </div>
+              <span id="alert-rule-count">0 条规则</span>
+            </div>
+            <div class="alert-rule-list" id="alert-rule-list">
+              <div class="alert-empty"><strong>尚未连接告警服务</strong><span>先填写服务地址和访问密钥。</span></div>
+            </div>
+          </article>
+        </div>
+
+        <article class="alert-log-panel" aria-labelledby="alert-log-title">
+          <div class="alert-panel-heading">
+            <div>
+              <p class="section-kicker">TRIGGER LOG</p>
+              <h3 id="alert-log-title">预警日志</h3>
+            </div>
+            <button class="alert-log-refresh" id="alert-log-refresh" type="button" disabled>刷新日志</button>
+          </div>
+          <div class="alert-log-table" id="alert-log-list">
+            <div class="alert-empty"><strong>还没有触发记录</strong><span>日志将记录触发时间、价格、通知渠道、确认和重新布防状态。</span></div>
+          </div>
+        </article>
+
+        <p class="alert-disclaimer">电话或推送可能受网络、系统省电和第三方服务影响；100 倍合约必须以交易所止损为第一道防线，预警只作为第二道保护。</p>
+      </section>
+
       <section class="social-section dashboard-panel" id="social-intel" role="tabpanel" aria-labelledby="dashboard-tab-social" data-dashboard-panel="social" hidden>
         <div class="section-head social-section-head">
           <div>
@@ -477,6 +666,6 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
     <script async src="https://platform.x.com/widgets.js" charset="utf-8"></script>
-    <script type="module" src="./app.js?v=20260809-15"></script>
+    <script type="module" src="./app.js?v=20260829-1"></script>
   </body>
 </html>

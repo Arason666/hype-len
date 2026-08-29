@@ -16,7 +16,8 @@
 - X API 每 15 分钟自动采集和服务端规则分析
 - 每天最多 20 条新帖、预估费用最多 `$0.15` 的硬保护
 - 观点发布后 15 分钟、1 小时、4 小时、1 日和 7 日的价格验证
-- 飞书或 Telegram 定时告警
+- 飞书或 Telegram 定时趋势告警
+- 秒级 HYPE 到价预警、ntfy 强推、腾讯云电话升级与触发日志
 
 比值下降表示 HYPE 相对走强，比值上涨表示 HYPE 相对走弱。
 
@@ -56,7 +57,7 @@ python3 -m unittest discover -s tests -v
 - 页面实时参考持仓量变化、资金费率/溢价拥挤度、前 10 档盘口失衡和近期主动买卖占比。
 - 历史样本积累不足时，这些结构数据只修正当前提示，不进入既有 30 天回测，避免把未来数据混入测试。
 
-## 配置告警
+## 配置趋势告警
 
 行情检查工作流每 15 分钟 K 线结束后运行一次。进入仓库：
 
@@ -80,6 +81,62 @@ python3 -m unittest discover -s tests -v
 
 配置完成后，可以在 Actions 页面手动运行 `Check HYPE relative-strength signals`，勾选测试告警验证渠道。
 
+## 配置实时价格预警
+
+实时到价预警不能依赖 GitHub Pages 或浏览器常驻。`scripts/price_alert_service.py` 是独立的轻量服务：默认每 3 秒读取一次 Hyperliquid 的 HYPE 标记价格，连续确认 3 次后触发 ntfy；若仍未在看板确认，可在 45 秒后调用腾讯云监控电话策略。
+
+### 1. 手机安装 ntfy
+
+在 OPPO 手机上建议安装 F-Droid 版 ntfy，订阅一个难以猜测的主题，并在 ColorOS 中允许：通知、锁屏通知、后台运行、自启动和忽略电池优化。把该主题设置成高优先级声音；如需在静音/勿扰下响铃，再用 MacroDroid 接收 ntfy 通知并临时提高闹钟音量。
+
+### 2. 在常驻服务器设置环境变量
+
+不要把真实值提交到 GitHub。下面命令只是当前终端的启动示例：
+
+```bash
+export ALERT_API_TOKEN="请替换为至少16位的随机密钥"
+export ALERT_ALLOWED_ORIGIN="https://arason666.github.io"
+export ALERT_STATE_PATH="/var/lib/hype-lens/price-alert-state.json"
+export ALERT_BIND_HOST="127.0.0.1"
+export ALERT_PORT="8787"
+export ALERT_POLL_SECONDS="3"
+
+export NTFY_URL="https://ntfy.sh"
+export NTFY_TOPIC="请替换为你的私有主题"
+export NTFY_ACCESS_TOKEN="可选；使用受保护主题时填写"
+export DASHBOARD_URL="https://arason666.github.io/hype-len/"
+
+python3 scripts/price_alert_service.py
+```
+
+生产环境需通过 Caddy、Nginx 或 Cloudflare Tunnel 暴露 HTTPS 地址，例如 `https://alerts.example.com`。GitHub Pages 是 HTTPS 页面，浏览器会阻止它直接调用未加密的 HTTP 服务。
+
+仓库的 `Deploy price alert server` 工作流会通过 SSH 安装 systemd 服务与 Caddy。服务器只在本机监听 `127.0.0.1:8787`，公网仅开放 `80/443`；部署私钥、API 访问密钥和 ntfy 主题均保存在 GitHub Actions Secrets 中。
+
+如果需要电话升级，再增加：
+
+```bash
+export TENCENTCLOUD_SECRET_ID="腾讯云 API SecretId"
+export TENCENTCLOUD_SECRET_KEY="腾讯云 API SecretKey"
+export TENCENT_MONITOR_POLICY_ID="已绑定本人电话通知模板的自定义告警策略 ID"
+export TENCENTCLOUD_REGION="ap-guangzhou"
+```
+
+腾讯云密钥只存在服务端。建议创建权限受限的子用户，只允许发送云监控自定义告警；电话策略中只填写本人的手机号，并开启按键确认。
+
+### 3. 在看板配置目标价
+
+打开 `价格预警` 页签：
+
+1. 填写 HTTPS 告警服务地址和 `ALERT_API_TOKEN`，点击“连接服务”。
+2. 选择“下跌至或低于”或“上涨至或高于”，输入 HYPE 目标价格。
+3. 勾选 `ntfy 强推`；确认腾讯云策略测试成功后再勾选“未确认后电话升级”。
+4. 默认保留连续确认 `3` 次、电话延迟 `45` 秒、冷却 `15` 分钟、重新布防缓冲 `0.25%`。
+5. 点击“保存并启用”。规则必须显示“已布防”才算真正运行。
+6. 分别点击“测试强推”和“测试电话”。测试电话可能产生语音通知费用。
+
+日志会保留最近 300 条事件，包括触发时间、阈值、实际价格、各渠道结果、确认时间和重新布防时间。访问密钥仅写入浏览器 `sessionStorage`；关闭当前浏览会话后需重新输入，但服务器上的规则仍持续运行。
+
 ## 配置付费 X 自动采集
 
 在 Repository secrets 中添加：
@@ -102,6 +159,8 @@ python3 -m unittest discover -s tests -v
 
 - GitHub Pages 是公开静态网页，没有原生密码保护。
 - GitHub Actions 的定时任务可能出现几分钟延迟，不适合自动交易执行。
+- 实时价格预警必须部署常驻服务；只打开静态看板并不会在后台监控。
+- ntfy、电话、移动网络和 ColorOS 省电策略都可能延迟或丢失通知，交易所条件止损必须独立存在。
 - 浏览器会缓存最近一次成功行情，在临时断网时显示缓存并明确标注。
 - 页面每 5 分钟自动刷新；指标只使用已经结束的 K 线。
 - X API 本身按读取量计费，程序显示的是基于当前官方单价的保守预估值；应定期核对 X Developer Console 的实际余额和价格。

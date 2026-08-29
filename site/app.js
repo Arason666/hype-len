@@ -3,6 +3,16 @@ const X_POSTS_URL = "./data/x-posts.json";
 const MARKET_CONTEXT_URL = "./data/market-context.json";
 const DAY = 24 * 60 * 60 * 1000;
 const MODEL_ROUND_TRIP_COST = 0.001;
+const RISK_PROFILE_STORAGE_KEY = "hype-lens-risk-profile-v1";
+const ALERT_API_URL_STORAGE_KEY = "hype-lens-alert-api-url-v1";
+const ALERT_API_TOKEN_SESSION_KEY = "hype-lens-alert-api-token-v1";
+const DEFAULT_RISK_PROFILE = Object.freeze({
+  equity: 17_000,
+  marginAllocation: 4,
+  leverage: 100,
+  maxRisk: 2,
+  roundTripCost: 0.1,
+});
 const PERIODS = {
   "15m": { interval: "15m", lookback: 30 * DAY, label: "最近 30 天" },
   "1h": { interval: "1h", lookback: 180 * DAY, label: "最近 180 天" },
@@ -46,6 +56,10 @@ const state = {
   opinionsExpanded: false,
   activeDashboardTab: "market",
   marketContext: null,
+  riskProfile: null,
+  alertConnected: false,
+  alertSnapshot: null,
+  alertPollTimer: null,
 };
 
 const $ = (id) => document.getElementById(id);
@@ -88,8 +102,9 @@ function wilderAverage(values, period) {
   return output;
 }
 
-function rollingZScores(values, period) {
-  const output = [];
+function rollingStatistics(values, period) {
+  const zScores = [];
+  const means = [];
   let sum = 0;
   let sumSquares = 0;
   for (let index = 0; index < values.length; index += 1) {
@@ -105,9 +120,10 @@ function rollingZScores(values, period) {
     const mean = sum / count;
     const variance = Math.max(0, sumSquares / count - mean * mean);
     const deviation = Math.sqrt(variance);
-    output.push(count >= Math.min(8, period) && deviation > 0 ? (value - mean) / deviation : 0);
+    means.push(mean);
+    zScores.push(count >= Math.min(8, period) && deviation > 0 ? (value - mean) / deviation : 0);
   }
-  return output;
+  return { zScores, means };
 }
 
 function technicalIndicatorSeries(rows, period = 14) {
@@ -137,12 +153,13 @@ function technicalIndicatorSeries(rows, period = 14) {
     return plusDi + minusDi > 0 ? 100 * Math.abs(plusDi - minusDi) / (plusDi + minusDi) : 0;
   });
   const adx = wilderAverage(dx, period);
-  const volumeZ = rollingZScores(rows.map((row) => Number(row.hypeVolume || 0)), 24);
+  const volumeStats = rollingStatistics(rows.map((row) => Number(row.hypeVolume || 0)), 24);
   return rows.map((row, index) => ({
     atrPercent: row.hype > 0 ? atr[index] / row.hype : 0,
     adx: adx[index],
     roc4h: index >= 4 ? (row.hype / rows[index - 4].hype) - 1 : 0,
-    volumeZ: volumeZ[index],
+    volumeZ: volumeStats.zScores[index],
+    volumeMean: volumeStats.means[index],
   }));
 }
 
@@ -169,6 +186,7 @@ function enrich(rows) {
     hypeAdx: indicators[index].adx,
     hypeRoc4h: indicators[index].roc4h,
     hypeVolumeZ: indicators[index].volumeZ,
+    hypeVolumeMean24: indicators[index].volumeMean,
   }));
 }
 
@@ -235,7 +253,7 @@ function showToast(message, duration = 3500) {
 }
 
 function activateDashboardTab(tab, moveFocus = false) {
-  const validTabs = ["market", "model", "social"];
+  const validTabs = ["market", "model", "social", "alert"];
   const nextTab = validTabs.includes(tab) ? tab : "market";
   state.activeDashboardTab = nextTab;
   document.querySelectorAll("[data-dashboard-tab]").forEach((button) => {
@@ -811,6 +829,7 @@ function renderMetrics() {
     setChange(`${prefix}-change-24h`, percentChange(rows, key, 96));
   });
   setText("last-updated", `更新于 ${formatFullTime.format(result.savedAt)} CST${result.stale ? " · 缓存" : ""}`);
+  if (!state.alertConnected) setText("alert-latest-price", `$${latest.hype.toFixed(3)} · 网页行情`);
   evaluateOpinions();
   renderFourHourBrief();
 }
@@ -1014,6 +1033,287 @@ function escapeHtml(value) {
 
 function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function alertCredentials() {
+  const url = $("alert-api-url")?.value.trim().replace(/\/+$/, "") || "";
+  const token = $("alert-api-token")?.value.trim() || "";
+  return { url, token };
+}
+
+async function alertApiRequest(path, options = {}) {
+  const { url, token } = alertCredentials();
+  if (!url || !token) throw new Error("请先填写告警服务地址和访问密钥");
+  const controller = new AbortController();
+  const timer = window.setTimeout(() => controller.abort(), 10_000);
+  try {
+    const response = await fetch(`${url}${path}`, {
+      ...options,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+        ...(options.headers || {}),
+      },
+      signal: controller.signal,
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(payload.error || `告警服务返回 ${response.status}`);
+    return payload;
+  } catch (error) {
+    if (error.name === "AbortError") throw new Error("告警服务连接超时");
+    throw error;
+  } finally {
+    window.clearTimeout(timer);
+  }
+}
+
+function setAlertServiceState(kind, title, detail) {
+  const panel = $("alert-service-state");
+  if (!panel) return;
+  panel.className = `alert-service-state ${kind}`;
+  panel.querySelector("strong").textContent = title;
+  panel.querySelector("span").textContent = detail;
+}
+
+function alertDirectionLabel(direction) {
+  return direction === "above" ? "上涨至或高于" : "下跌至或低于";
+}
+
+function alertRuleState(rule) {
+  if (!rule.enabled) return { key: "disabled", label: "已暂停" };
+  if (rule.state === "armed") return { key: "armed", label: "已布防" };
+  return { key: "cooldown", label: "冷却 / 待重置" };
+}
+
+function alertChannelStatus(event, channel) {
+  if (!event.channels?.includes(channel)) return "未启用";
+  const status = event[`${channel}_status`];
+  if (status === "sent") return channel === "phone" ? "电话已呼叫" : "强推已发送";
+  if (status === "failed") return "发送失败";
+  if (status === "pending") return channel === "phone" ? "等待电话升级" : "等待发送";
+  return status || "--";
+}
+
+function formatAlertTimestamp(value) {
+  const date = new Date(value);
+  return Number.isFinite(date.getTime()) ? `${formatFullTime.format(date)} 北京时间` : "--";
+}
+
+function renderAlertSnapshot(snapshot) {
+  state.alertSnapshot = snapshot;
+  const fresh = snapshot.latest_price_at && Date.now() - new Date(snapshot.latest_price_at).getTime() < 30_000;
+  const serviceKind = snapshot.ok && fresh ? "online" : "degraded";
+  const channelText = `ntfy ${snapshot.channels?.ntfy ? "已配置" : "未配置"} · 电话 ${snapshot.channels?.phone ? "已配置" : "未配置"}`;
+  setAlertServiceState(
+    serviceKind,
+    snapshot.ok ? "告警服务在线" : "告警服务异常",
+    snapshot.last_error ? `最近错误：${snapshot.last_error}` : channelText,
+  );
+  setText("alert-latest-price", Number.isFinite(Number(snapshot.latest_price))
+    ? `$${Number(snapshot.latest_price).toFixed(3)}`
+    : "等待价格");
+
+  const rules = Array.isArray(snapshot.rules) ? snapshot.rules : [];
+  setText("alert-rule-count", `${rules.length} 条规则`);
+  $("alert-rule-list").innerHTML = rules.length ? rules.map((rule) => {
+    const status = alertRuleState(rule);
+    const channels = rule.channels.map((channel) => channel === "phone" ? "电话" : "ntfy").join(" + ");
+    const cooldown = rule.cooldown_until ? formatAlertTimestamp(rule.cooldown_until) : "--";
+    return `
+      <div class="alert-rule-card ${status.key}">
+        <div class="alert-rule-card-head">
+          <div><strong>${escapeHtml(rule.name)}</strong><span>${alertDirectionLabel(rule.direction)} $${Number(rule.threshold).toFixed(3)}</span></div>
+          <span class="alert-rule-status">${status.label}</span>
+        </div>
+        <div class="alert-rule-meta">
+          <span>渠道 ${escapeHtml(channels)}</span>
+          <span>确认 ${rule.confirm_ticks} 次</span>
+          <span>冷却 ${rule.cooldown_minutes} 分钟</span>
+          <span>重置缓冲 ${Number(rule.rearm_percent).toFixed(2)}%</span>
+        </div>
+        ${rule.state !== "armed" ? `<p>冷却至 ${cooldown}，且价格离开阈值后自动重新布防。</p>` : ""}
+        <div class="alert-rule-actions">
+          <button type="button" data-alert-rule-toggle="${rule.id}">${rule.enabled ? "暂停" : "启用"}</button>
+          <button type="button" data-alert-rule-reset="${rule.id}">立即重置</button>
+          <button class="danger" type="button" data-alert-rule-delete="${rule.id}">删除</button>
+        </div>
+      </div>`;
+  }).join("") : '<div class="alert-empty"><strong>还没有价格规则</strong><span>在左侧填写目标价格并保存，服务会立即开始监控。</span></div>';
+
+  const events = Array.isArray(snapshot.events) ? snapshot.events : [];
+  $("alert-log-list").innerHTML = events.length ? events.slice(0, 100).map((event) => {
+    const acknowledged = Boolean(event.acknowledged_at);
+    const rearmed = event.rearmed_at ? `重新布防 ${formatAlertTimestamp(event.rearmed_at)}` : "等待价格离开阈值后重新布防";
+    return `
+      <div class="alert-log-row ${acknowledged ? "acknowledged" : "open"}">
+        <div class="alert-log-time"><strong>${formatAlertTimestamp(event.triggered_at)}</strong><span>${escapeHtml(event.rule_name)}</span></div>
+        <div><small>触发条件</small><strong>${alertDirectionLabel(event.direction)} $${Number(event.threshold).toFixed(3)}</strong><span>实际 $${Number(event.trigger_price).toFixed(3)}</span></div>
+        <div><small>通知结果</small><strong>${alertChannelStatus(event, "ntfy")}</strong><span>${alertChannelStatus(event, "phone")}</span></div>
+        <div><small>处理状态</small><strong>${acknowledged ? "已确认" : "待确认"}</strong><span>${acknowledged ? formatAlertTimestamp(event.acknowledged_at) : rearmed}</span></div>
+        ${acknowledged ? "" : `<button type="button" data-alert-event-ack="${event.id}">我已知晓</button>`}
+      </div>`;
+  }).join("") : '<div class="alert-empty"><strong>还没有触发记录</strong><span>日志将记录触发时间、价格、通知渠道、确认和重新布防状态。</span></div>';
+
+  const enabled = state.alertConnected;
+  document.querySelectorAll(".alert-form-actions button, #alert-log-refresh").forEach((button) => { button.disabled = !enabled; });
+}
+
+function setAlertDisconnected(message = "当前规则不会在后台执行") {
+  state.alertConnected = false;
+  state.alertSnapshot = null;
+  setAlertServiceState("offline", "告警服务未连接", message);
+  document.querySelectorAll(".alert-form-actions button, #alert-log-refresh").forEach((button) => { button.disabled = true; });
+}
+
+async function connectAlertService(announce = true) {
+  const button = $("alert-connect-button");
+  const credentials = alertCredentials();
+  if (!credentials.url || !credentials.token) {
+    setAlertDisconnected("请填写服务地址和访问密钥");
+    if (announce) showToast("请填写服务地址和访问密钥");
+    return;
+  }
+  button.disabled = true;
+  button.textContent = "连接中…";
+  try {
+    const snapshot = await alertApiRequest("/api/alerts");
+    state.alertConnected = true;
+    localStorage.setItem(ALERT_API_URL_STORAGE_KEY, credentials.url);
+    sessionStorage.setItem(ALERT_API_TOKEN_SESSION_KEY, credentials.token);
+    renderAlertSnapshot(snapshot);
+    button.textContent = "重新连接";
+    if (announce) showToast("告警服务已连接");
+  } catch (error) {
+    setAlertDisconnected(error.message || "连接失败");
+    button.textContent = "连接服务";
+    if (announce) showToast(error.message || "无法连接告警服务", 5000);
+  } finally {
+    button.disabled = false;
+  }
+}
+
+async function refreshAlertSnapshot(silent = false) {
+  if (!state.alertConnected) return;
+  try {
+    renderAlertSnapshot(await alertApiRequest("/api/alerts"));
+    if (!silent) showToast("预警状态已更新");
+  } catch (error) {
+    setAlertDisconnected(error.message || "服务连接中断");
+    if (!silent) showToast(error.message || "预警状态更新失败");
+  }
+}
+
+async function saveAlertRule(event) {
+  event.preventDefault();
+  const channels = [
+    $("alert-channel-ntfy").checked ? "ntfy" : null,
+    $("alert-channel-phone").checked ? "phone" : null,
+  ].filter(Boolean);
+  if (!channels.length) {
+    showToast("至少选择一个通知渠道");
+    return;
+  }
+  if (channels.includes("phone") && !state.alertSnapshot?.channels?.phone) {
+    showToast("服务端尚未配置腾讯云电话策略", 5000);
+    return;
+  }
+  if (channels.includes("ntfy") && !state.alertSnapshot?.channels?.ntfy) {
+    showToast("服务端尚未配置 ntfy 主题", 5000);
+    return;
+  }
+  const threshold = Number($("alert-threshold").value);
+  if (!(threshold > 0)) {
+    showToast("请输入有效的目标价格");
+    return;
+  }
+  const payload = {
+    name: $("alert-rule-name").value.trim(),
+    direction: $("alert-direction").value,
+    threshold,
+    channels,
+    confirm_ticks: Number($("alert-confirm-ticks").value),
+    phone_delay_seconds: Number($("alert-phone-delay").value),
+    cooldown_minutes: Number($("alert-cooldown").value),
+    rearm_percent: Number($("alert-rearm").value),
+  };
+  const submit = event.submitter || event.currentTarget.querySelector("button[type=submit]");
+  submit.disabled = true;
+  try {
+    await alertApiRequest("/api/rules", { method: "POST", body: JSON.stringify(payload) });
+    $("alert-rule-name").value = "";
+    $("alert-threshold").value = "";
+    await refreshAlertSnapshot(true);
+    showToast("价格预警已保存并启用");
+  } catch (error) {
+    showToast(error.message || "价格预警保存失败", 5000);
+  } finally {
+    submit.disabled = !state.alertConnected;
+  }
+}
+
+async function changeAlertRule(ruleId, payload, successMessage) {
+  try {
+    await alertApiRequest(`/api/rules/${encodeURIComponent(ruleId)}`, { method: "PATCH", body: JSON.stringify(payload) });
+    await refreshAlertSnapshot(true);
+    showToast(successMessage);
+  } catch (error) {
+    showToast(error.message || "规则更新失败", 5000);
+  }
+}
+
+async function testAlertChannel(channel) {
+  if (channel === "phone" && !window.confirm("测试电话可能产生腾讯云语音通知费用，确定现在拨打吗？")) return;
+  try {
+    await alertApiRequest("/api/test", { method: "POST", body: JSON.stringify({ channel }) });
+    showToast(channel === "phone" ? "测试电话已提交" : "测试强推已发送");
+  } catch (error) {
+    showToast(error.message || "测试通知失败", 5000);
+  }
+}
+
+function initPriceAlerts() {
+  const savedUrl = localStorage.getItem(ALERT_API_URL_STORAGE_KEY) || "";
+  const savedToken = sessionStorage.getItem(ALERT_API_TOKEN_SESSION_KEY) || "";
+  $("alert-api-url").value = savedUrl;
+  $("alert-api-token").value = savedToken;
+  $("alert-connect-button").addEventListener("click", () => connectAlertService(true));
+  $("alert-rule-form").addEventListener("submit", saveAlertRule);
+  $("alert-log-refresh").addEventListener("click", () => refreshAlertSnapshot(false));
+  document.querySelectorAll("[data-alert-test]").forEach((button) => {
+    button.addEventListener("click", () => testAlertChannel(button.dataset.alertTest));
+  });
+  $("alert-rule-list").addEventListener("click", async (event) => {
+    const toggle = event.target.closest("[data-alert-rule-toggle]");
+    const reset = event.target.closest("[data-alert-rule-reset]");
+    const remove = event.target.closest("[data-alert-rule-delete]");
+    if (toggle) {
+      const rule = state.alertSnapshot?.rules?.find((item) => item.id === toggle.dataset.alertRuleToggle);
+      if (rule) await changeAlertRule(rule.id, { enabled: !rule.enabled }, rule.enabled ? "规则已暂停" : "规则已启用");
+    } else if (reset) {
+      await changeAlertRule(reset.dataset.alertRuleReset, { reset_state: true }, "规则已重新布防");
+    } else if (remove && window.confirm("确定删除这条价格预警吗？历史触发日志会保留。")) {
+      try {
+        await alertApiRequest(`/api/rules/${encodeURIComponent(remove.dataset.alertRuleDelete)}`, { method: "DELETE" });
+        await refreshAlertSnapshot(true);
+        showToast("价格预警已删除");
+      } catch (error) {
+        showToast(error.message || "删除失败", 5000);
+      }
+    }
+  });
+  $("alert-log-list").addEventListener("click", async (event) => {
+    const acknowledge = event.target.closest("[data-alert-event-ack]");
+    if (!acknowledge) return;
+    try {
+      await alertApiRequest(`/api/events/${encodeURIComponent(acknowledge.dataset.alertEventAck)}/ack`, { method: "POST", body: "{}" });
+      await refreshAlertSnapshot(true);
+      showToast("预警已确认，未拨出的升级电话将取消");
+    } catch (error) {
+      showToast(error.message || "确认失败", 5000);
+    }
+  });
+  if (savedUrl && savedToken) connectAlertService(false);
+  state.alertPollTimer = window.setInterval(() => refreshAlertSnapshot(true), 15_000);
 }
 
 function countTerms(text, terms) {
@@ -1340,6 +1640,19 @@ function trendScoreAt(rows, index, useAuxIndicators = true) {
   const ethEma = -safeLogReturn(row.ethFast, row.ethSlow);
   const btcEma = -safeLogReturn(row.btcFast, row.btcSlow);
   const indicators = indicatorSnapshotAt(rows, index);
+  if (!useAuxIndicators) {
+    const recentVolume = Number(row.hypeVolumeMean24 || 0);
+    const volumeDirection = recentVolume > 0 && row.hypeVolume > recentVolume * 1.35 ? Math.sign(hype4h) * 5 : 0;
+    const baselineScore = scaledTrendComponent(hype4h, 0.018, 19)
+      + scaledTrendComponent(hype24h, 0.05, 15)
+      + scaledTrendComponent(eth4h, 0.014, 13)
+      + scaledTrendComponent(btc4h, 0.014, 13)
+      + scaledTrendComponent(hypeEma, 0.016, 18)
+      + scaledTrendComponent(ethEma, 0.01, 8)
+      + scaledTrendComponent(btcEma, 0.01, 8)
+      + volumeDirection;
+    return Math.round(Math.max(-100, Math.min(100, baselineScore)));
+  }
   let score = scaledTrendComponent(hype4h, 0.018, 17)
     + scaledTrendComponent(hype24h, 0.05, 14)
     + scaledTrendComponent(eth4h, 0.014, 12)
@@ -1347,18 +1660,16 @@ function trendScoreAt(rows, index, useAuxIndicators = true) {
     + scaledTrendComponent(hypeEma, 0.016, 16)
     + scaledTrendComponent(ethEma, 0.01, 7)
     + scaledTrendComponent(btcEma, 0.01, 7);
-  if (useAuxIndicators) {
-    score += scaledTrendComponent(indicators.roc4h, 0.018, 10);
-    const adxFactor = indicators.adx < 14 ? 0.68
-      : indicators.adx < 18 ? 0.82
-        : indicators.adx >= 30 ? 1.08 : 1;
-    score *= adxFactor;
-    if (indicators.volumeZ > 0.75) {
-      const participationDirection = Math.sign(indicators.roc4h || hype4h);
-      score += participationDirection * Math.min(6, (indicators.volumeZ - 0.75) * 2.5);
-    } else if (indicators.volumeZ < -0.75) {
-      score *= 0.9;
-    }
+  score += scaledTrendComponent(indicators.roc4h, 0.018, 10);
+  const adxFactor = indicators.adx < 14 ? 0.68
+    : indicators.adx < 18 ? 0.82
+      : indicators.adx >= 30 ? 1.08 : 1;
+  score *= adxFactor;
+  if (indicators.volumeZ > 0.75) {
+    const participationDirection = Math.sign(indicators.roc4h || hype4h);
+    score += participationDirection * Math.min(6, (indicators.volumeZ - 0.75) * 2.5);
+  } else if (indicators.volumeZ < -0.75) {
+    score *= 0.9;
   }
   return Math.round(Math.max(-100, Math.min(100, score)));
 }
@@ -1640,7 +1951,42 @@ function evaluateTrendCapture(rows, trades, trends) {
   };
 }
 
-function selectTrendParameters(rows, trainingEnd) {
+function average(values) {
+  return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
+}
+
+function evaluateTrendParameters(rows, params, foldRanges, useAuxIndicators) {
+  const foldResults = foldRanges.map((range) => {
+    const simulation = simulateTrendStrategy(rows, params, range.start, range.end, true, useAuxIndicators);
+    const trends = referenceTrendSegments(rows, range.start, range.end);
+    const capture = evaluateTrendCapture(rows, simulation.trades, trends);
+    if (simulation.trades.length < 2 || trends.length < 2) return null;
+    const score = simulation.netReturn
+      - Math.abs(simulation.maxDrawdown) * 0.45
+      + capture.captureRate * 0.8
+      + capture.recall * 0.25
+      - simulation.averageGiveback * 0.1
+      - Math.min(0.08, capture.averageEntryDelayBars * 0.002)
+      - Math.max(0, capture.signalsPerTrend - 1.5) * 0.025
+      - capture.earlyExitRate * 0.03;
+    return { score, simulation, capture };
+  });
+  if (!foldResults.length || foldResults.some((result) => !result)) return null;
+  const scores = foldResults.map((result) => result.score);
+  const meanScore = average(scores);
+  const worstScore = Math.min(...scores);
+  return {
+    objective: meanScore * 0.75 + worstScore * 0.25,
+    diagnostics: {
+      captureRate: average(foldResults.map((result) => result.capture.captureRate)),
+      recall: average(foldResults.map((result) => result.capture.recall)),
+      maxDrawdown: Math.min(...foldResults.map((result) => result.simulation.maxDrawdown)),
+      netReturn: average(foldResults.map((result) => result.simulation.netReturn)),
+    },
+  };
+}
+
+function selectTrendParameters(rows, trainingEnd, useAuxIndicators = false) {
   let best = null;
   const validationBars = 30 * 24;
   const foldRanges = [3, 2, 1]
@@ -1665,32 +2011,17 @@ function selectTrendParameters(rows, trainingEnd) {
                 cooldownBars: 6,
                 resetScore: 18,
               };
-              const foldScores = foldRanges.map((range) => {
-                const simulation = simulateTrendStrategy(rows, params, range.start, range.end);
-                const trends = referenceTrendSegments(rows, range.start, range.end);
-                const capture = evaluateTrendCapture(rows, simulation.trades, trends);
-                if (simulation.trades.length < 2 || trends.length < 2) return -1;
-                return simulation.netReturn
-                  - Math.abs(simulation.maxDrawdown) * 0.45
-                  + capture.captureRate * 0.8
-                  + capture.recall * 0.25
-                  - simulation.averageGiveback * 0.1
-                  - Math.min(0.08, capture.averageEntryDelayBars * 0.002)
-                  - Math.max(0, capture.signalsPerTrend - 1.5) * 0.025
-                  - capture.earlyExitRate * 0.03;
-              });
-              if (!foldScores.length || foldScores.some((score) => score <= -1)) return;
-              const meanScore = foldScores.reduce((sum, score) => sum + score, 0) / foldScores.length;
-              const worstScore = Math.min(...foldScores);
-              const objective = meanScore * 0.75 + worstScore * 0.25;
-              if (!best || objective > best.objective) best = { params, objective };
+              const evaluation = evaluateTrendParameters(rows, params, foldRanges, useAuxIndicators);
+              if (!evaluation) return;
+              if (!best || evaluation.objective > best.objective) best = { params, ...evaluation };
             });
           });
         });
       });
     });
   });
-  return best?.params || {
+  if (best) return best;
+  const params = {
     entryScore: 46,
     exitScore: 10,
     minDrawdown: 0.035,
@@ -1700,6 +2031,19 @@ function selectTrendParameters(rows, trainingEnd) {
     cooldownBars: 6,
     resetScore: 18,
   };
+  const fallback = evaluateTrendParameters(rows, params, foldRanges, useAuxIndicators);
+  return { params, objective: fallback?.objective ?? -Infinity, diagnostics: fallback?.diagnostics || null };
+}
+
+function shouldPromoteAuxiliaryModel(candidate, baseline) {
+  const next = candidate?.diagnostics;
+  const current = baseline?.diagnostics;
+  if (!next || !current) return false;
+  return candidate.objective > baseline.objective
+    && next.captureRate >= current.captureRate
+    && next.recall >= current.recall - 0.05
+    && Math.abs(next.maxDrawdown) <= Math.abs(current.maxDrawdown) + 0.005
+    && next.netReturn >= current.netReturn - 0.005;
 }
 
 function setModelEvidence(id, value, tone = "neutral") {
@@ -1709,6 +2053,14 @@ function setModelEvidence(id, value, tone = "neutral") {
   element.parentElement.dataset.tone = tone;
 }
 
+function directionScorePresentation(score) {
+  if (score >= 40) return { label: "明显偏强 · 等待开多确认", tone: "positive" };
+  if (score >= 15) return { label: "轻度偏强 · 尚非开多信号", tone: "positive" };
+  if (score > -15) return { label: "中性分歧 · 暂无方向", tone: "neutral" };
+  if (score > -40) return { label: "轻度偏弱 · 尚非开空信号", tone: "negative" };
+  return { label: "明显偏弱 · 等待开空确认", tone: "negative" };
+}
+
 function renderWalkForwardModel() {
   const panel = $("model-lab");
   const rows = state.cache.get("1h")?.rows;
@@ -1716,30 +2068,41 @@ function renderWalkForwardModel() {
   const cutoff = rows.at(-1).t - 30 * DAY;
   const testingStart = rows.findIndex((row) => row.t >= cutoff);
   if (testingStart < 2400 || rows.length - testingStart < 600) return;
-  const params = selectTrendParameters(rows, testingStart);
-  const testing = simulateTrendStrategy(rows, params, testingStart, rows.length);
+  const baselineSelection = selectTrendParameters(rows, testingStart, false);
+  const candidateSelection = selectTrendParameters(rows, testingStart, true);
+  const auxiliaryPromoted = shouldPromoteAuxiliaryModel(candidateSelection, baselineSelection);
+  const productionSelection = auxiliaryPromoted ? candidateSelection : baselineSelection;
+  const useAuxIndicators = auxiliaryPromoted;
+  const params = productionSelection.params;
+  const testing = simulateTrendStrategy(rows, params, testingStart, rows.length, true, useAuxIndicators);
   const referenceTrends = referenceTrendSegments(rows, testingStart, rows.length);
   const capture = evaluateTrendCapture(rows, testing.trades, referenceTrends);
-  const baselineTesting = simulateTrendStrategy(rows, params, testingStart, rows.length, true, false);
+  const baselineTesting = simulateTrendStrategy(rows, baselineSelection.params, testingStart, rows.length, true, false);
   const baselineCapture = evaluateTrendCapture(rows, baselineTesting.trades, referenceTrends);
-  const live = simulateTrendStrategy(rows, params, 24, rows.length, false);
+  const candidateTesting = simulateTrendStrategy(rows, candidateSelection.params, testingStart, rows.length, true, true);
+  const candidateCapture = evaluateTrendCapture(rows, candidateTesting.trades, referenceTrends);
+  const live = simulateTrendStrategy(rows, params, 24, rows.length, false, useAuxIndicators);
   const latest = rows.at(-1);
   const indicators = indicatorSnapshotAt(rows, rows.length - 1);
-  const rawScore = trendScoreAt(rows, rows.length - 1);
+  const rawScore = trendScoreAt(rows, rows.length - 1, useAuxIndicators);
   const relativeScore = relativeReversalScoreAt(rows, rows.length - 1);
   const opinion = recentOpinionSignal(allOpinions());
   const opinionScore = opinion ? Math.round(opinion.score * 0.1) : 0;
   const marketStructure = marketStructureSignal(state.marketContext);
   const marketScore = marketStructure?.score || 0;
   const displayScore = Math.max(-100, Math.min(100, rawScore + opinionScore + marketScore));
+  const scorePresentation = directionScorePresentation(displayScore);
   const active = live.active;
   const liveCandidate = live.candidate;
   let direction = "neutral";
-  let title = "震荡观望 · 等待趋势形成";
-  let summary = `趋势强度 ${displayScore > 0 ? "+" : ""}${displayScore}/100，尚未达到训练期选出的 ±${params.entryScore} 启动门槛。`;
+  let title = displayScore <= -15 ? "震荡偏弱 · 暂不开仓" : displayScore >= 15 ? "震荡偏强 · 暂不开仓" : "震荡观望 · 等待趋势形成";
+  let summary = `当前动量评分 ${displayScore > 0 ? "+" : ""}${displayScore}/100（${scorePresentation.label}），尚未形成经过价格确认的新趋势。`;
   let entryPrice = "尚未启动";
   let trendDrawdown = "--";
   let invalidation = "等待趋势启动";
+  let existingTrend = "无有效趋势";
+  let newEntry = "暂不开仓";
+  let nextTrigger = `等待方向评分达到门槛并由1小时收盘确认`;
   if (active) {
     direction = active.direction > 0 ? "bullish" : "bearish";
     const pullback = active.direction > 0
@@ -1747,9 +2110,11 @@ function renderWalkForwardModel() {
       : Math.max(0, (latest.hype / active.extremePrice) - 1);
     const drawdownLimit = Math.max(params.minDrawdown, params.atrMultiplier * rollingAtrPercent(rows, rows.length - 1));
     const weakening = pullback >= drawdownLimit * 0.72 || (active.direction > 0 ? displayScore < 0 : displayScore > 0);
+    const currentGross = active.direction * ((latest.hype / active.entryPrice) - 1);
+    const hasProfit = currentGross > MODEL_ROUND_TRIP_COST;
     title = active.direction > 0
-      ? (weakening ? "上涨趋势减弱 · 保护已有收益" : "上涨趋势持有 · 尚未失效")
-      : (weakening ? "下跌趋势减弱 · 保护已有收益" : "下跌趋势持有 · 尚未失效");
+      ? (weakening ? `上涨趋势减弱 · ${hasProfit ? "保护浮盈" : "控制风险"}` : "上涨趋势持有 · 尚未失效")
+      : (weakening ? `下跌趋势减弱 · ${hasProfit ? "保护浮盈" : "控制风险"}` : "下跌趋势持有 · 尚未失效");
     const extremeLabel = active.direction > 0 ? "峰值" : "谷值";
     entryPrice = `$${active.entryPrice.toFixed(3)} · ${formatTime.format(active.entryTime)}`;
     trendDrawdown = `${extremeLabel} $${active.extremePrice.toFixed(3)} · ${formatPercent(-pullback * 100)}`;
@@ -1758,13 +2123,20 @@ function renderWalkForwardModel() {
       : active.extremePrice * (1 + drawdownLimit);
     invalidation = `${active.direction > 0 ? "收盘低于" : "收盘高于"} $${invalidationPrice.toFixed(3)}`;
     const structureText = marketStructure ? `${marketStructure.label} ${marketScore > 0 ? "+" : ""}${marketScore} 分` : "市场结构正在积累";
-    summary = `模型从趋势启动后持续持有，不要求每小时判断正确。当前动态回撤 ${formatPercent(-pullback * 100)}，失效阈值 ${formatPercent(-drawdownLimit * 100)}；${opinion ? `观点修正 ${opinionScore > 0 ? "+" : ""}${opinionScore} 分` : "暂无观点修正"}，${structureText}。`;
+    existingTrend = `${active.direction > 0 ? "已有多头" : "已有空头"} · ${weakening ? "减弱" : "有效"}`;
+    newEntry = weakening ? "暂停新增 · 不反手" : "无新增信号 · 继续观察";
+    nextTrigger = `${active.direction > 0 ? "收盘低于" : "收盘高于"} $${invalidationPrice.toFixed(3)} 则趋势失效`;
+    summary = `已有${active.direction > 0 ? "多头" : "空头"}趋势尚未失效，但当前动量为 ${displayScore > 0 ? "+" : ""}${displayScore}/100。当前相对启动价 ${formatPercent(currentGross * 100)}，动态回撤 ${formatPercent(-pullback * 100)}；${opinion ? `观点修正 ${opinionScore > 0 ? "+" : ""}${opinionScore} 分` : "暂无观点修正"}，${structureText}。`;
   } else if (liveCandidate?.direction > 0 || displayScore >= params.entryScore - 6) {
     title = "开多候选 · 等待突破确认";
     summary = `趋势强度接近开多门槛；候选信号需保持并由1小时收盘突破最近 ${params.breakoutLookback} 小时高点确认。`;
+    newEntry = "开多候选 · 尚未确认";
+    nextTrigger = `1小时收盘突破最近 ${params.breakoutLookback} 小时高点`;
   } else if (liveCandidate?.direction < 0 || displayScore <= -(params.entryScore - 6)) {
     title = "开空候选 · 等待跌破确认";
     summary = `趋势强度接近开空门槛；候选信号需保持并由1小时收盘跌破最近 ${params.breakoutLookback} 小时低点确认。`;
+    newEntry = "开空候选 · 尚未确认";
+    nextTrigger = `1小时收盘跌破最近 ${params.breakoutLookback} 小时低点`;
   }
   const nextReviewTime = latest.t + 60 * 60 * 1000;
   const trainDays = Math.max(1, Math.round((rows[testingStart - 1].t - rows[24].t) / DAY));
@@ -1774,7 +2146,13 @@ function renderWalkForwardModel() {
   panel.dataset.direction = direction;
   setText("model-now-title", title);
   setText("model-probability", `${displayScore > 0 ? "+" : ""}${displayScore}/100`);
+  const scoreBlock = document.querySelector(".model-score");
+  if (scoreBlock) scoreBlock.dataset.tone = scorePresentation.tone;
+  setText("model-score-meaning", scorePresentation.label);
   setText("model-summary", summary);
+  setText("model-existing-trend", existingTrend);
+  setText("model-new-entry", newEntry);
+  setText("model-next-trigger", nextTrigger);
   setText("model-entry-price", entryPrice);
   setText("model-trend-drawdown", trendDrawdown);
   setText("model-invalidation", invalidation);
@@ -1791,6 +2169,7 @@ function renderWalkForwardModel() {
   setModelEvidence("model-relative-strength", `${relativeLabel} ${relativeScore > 0 ? "+" : ""}${relativeScore}`, relativeTone);
   setModelEvidence("model-contract-structure", marketStructure ? `${marketStructure.label} ${marketScore > 0 ? "+" : ""}${marketScore}` : "等待结构快照",
     marketScore > 3 ? "positive" : marketScore < -3 ? "negative" : "neutral");
+  setText("model-version-badge", auxiliaryPromoted ? "正式模型 · 指标增强" : "正式模型 · 稳定基线");
   setText("model-split-badge", `${trainDays}日训练 · ${testDays}日测试`);
   setText("model-samples", `${testing.trades.length} 次趋势信号`);
   setText("model-trend-recall", referenceTrends.length ? `${Math.round(capture.recall * 100)}%` : "事件不足");
@@ -1798,7 +2177,8 @@ function renderWalkForwardModel() {
   setText("model-win-rate", testing.trades.length ? `${Math.round(testing.winRate * 100)}%` : "暂无交易");
   setText("model-giveback", testing.trades.length ? `${Math.round(testing.averageGiveback * 100)}%` : "--");
   const sampleConfidence = referenceTrends.length >= 20 ? "样本可信度较高" : referenceTrends.length >= 8 ? "样本可信度中等" : "样本仍有限";
-  setText("model-validation-note", `测试期以回撤超过5%的完整趋势作为参照，识别到 ${capture.detected}/${referenceTrends.length} 段，${sampleConfidence}；动态回撤为 max(${(params.minDrawdown * 100).toFixed(1)}%，${params.atrMultiplier}倍ATR)。`);
+  const modelNote = auxiliaryPromoted ? "辅助指标已通过训练期升级门槛" : "辅助指标候选未通过升级门槛，当前自动使用稳定基线";
+  setText("model-validation-note", `测试期识别到 ${capture.detected}/${referenceTrends.length} 段，${sampleConfidence}；${modelNote}。动态回撤为 max(${(params.minDrawdown * 100).toFixed(1)}%，${params.atrMultiplier}倍ATR)。`);
   setText("model-net-return", formatPercent(testing.netReturn * 100));
   setText("model-strategy-drawdown", formatPercent(testing.maxDrawdown * 100));
   setText("model-hold-time", testing.trades.length ? `${testing.averageHoldBars.toFixed(1)} 小时` : "--");
@@ -1806,12 +2186,194 @@ function renderWalkForwardModel() {
   setText("model-entry-delay", referenceTrends.length ? `${capture.averageEntryDelayBars.toFixed(1)} 小时` : "--");
   setText("model-early-exit", testing.trades.length ? `${Math.round(capture.earlyExitRate * 100)}%` : "--");
   setText("model-repeat-signals", referenceTrends.length ? `${capture.signalsPerTrend.toFixed(1)} 次/趋势` : "--");
-  const captureDelta = (capture.captureRate - baselineCapture.captureRate) * 100;
-  const drawdownImprovement = (Math.abs(baselineTesting.maxDrawdown) - Math.abs(testing.maxDrawdown)) * 100;
-  setText("model-aux-impact", `捕获 ${captureDelta >= 0 ? "+" : ""}${captureDelta.toFixed(1)}pp · 回撤 ${drawdownImprovement >= 0 ? "改善" : "增加"}${Math.abs(drawdownImprovement).toFixed(1)}pp`);
+  const captureDelta = (candidateCapture.captureRate - baselineCapture.captureRate) * 100;
+  const drawdownImprovement = (Math.abs(baselineTesting.maxDrawdown) - Math.abs(candidateTesting.maxDrawdown)) * 100;
+  setText("model-aux-impact", `${auxiliaryPromoted ? "已升级" : "候选未升级"} · 捕获 ${captureDelta >= 0 ? "+" : ""}${captureDelta.toFixed(1)}pp · 回撤 ${drawdownImprovement >= 0 ? "改善" : "增加"}${Math.abs(drawdownImprovement).toFixed(1)}pp`);
   setText("model-market-context", marketStructure
     ? `${marketStructure.snapshots} 条快照 · ${marketStructure.fundingPoints} 资金费率点`
     : "等待首次免费采集");
+}
+
+function fourHourTradeDecision(components, score, confidence) {
+  const marketSignals = components.slice(0, 3);
+  const signalFor = (id) => marketSignals.find((component) => component.id === id)?.signal;
+  const oneHour = signalFor("1h");
+  const fourHour = signalFor("4h");
+  const bullishCount = marketSignals.filter((component) => component.signal?.key === "bullish").length;
+  const bearishCount = marketSignals.filter((component) => component.signal?.key === "bearish").length;
+  const marketDataComplete = marketSignals.every((component) => component.signal);
+  const canLong = marketDataComplete
+    && score >= 40
+    && confidence >= 65
+    && bullishCount >= 2
+    && oneHour?.key === "bullish"
+    && fourHour?.key === "bullish";
+  const canShort = marketDataComplete
+    && score <= -40
+    && confidence >= 65
+    && bearishCount >= 2
+    && oneHour?.key === "bearish"
+    && fourHour?.key === "bearish";
+
+  if (canLong) {
+    return {
+      key: "bullish",
+      action: "long",
+      label: "可以开多",
+      condition: "行动参考：可以考虑分批、轻仓开多，等待15分钟回踩不转弱再执行，避免追高。若1小时或4小时转弱，或综合评分跌回 +20 以下，停止加仓并考虑减仓。",
+    };
+  }
+  if (canShort) {
+    return {
+      key: "bearish",
+      action: "short",
+      label: "可以开空",
+      condition: "行动参考：可以考虑分批、轻仓开空，等待15分钟反弹不转强再执行，避免追跌。若1小时或4小时转强，或综合评分回升至 -20 以上，停止加仓并考虑减仓。",
+    };
+  }
+
+  const candidate = score >= 25
+    ? "偏多候选，但尚未同时满足1小时、4小时确认和评分门槛"
+    : score <= -25
+      ? "偏空候选，但尚未同时满足1小时、4小时确认和评分门槛"
+      : "多空证据不足或存在分歧";
+  return {
+    key: "neutral",
+    action: "wait",
+    label: "观望",
+    condition: `行动参考：暂不开仓。${candidate}；等待综合评分达到 ±40，且1小时与4小时同向后再评估。`,
+  };
+}
+
+function normalizedRiskProfile(profile = {}) {
+  const numberWithin = (value, fallback, minimum, maximum) => {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? Math.max(minimum, Math.min(maximum, parsed)) : fallback;
+  };
+  return {
+    equity: numberWithin(profile.equity, DEFAULT_RISK_PROFILE.equity, 100, 10_000_000),
+    marginAllocation: numberWithin(profile.marginAllocation, DEFAULT_RISK_PROFILE.marginAllocation, 0.1, 100),
+    leverage: numberWithin(profile.leverage, DEFAULT_RISK_PROFILE.leverage, 1, 200),
+    maxRisk: numberWithin(profile.maxRisk, DEFAULT_RISK_PROFILE.maxRisk, 0.1, 100),
+    roundTripCost: numberWithin(profile.roundTripCost, DEFAULT_RISK_PROFILE.roundTripCost, 0, 2),
+  };
+}
+
+function calculateExecutionRisk(profile, price, atrFraction, signalAction = "wait") {
+  const config = normalizedRiskProfile(profile);
+  const marginUsed = config.equity * config.marginAllocation / 100;
+  const notional = marginUsed * config.leverage;
+  const effectiveLeverage = notional / config.equity;
+  const technicalStopFraction = Math.max(0.0035, Number(atrFraction || 0) * 1.25);
+  const costFraction = config.roundTripCost / 100;
+  const estimatedCost = notional * costFraction;
+  const stopLoss = notional * technicalStopFraction;
+  const projectedLoss = estimatedCost + stopLoss;
+  const riskBudget = config.equity * config.maxRisk / 100;
+  const maximumSafeNotional = riskBudget / Math.max(technicalStopFraction + costFraction, 0.000001);
+  const maximumSafeMargin = maximumSafeNotional / config.leverage;
+  const maximumSafeAllocation = maximumSafeMargin / config.equity * 100;
+  const directionConfirmed = signalAction === "long" || signalAction === "short";
+  const riskPassed = projectedLoss <= riskBudget;
+  const quantity = price > 0 ? notional / price : 0;
+  const direction = signalAction === "long" ? 1 : signalAction === "short" ? -1 : 0;
+  const stopPrice = direction ? price * (1 - direction * technicalStopFraction) : null;
+  const targetOne = direction ? price * (1 + direction * technicalStopFraction * 1.5) : null;
+  const targetTwo = direction ? price * (1 + direction * technicalStopFraction * 2) : null;
+  const status = !directionConfirmed ? "wait" : riskPassed ? "ready" : "blocked";
+  return {
+    config,
+    marginUsed,
+    notional,
+    effectiveLeverage,
+    technicalStopFraction,
+    estimatedCost,
+    projectedLoss,
+    projectedRiskPercent: projectedLoss / config.equity * 100,
+    riskBudget,
+    maximumSafeNotional,
+    maximumSafeMargin,
+    maximumSafeAllocation,
+    quantity,
+    price,
+    stopPrice,
+    targetOne,
+    targetTwo,
+    signalAction,
+    status,
+  };
+}
+
+function formatRiskUsd(value) {
+  return `$${Number(value || 0).toLocaleString("zh-CN", { maximumFractionDigits: 0 })}`;
+}
+
+function readRiskProfile() {
+  try {
+    return normalizedRiskProfile(JSON.parse(localStorage.getItem(RISK_PROFILE_STORAGE_KEY) || "{}"));
+  } catch {
+    return normalizedRiskProfile();
+  }
+}
+
+function renderExecutionRisk() {
+  const rows = state.cache.get("15m")?.rows;
+  if (!rows?.length) return;
+  const latest = rows.at(-1);
+  const price = Number(latest.hype || 0);
+  const atrFraction = Number(latest.hypeAtrPercent || rollingAtrPercent(rows, rows.length - 1));
+  const signalAction = $("four-hour-brief")?.dataset.action || "wait";
+  const plan = calculateExecutionRisk(state.riskProfile || DEFAULT_RISK_PROFILE, price, atrFraction, signalAction);
+  const status = $("execution-status");
+  status.className = `execution-status ${plan.status}`;
+  const decision = plan.status === "ready"
+    ? `可以执行${signalAction === "long" ? "开多" : "开空"}`
+    : plan.status === "blocked"
+      ? "暂不执行 · 仓位过大"
+      : "观望 · 等待方向";
+  setText("execution-decision", decision);
+  setText("execution-direction", signalAction === "long" ? "方向允许开多" : signalAction === "short" ? "方向允许开空" : "方向信号尚未确认");
+  setText("risk-margin-used", `${formatRiskUsd(plan.marginUsed)} · ${plan.config.marginAllocation.toFixed(1)}%`);
+  setText("risk-notional", formatRiskUsd(plan.notional));
+  setText("risk-effective-leverage", `${plan.effectiveLeverage.toFixed(1)}×`);
+  setText("risk-quantity", `${plan.quantity.toLocaleString("zh-CN", { maximumFractionDigits: 2 })} HYPE`);
+  setText("risk-stop-distance", `${(plan.technicalStopFraction * 100).toFixed(2)}%`);
+  setText("risk-projected-loss", `${formatRiskUsd(plan.projectedLoss)} · ${plan.projectedRiskPercent.toFixed(2)}%账户`);
+  setText("risk-budget-value", `${formatRiskUsd(plan.riskBudget)} · ${plan.config.maxRisk.toFixed(1)}%`);
+  setText("risk-safe-margin", `${formatRiskUsd(plan.maximumSafeMargin)} · ${plan.maximumSafeAllocation.toFixed(2)}%账户`);
+  setText("risk-entry-price", price ? `$${price.toFixed(3)}` : "--");
+  setText("risk-stop-price", plan.stopPrice ? `$${plan.stopPrice.toFixed(3)}` : "等待方向");
+  setText("risk-target-one", plan.targetOne ? `$${plan.targetOne.toFixed(3)}` : "等待方向");
+  setText("risk-target-two", plan.targetTwo ? `$${plan.targetTwo.toFixed(3)}` : "等待方向");
+
+  const note = plan.status === "blocked"
+    ? `当前计划预计亏损 ${formatRiskUsd(plan.projectedLoss)}，超过 ${formatRiskUsd(plan.riskBudget)} 风险预算。按当前波动，100倍参数下单次保证金建议不超过 ${formatRiskUsd(plan.maximumSafeMargin)}；先缩小仓位，再考虑执行。`
+    : plan.status === "ready"
+      ? `方向与风险预算同时通过。参考止损采用1.25倍15分钟ATR且不低于0.35%；预计损失含 ${plan.config.roundTripCost.toFixed(2)}% 往返成本，未含跳价、额外滑点和资金费率。`
+      : `当前只做观察。按现有参数，技术止损加往返成本预计占账户 ${plan.projectedRiskPercent.toFixed(2)}%；全仓模式下单次保证金不是最大亏损。`;
+  setText("execution-risk-note", note);
+}
+
+function initRiskControls() {
+  state.riskProfile = readRiskProfile();
+  const fields = {
+    equity: $("risk-equity"),
+    marginAllocation: $("risk-margin-allocation"),
+    leverage: $("risk-leverage"),
+    maxRisk: $("risk-budget"),
+    roundTripCost: $("risk-round-trip-cost"),
+  };
+  Object.entries(fields).forEach(([key, element]) => {
+    element.value = state.riskProfile[key];
+    element.addEventListener("input", () => {
+      state.riskProfile = normalizedRiskProfile({
+        ...state.riskProfile,
+        [key]: element.value,
+      });
+      localStorage.setItem(RISK_PROFILE_STORAGE_KEY, JSON.stringify(state.riskProfile));
+      renderExecutionRisk();
+    });
+  });
 }
 
 function renderFourHourBrief() {
@@ -1830,42 +2392,35 @@ function renderFourHourBrief() {
   const score = Math.round(available.reduce((sum, component) => (
     sum + component.signal.score * component.weight
   ), 0) / availableWeight);
-  const direction = score >= 25
-    ? { key: "bullish", label: "条件偏强" }
-    : score <= -25
-      ? { key: "bearish", label: "条件偏弱" }
-      : { key: "neutral", label: "观望为主" };
   const directional = available.filter((component) => Math.abs(component.signal.score) >= 15);
   const positive = directional.filter((component) => component.signal.score > 0).length;
   const negative = directional.filter((component) => component.signal.score < 0).length;
   const alignment = directional.length ? Math.max(positive, negative) / directional.length : 0.5;
   const completeness = availableWeight;
   const confidence = Math.min(92, Math.round(32 + completeness * 24 + alignment * 23 + Math.min(Math.abs(score) * 0.22, 13)));
+  const decision = fourHourTradeDecision(components, score, confidence);
   const marketLabels = components.slice(0, 3).map((component) => (
     `${component.label}${component.signal ? component.signal.label : "待更新"}`
   )).join("、");
   const opinion = components[3].signal;
   const opinionText = opinion ? `最近24小时观点为${opinion.label}` : "最近24小时观点数据不足";
-  const summary = `${marketLabels}；${opinionText}。综合评分 ${score > 0 ? "+" : ""}${score}/100。`;
-  const condition = direction.key === "bullish"
-    ? "策略参考：等待回踩确认，避免追高；只有15分钟与1小时保持同向、且4小时不转弱时，偏强判断才继续有效。"
-    : direction.key === "bearish"
-      ? "策略参考：优先控制风险，避免逆势追多；只有15分钟与1小时先转强、且4小时停止走弱时，才视为修复信号。"
-      : "策略参考：暂不依据单一周期采取动作；等待15分钟与1小时同向，并获得4小时趋势或观点共识确认。";
+  const summary = `当前信号：${decision.label}。${marketLabels}；${opinionText}。综合评分 ${score > 0 ? "+" : ""}${score}/100。`;
 
   panel.classList.remove("loading-block");
-  panel.dataset.direction = direction.key;
+  panel.dataset.direction = decision.key;
+  panel.dataset.action = decision.action;
   const stance = $("four-hour-stance");
-  stance.className = `four-hour-stance ${direction.key}`;
-  stance.textContent = direction.label;
+  stance.className = `four-hour-stance ${decision.key}`;
+  stance.textContent = decision.label;
   setText("four-hour-summary", summary);
-  setText("four-hour-condition", condition);
+  setText("four-hour-condition", decision.condition);
   setText("four-hour-score", `${score > 0 ? "+" : ""}${score}`);
   setText("four-hour-confidence", `置信度 ${confidence}%`);
   $("four-hour-signals").innerHTML = components.map((component) => {
     const signal = component.signal || { key: "neutral", label: "待更新", score: 0 };
     return `<span class="${signal.key}"><small>${component.label}</small><strong>${escapeHtml(signal.label)}</strong></span>`;
   }).join("");
+  renderExecutionRisk();
 }
 
 function horizonBucket(horizon = "") {
@@ -2309,6 +2864,10 @@ function initSocial() {
 document.querySelectorAll("[data-period]").forEach((button) => {
   button.addEventListener("click", () => switchPeriod(button.dataset.period));
 });
+document.addEventListener("click", (event) => {
+  const help = event.target.closest(".stat-help");
+  if (help?.dataset.help) showToast(help.dataset.help, 6500);
+});
 $("refresh-button").addEventListener("click", () => refreshAll(true));
 
 window.addEventListener("online", () => {
@@ -2318,7 +2877,9 @@ window.addEventListener("online", () => {
 window.addEventListener("offline", () => setConnection("error", "网络离线"));
 
 initSocial();
+initPriceAlerts();
 initDashboardTabs();
+initRiskControls();
 loadMarketContext();
 refreshAll();
 window.setInterval(() => refreshAll(true), 5 * 60 * 1000);

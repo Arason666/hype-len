@@ -19,6 +19,7 @@ def main() -> None:
         SITE / "data" / "market-context.json",
         ROOT / "scripts" / "x_monitor.py",
         ROOT / "scripts" / "market_context.py",
+        ROOT / "scripts" / "price_alert_service.py",
         ROOT / ".github" / "workflows" / "x-monitor.yml",
         ROOT / ".github" / "workflows" / "market-context.yml",
     ]
@@ -35,6 +36,7 @@ def main() -> None:
     market_data = json.loads((SITE / "data" / "market-context.json").read_text(encoding="utf-8"))
     market_collector = (ROOT / "scripts" / "market_context.py").read_text(encoding="utf-8")
     market_workflow = (ROOT / ".github" / "workflows" / "market-context.yml").read_text(encoding="utf-8")
+    alert_service = (ROOT / "scripts" / "price_alert_service.py").read_text(encoding="utf-8")
     checks = {
         "responsive viewport": 'name="viewport"' in html,
         "Chinese language": 'lang="zh-CN"' in html,
@@ -62,8 +64,17 @@ def main() -> None:
         "multi-horizon opinion checks": "OPINION_HORIZONS" in javascript and "evaluateOpinions" in javascript,
         "weighted opinion summary": 'id="opinion-summary"' in html and "renderOpinionSummary" in javascript and "opinionWeight" in javascript,
         "four hour strategy brief": 'id="four-hour-brief"' in html and "renderFourHourBrief" in javascript and "relativePeriodSignal" in javascript,
+        "explicit four hour trade action": "fourHourTradeDecision" in javascript and all(label in javascript for label in ("可以开多", "可以开空", "观望")),
+        "cross margin risk execution panel": 'id="execution-risk"' in html and "calculateExecutionRisk" in javascript and "maximumSafeMargin" in javascript,
+        "configurable account risk": all(f'id="{element_id}"' in html for element_id in ("risk-equity", "risk-margin-allocation", "risk-leverage", "risk-budget", "risk-round-trip-cost")),
         "decision first dashboard": 'class="decision-command"' in html and "data-dashboard-tab" in html and "activateDashboardTab" in javascript,
         "three analysis panels": all(f'data-dashboard-panel="{name}"' in html for name in ("market", "model", "social")),
+        "price alert dashboard panel": 'data-dashboard-panel="alert"' in html and 'id="alert-rule-form"' in html and 'id="alert-log-list"' in html,
+        "authenticated alert frontend": "ALERT_API_TOKEN_SESSION_KEY" in javascript and "alertApiRequest" in javascript and 'Authorization: `Bearer ${token}`' in javascript,
+        "alert rules and log actions": all(token in javascript for token in ("saveAlertRule", "data-alert-rule-toggle", "data-alert-event-ack", "renderAlertSnapshot")),
+        "always on Hyperliquid price service": all(token in alert_service for token in ("metaAndAssetCtxs", "fetch_hype_mark_price", "AlertEngine", "ALERT_API_TOKEN")),
+        "price alert anti flap controls": all(token in alert_service for token in ("confirm_ticks", "cooldown_minutes", "rearm_percent", "phone_delay_seconds")),
+        "ntfy and phone escalation": all(token in alert_service for token in ("send_ntfy", "send_phone", "SendCustomAlarmMsg", "phone_events_due")),
         "progressive detail disclosures": "model-detail-disclosure" in html and "market-detail-disclosure" in html and "social-settings" in html,
         "condensed opinion records": "visibleRecords.slice(0, 3)" in javascript and 'id="toggle-opinions"' in html,
         "event driven trend model": 'id="model-lab"' in html and "renderWalkForwardModel" in javascript and "simulateTrendStrategy" in javascript,
@@ -76,6 +87,9 @@ def main() -> None:
         "indicator gated trend entries": "longTrendQuality" in javascript and "shortTrendQuality" in javascript and "momentumAligned" in javascript,
         "live indicator evidence": all(f'id="{element_id}"' in html for element_id in ("model-adx", "model-atr", "model-roc", "model-volume-z", "model-relative-strength", "model-contract-structure")),
         "auxiliary indicator ablation": "baselineCapture" in javascript and 'id="model-aux-impact"' in html,
+        "champion challenger fallback": "shouldPromoteAuxiliaryModel" in javascript and "auxiliaryPromoted" in javascript and 'id="model-version-badge"' in html,
+        "clear model decision fields": all(f'id="{element_id}"' in html for element_id in ("model-score-meaning", "model-existing-trend", "model-new-entry", "model-next-trigger")),
+        "accessible metric explanations": html.count('class="stat-help"') >= 11 and "data-help" in html and 'closest(".stat-help")' in javascript,
         "free market context panel": 'id="model-market-context"' in html and "marketStructureSignal" in javascript and "loadMarketContext" in javascript,
         "free market context collector": all(token in market_collector for token in ("metaAndAssetCtxs", "fundingHistory", "l2Book", "recentTrades")),
         "market context retention": market_data.get("snapshot_retention_days") == 60 and market_data.get("funding_retention_days") == 180,

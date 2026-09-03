@@ -2933,6 +2933,23 @@ footer p { margin: 0; }
   font-size: 12px;
 }
 
+.alert-mobile-pair-link {
+  grid-column: 1 / -1;
+  width: fit-content;
+  color: var(--mint-bright);
+  font-size: 12px;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.alert-mobile-pair-link:hover {
+  text-decoration: underline;
+}
+
+.alert-mobile-pair-link[hidden] {
+  display: none;
+}
+
 .alert-service-config > p i {
   display: inline-block;
   width: 7px;
@@ -2992,7 +3009,7 @@ footer p { margin: 0; }
 
 .alert-rule-form {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 15px;
   margin-top: 20px;
 }

@@ -83,7 +83,7 @@ python3 -m unittest discover -s tests -v
 
 ## 配置实时价格预警
 
-实时到价预警不能依赖 GitHub Pages 或浏览器常驻。`scripts/price_alert_service.py` 是独立的轻量服务：默认每 3 秒读取一次 Hyperliquid 的 HYPE 标记价格，连续确认 3 次后触发 ntfy；若仍未在看板确认，可在 45 秒后调用腾讯云监控电话策略。
+实时到价预警不能依赖 GitHub Pages 或浏览器常驻。`scripts/price_alert_service.py` 是独立的轻量服务：默认每 3 秒一次性读取 Hyperliquid 的 HYPE、ETH 与 BTC 标记价格，按规则所选币种判断，连续确认 3 次后触发 ntfy；若仍未在看板确认，可在 45 秒后调用腾讯云监控电话策略。
 
 ### 1. 手机安装 ntfy
 
@@ -129,8 +129,8 @@ export TENCENTCLOUD_REGION="ap-guangzhou"
 
 打开 `价格预警` 页签：
 
-1. 看板默认连接 `https://alerts.northinterval.com`。每台设备首次使用时填写一次 `ALERT_API_TOKEN` 并点击“配对此设备”；服务会签发 30 天有效的 `HttpOnly + Secure` Cookie，网页不会永久保存原始密钥。
-2. 选择“下跌至或低于”或“上涨至或高于”，输入 HYPE 目标价格。
+1. 看板默认连接 `https://alerts.northinterval.com`。每台设备首次使用时填写一次 `ALERT_API_TOKEN` 并点击“配对此设备”；浏览器会打开同域安全配对页、签发 30 天有效的 `HttpOnly + Secure` Cookie，再自动返回看板。网页不会永久保存原始密钥。若手机浏览器没有跳转，可点“手机仍无法配对？打开独立安全配对页”。
+2. 选择 `HYPE`、`ETH` 或 `BTC`，再选择“下跌至或低于”或“上涨至或高于”，输入目标价格。
 3. 勾选 `ntfy 强推`；确认腾讯云策略测试成功后再勾选“未确认后电话升级”。
 4. 默认保留连续确认 `3` 次、电话延迟 `45` 秒、冷却 `15` 分钟、重新布防缓冲 `0.25%`。
 5. 点击“保存并启用”。规则必须显示“已布防”才算真正运行。

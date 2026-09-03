@@ -10,7 +10,7 @@
     />
     <title>HYPE 趋势分析</title>
     <link rel="manifest" href="./manifest.webmanifest" />
-    <link rel="stylesheet" href="./styles.css?v=20260830-1" />
+    <link rel="stylesheet" href="./styles.css?v=20260903-1" />
   </head>
   <body>
     <div class="ambient ambient-one" aria-hidden="true"></div>
@@ -408,8 +408,8 @@
         <div class="section-head alert-section-head">
           <div>
             <p class="section-kicker">ALWAYS-ON PRICE ALERTS</p>
-            <h2>HYPE 到价预警</h2>
-            <p class="alert-intro">由常驻服务持续读取 Hyperliquid 标记价格；网页关闭、手机锁屏后仍可触发。</p>
+            <h2>HYPE / ETH / BTC 到价预警</h2>
+            <p class="alert-intro">由常驻服务持续读取 Hyperliquid 的 HYPE、ETH 与 BTC 标记价格；网页关闭、手机锁屏后仍可触发。</p>
           </div>
           <div class="alert-service-state offline" id="alert-service-state" role="status" aria-live="polite">
             <i></i>
@@ -429,6 +429,7 @@
           <button class="alert-connect-button" id="alert-connect-button" type="button">配对此设备</button>
           <button class="alert-disconnect-button" id="alert-disconnect-button" type="button" hidden>断开 / 重新配对</button>
           <p id="alert-runtime-note"><i></i> 密钥仅在首次配对时提交；随后由安全 Cookie 自动连接，关闭网页或电脑不会停止服务器预警。</p>
+          <a class="alert-mobile-pair-link" id="alert-mobile-pair-link" href="https://alerts.northinterval.com/pair">手机仍无法配对？打开独立安全配对页</a>
         </div>
 
         <div class="alert-workspace">
@@ -438,13 +439,21 @@
                 <p class="section-kicker">TRIGGER RULE</p>
                 <h3 id="alert-rule-title">新增价格预警</h3>
               </div>
-              <span class="alert-live-price"><small>HYPE 标记价格</small><strong id="alert-latest-price">--</strong></span>
+              <span class="alert-live-price"><small id="alert-live-asset-label">HYPE 标记价格</small><strong id="alert-latest-price">--</strong></span>
             </div>
 
             <form class="alert-rule-form" id="alert-rule-form">
               <label class="alert-rule-name">
                 <span>规则名称</span>
                 <input id="alert-rule-name" type="text" maxlength="80" placeholder="例如：跌破防守位" />
+              </label>
+              <label>
+                <span>币种</span>
+                <select id="alert-asset">
+                  <option value="HYPE">HYPE</option>
+                  <option value="ETH">ETH</option>
+                  <option value="BTC">BTC</option>
+                </select>
               </label>
               <label>
                 <span>触发方向</span>
@@ -667,6 +676,6 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
     <script async src="https://platform.x.com/widgets.js" charset="utf-8"></script>
-    <script type="module" src="./app.js?v=20260830-1"></script>
+    <script type="module" src="./app.js?v=20260903-1"></script>
   </body>
 </html>

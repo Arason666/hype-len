@@ -5,6 +5,7 @@ const DAY = 24 * 60 * 60 * 1000;
 const MODEL_ROUND_TRIP_COST = 0.001;
 const RISK_PROFILE_STORAGE_KEY = "hype-lens-risk-profile-v1";
 const ALERT_DEFAULT_API_URL = "https://alerts.northinterval.com";
+const ALERT_ASSETS = Object.freeze(["HYPE", "ETH", "BTC"]);
 const DEFAULT_RISK_PROFILE = Object.freeze({
   equity: 17_000,
   marginAllocation: 4,
@@ -828,7 +829,7 @@ function renderMetrics() {
     setChange(`${prefix}-change-24h`, percentChange(rows, key, 96));
   });
   setText("last-updated", `更新于 ${formatFullTime.format(result.savedAt)} CST${result.stale ? " · 缓存" : ""}`);
-  if (!state.alertConnected) setText("alert-latest-price", `$${latest.hype.toFixed(3)} · 网页行情`);
+  if (!state.alertConnected) renderSelectedAlertPrice();
   evaluateOpinions();
   renderFourHourBrief();
 }
@@ -1101,6 +1102,39 @@ function alertDirectionLabel(direction) {
   return direction === "above" ? "上涨至或高于" : "下跌至或低于";
 }
 
+function alertAsset(value) {
+  const normalized = String(value || "HYPE").toUpperCase();
+  return ALERT_ASSETS.includes(normalized) ? normalized : "HYPE";
+}
+
+function selectedAlertAsset() {
+  return alertAsset($("alert-asset")?.value);
+}
+
+function formatAlertPrice(value, asset = "HYPE") {
+  if (value === null || value === undefined || value === "") return "等待价格";
+  const price = Number(value);
+  if (!Number.isFinite(price)) return "等待价格";
+  return `$${price.toLocaleString("en-US", {
+    minimumFractionDigits: asset === "HYPE" ? 3 : 2,
+    maximumFractionDigits: asset === "HYPE" ? 3 : 2,
+  })}`;
+}
+
+function renderSelectedAlertPrice(snapshot = state.alertSnapshot) {
+  const asset = selectedAlertAsset();
+  setText("alert-live-asset-label", `${asset} 标记价格`);
+  const latestPrices = snapshot?.latest_prices || {};
+  let price = latestPrices[asset] ?? (asset === "HYPE" ? snapshot?.latest_price : null);
+  let suffix = "";
+  if (!snapshot) {
+    const latest = state.cache.get("15m")?.rows?.at(-1);
+    price = latest ? { HYPE: latest.hype, ETH: latest.ethUsd, BTC: latest.btcUsd }[asset] : null;
+    suffix = price === null || price === undefined ? "" : " · 网页行情";
+  }
+  setText("alert-latest-price", `${formatAlertPrice(price, asset)}${suffix}`);
+}
+
 function alertRuleState(rule) {
   if (!rule.enabled) return { key: "disabled", label: "已暂停" };
   if (rule.state === "armed") return { key: "armed", label: "已布防" };
@@ -1145,19 +1179,18 @@ function renderAlertSnapshot(snapshot) {
     runtimeError ? `最近错误：${runtimeError}` : `${rules.length} 条规则 · ${pushText}`,
   );
   setAlertRuntimeNote(`服务器独立运行，关闭网页或电脑不影响预警 · 最新价格更新：${latestTime} · ${pushText}`);
-  setText("alert-latest-price", Number.isFinite(Number(snapshot.latest_price))
-    ? `$${Number(snapshot.latest_price).toFixed(3)}`
-    : "等待价格");
+  renderSelectedAlertPrice(snapshot);
 
   setText("alert-rule-count", `${rules.length} 条规则`);
   $("alert-rule-list").innerHTML = rules.length ? rules.map((rule) => {
     const status = alertRuleState(rule);
+    const asset = alertAsset(rule.asset);
     const channels = rule.channels.map((channel) => channel === "phone" ? "电话" : "ntfy").join(" + ");
     const cooldown = rule.cooldown_until ? formatAlertTimestamp(rule.cooldown_until) : "--";
     return `
       <div class="alert-rule-card ${status.key}">
         <div class="alert-rule-card-head">
-          <div><strong>${escapeHtml(rule.name)}</strong><span>${alertDirectionLabel(rule.direction)} $${Number(rule.threshold).toFixed(3)}</span></div>
+          <div><strong>${escapeHtml(rule.name)}</strong><span>${asset} ${alertDirectionLabel(rule.direction)} ${formatAlertPrice(rule.threshold, asset)}</span></div>
           <span class="alert-rule-status">${status.label}</span>
         </div>
         <div class="alert-rule-meta">
@@ -1177,11 +1210,12 @@ function renderAlertSnapshot(snapshot) {
 
   $("alert-log-list").innerHTML = events.length ? events.slice(0, 100).map((event) => {
     const acknowledged = Boolean(event.acknowledged_at);
+    const asset = alertAsset(event.asset);
     const rearmed = event.rearmed_at ? `重新布防 ${formatAlertTimestamp(event.rearmed_at)}` : "等待价格离开阈值后重新布防";
     return `
       <div class="alert-log-row ${acknowledged ? "acknowledged" : "open"}">
         <div class="alert-log-time"><strong>${formatAlertTimestamp(event.triggered_at)}</strong><span>${escapeHtml(event.rule_name)}</span></div>
-        <div><small>触发条件</small><strong>${alertDirectionLabel(event.direction)} $${Number(event.threshold).toFixed(3)}</strong><span>实际 $${Number(event.trigger_price).toFixed(3)}</span></div>
+        <div><small>触发条件</small><strong>${asset} ${alertDirectionLabel(event.direction)} ${formatAlertPrice(event.threshold, asset)}</strong><span>实际 ${formatAlertPrice(event.trigger_price, asset)}</span></div>
         <div><small>通知结果</small><strong>${alertChannelStatus(event, "ntfy")}</strong><span>${alertChannelStatus(event, "phone")}</span></div>
         <div><small>处理状态</small><strong>${acknowledged ? "已确认" : "待确认"}</strong><span>${acknowledged ? formatAlertTimestamp(event.acknowledged_at) : rearmed}</span></div>
         ${acknowledged ? "" : `<button type="button" data-alert-event-ack="${event.id}">我已知晓</button>`}
@@ -1200,6 +1234,7 @@ function setAlertConnectionControls(connected) {
   tokenInput.placeholder = connected ? "本设备已安全配对" : "每台设备只需输入一次";
   $("alert-connect-button").textContent = connected ? "刷新状态" : "配对此设备";
   $("alert-disconnect-button").hidden = !connected;
+  $("alert-mobile-pair-link").hidden = connected;
 }
 
 function setAlertDisconnected(message = "网页尚未连接；服务器上已保存的规则仍会继续执行") {
@@ -1218,8 +1253,8 @@ async function connectAlertService(announce = true) {
   button.textContent = token ? "正在配对…" : "正在连接…";
   try {
     if (token) {
-      await alertApiRequest("/api/pair", { method: "POST", alertToken: token });
-      $("alert-api-token").value = "";
+      submitAlertPairing(token);
+      return;
     }
     const snapshot = await alertApiRequest("/api/alerts");
     state.alertConnected = true;
@@ -1232,6 +1267,21 @@ async function connectAlertService(announce = true) {
   } finally {
     button.disabled = false;
   }
+}
+
+function submitAlertPairing(token) {
+  const { url } = alertCredentials();
+  const form = document.createElement("form");
+  const field = document.createElement("input");
+  form.method = "POST";
+  form.action = `${url}/pair`;
+  form.hidden = true;
+  field.type = "hidden";
+  field.name = "token";
+  field.value = token;
+  form.append(field);
+  document.body.append(form);
+  form.submit();
 }
 
 async function disconnectAlertDevice() {
@@ -1285,6 +1335,7 @@ async function saveAlertRule(event) {
   }
   const payload = {
     name: $("alert-rule-name").value.trim(),
+    asset: selectedAlertAsset(),
     direction: $("alert-direction").value,
     threshold,
     channels,
@@ -1325,7 +1376,7 @@ async function testAlertChannel(channel) {
   const originalText = button.textContent;
   button.textContent = "发送中…";
   try {
-    await alertApiRequest("/api/test", { method: "POST", body: JSON.stringify({ channel }) });
+    await alertApiRequest("/api/test", { method: "POST", body: JSON.stringify({ channel, asset: selectedAlertAsset() }) });
     showToast(channel === "phone" ? "测试电话已提交" : "测试强推已发送");
     await refreshAlertSnapshot(true);
   } catch (error) {
@@ -1344,6 +1395,7 @@ function initPriceAlerts() {
   setAlertConnectionControls(false);
   $("alert-connect-button").addEventListener("click", () => connectAlertService(true));
   $("alert-disconnect-button").addEventListener("click", disconnectAlertDevice);
+  $("alert-asset").addEventListener("change", () => renderSelectedAlertPrice());
   $("alert-rule-form").addEventListener("submit", saveAlertRule);
   $("alert-log-refresh").addEventListener("click", () => refreshAlertSnapshot(false));
   document.querySelectorAll("[data-alert-test]").forEach((button) => {

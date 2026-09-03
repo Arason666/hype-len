@@ -3,6 +3,7 @@ import json
 import tempfile
 import threading
 import unittest
+import urllib.parse
 from http.server import ThreadingHTTPServer
 from pathlib import Path
 from unittest import mock
@@ -78,6 +79,27 @@ class PriceAlertEngineTests(unittest.TestCase):
         self.assertEqual(snapshot["rules"][0]["id"], rule["id"])
         self.assertEqual(len(snapshot["events"]), 1)
 
+    def test_rules_are_scoped_to_hype_eth_or_btc(self):
+        self.add_rule(name="ETH 跌破", asset="ETH", threshold=3_000, confirm_ticks=1)
+        self.add_rule(name="BTC 突破", asset="BTC", direction="above", threshold=100_000, confirm_ticks=1)
+        events = self.engine.process_prices({"HYPE": 50, "ETH": 2_999, "BTC": 99_999}, 4_000)
+        self.assertEqual([event["asset"] for event in events], ["ETH"])
+        snapshot = self.engine.snapshot()
+        self.assertEqual(snapshot["latest_prices"], {"HYPE": 50.0, "ETH": 2_999.0, "BTC": 99_999.0})
+        self.assertEqual(snapshot["latest_price"], 50.0)
+
+    def test_legacy_rules_are_migrated_to_hype(self):
+        path = self.engine.store.path
+        path.write_text(json.dumps({
+            "rules": [{"id": "legacy", "name": "旧规则"}],
+            "events": [{"id": "legacy-event"}],
+            "latest_price": 83.25,
+        }), encoding="utf-8")
+        snapshot = AlertEngine(JsonStateStore(path)).snapshot()
+        self.assertEqual(snapshot["rules"][0]["asset"], "HYPE")
+        self.assertEqual(snapshot["events"][0]["asset"], "HYPE")
+        self.assertEqual(snapshot["latest_prices"]["HYPE"], 83.25)
+
     def test_invalid_rule_is_rejected(self):
         with self.assertRaises(ValueError):
             self.add_rule(direction="sideways")
@@ -85,6 +107,8 @@ class PriceAlertEngineTests(unittest.TestCase):
             self.add_rule(threshold=-1)
         with self.assertRaises(ValueError):
             self.add_rule(channels=[])
+        with self.assertRaises(ValueError):
+            self.add_rule(asset="DOGE")
 
 
 class PriceAlertServiceTests(unittest.TestCase):
@@ -118,6 +142,7 @@ class PriceAlertServiceTests(unittest.TestCase):
         with mock.patch("urllib.request.urlopen", return_value=response) as urlopen:
             NotificationSender(self.config).send_ntfy({
                 "rule_name": "下跌至83",
+                "asset": "ETH",
                 "direction": "below",
                 "threshold": 83,
                 "trigger_price": 82.99,
@@ -127,13 +152,14 @@ class PriceAlertServiceTests(unittest.TestCase):
         payload = json.loads(request.data.decode("utf-8"))
         self.assertEqual(request.full_url, "https://ntfy.sh")
         self.assertEqual(payload["topic"], "private_test_topic")
-        self.assertEqual(payload["title"], "HYPE 到价预警")
+        self.assertEqual(payload["title"], "ETH 到价预警")
         self.assertIn("下跌至83", payload["message"])
+        self.assertIn("ETH", payload["message"])
         for _, value in request.header_items():
             value.encode("latin-1")
 
     def test_pairing_cookie_authenticates_only_the_allowed_origin(self):
-        application = PriceAlertApplication(self.config, fetch_price=lambda: 83.0)
+        application = PriceAlertApplication(self.config, fetch_prices=lambda: {"HYPE": 83.0, "ETH": 3_000.0, "BTC": 100_000.0})
         server = ThreadingHTTPServer(("127.0.0.1", 0), make_handler(application))
         thread = threading.Thread(target=server.serve_forever, daemon=True)
         thread.start()
@@ -165,6 +191,45 @@ class PriceAlertServiceTests(unittest.TestCase):
             response = connection.getresponse()
             response.read()
             self.assertEqual(response.status, 403)
+        finally:
+            connection.close()
+            server.shutdown()
+            server.server_close()
+
+    def test_first_party_pair_page_sets_cookie_and_redirects(self):
+        application = PriceAlertApplication(self.config, fetch_prices=lambda: {"HYPE": 83.0, "ETH": 3_000.0, "BTC": 100_000.0})
+        server = ThreadingHTTPServer(("127.0.0.1", 0), make_handler(application))
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        connection = http.client.HTTPConnection("127.0.0.1", server.server_port, timeout=5)
+        try:
+            connection.request("GET", "/pair")
+            response = connection.getresponse()
+            page = response.read().decode("utf-8")
+            self.assertEqual(response.status, 200)
+            self.assertIn("价格预警设备配对", page)
+
+            body = urllib.parse.urlencode({"token": self.config.api_token})
+            connection.request("POST", "/pair", body=body, headers={
+                "Content-Type": "application/x-www-form-urlencoded",
+                "Content-Length": str(len(body.encode("utf-8"))),
+            })
+            response = connection.getresponse()
+            response.read()
+            self.assertEqual(response.status, 303)
+            self.assertEqual(response.getheader("Location"), "https://northinterval.com/#alert")
+            cookie_header = response.getheader("Set-Cookie")
+            self.assertIn("HttpOnly", cookie_header)
+            self.assertIn("SameSite=Strict", cookie_header)
+            cookie = cookie_header.split(";", 1)[0]
+
+            connection.request("GET", "/api/alerts", headers={
+                "Cookie": cookie,
+                "Origin": self.config.allowed_origin,
+            })
+            response = connection.getresponse()
+            response.read()
+            self.assertEqual(response.status, 200)
         finally:
             connection.close()
             server.shutdown()

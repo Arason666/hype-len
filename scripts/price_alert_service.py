@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Always-on HYPE price alerts with a small authenticated JSON API.
+"""Always-on HYPE, ETH and BTC price alerts with a small authenticated JSON API.
 
 The service intentionally uses only the Python standard library.  It polls the
 Hyperliquid public API, persists rules/events to a JSON file, sends an urgent
@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import hashlib
 import hmac
+import html
 import json
 import os
 import secrets
@@ -37,6 +38,7 @@ TENCENT_MONITOR_VERSION = "2018-07-24"
 MAX_RULES = 30
 MAX_EVENTS = 300
 ALERT_SESSION_COOKIE = "__Host-hype_alert_session"
+SUPPORTED_ASSETS = ("HYPE", "ETH", "BTC")
 
 
 def utc_now_iso(timestamp: float | None = None) -> str:
@@ -62,18 +64,28 @@ def post_json(url: str, payload: object, headers: dict[str, str] | None = None, 
         return json.loads(response.read().decode("utf-8"))
 
 
-def fetch_hype_mark_price() -> float:
+def fetch_mark_prices() -> dict[str, float]:
     payload = post_json(HYPERLIQUID_API_URL, {"type": "metaAndAssetCtxs"})
     if not isinstance(payload, list) or len(payload) < 2:
         raise RuntimeError("Hyperliquid returned an unexpected market payload")
     universe = payload[0].get("universe", [])
     contexts = payload[1]
+    prices: dict[str, float] = {}
     for index, asset in enumerate(universe):
-        if asset.get("name") == "HYPE" and index < len(contexts):
+        symbol = str(asset.get("name", "")).upper()
+        if symbol in SUPPORTED_ASSETS and index < len(contexts):
             price = float(contexts[index]["markPx"])
             if price > 0:
-                return price
-    raise RuntimeError("HYPE mark price is missing from Hyperliquid")
+                prices[symbol] = price
+    missing = [symbol for symbol in SUPPORTED_ASSETS if symbol not in prices]
+    if missing:
+        raise RuntimeError(f"Mark price is missing from Hyperliquid: {', '.join(missing)}")
+    return prices
+
+
+def fetch_hype_mark_price() -> float:
+    """Backward-compatible single-price helper used by older integrations."""
+    return fetch_mark_prices()["HYPE"]
 
 
 class JsonStateStore:
@@ -82,13 +94,20 @@ class JsonStateStore:
 
     def load(self) -> dict:
         if not self.path.exists():
-            return {"rules": [], "events": [], "latest_price": None, "latest_price_at": None}
+            return {"rules": [], "events": [], "latest_price": None, "latest_prices": {}, "latest_price_at": None}
         try:
             payload = json.loads(self.path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError) as exc:
             raise RuntimeError(f"Unable to read alert state: {exc}") from exc
         payload.setdefault("rules", [])
         payload.setdefault("events", [])
+        payload.setdefault("latest_prices", {})
+        if payload.get("latest_price") is not None:
+            payload["latest_prices"].setdefault("HYPE", payload["latest_price"])
+        for rule in payload["rules"]:
+            rule.setdefault("asset", "HYPE")
+        for event in payload["events"]:
+            event.setdefault("asset", "HYPE")
         return payload
 
     def save(self, payload: dict) -> None:
@@ -115,6 +134,9 @@ class AlertEngine:
     @staticmethod
     def validate_rule(payload: dict, existing: dict | None = None) -> dict:
         merged = {**(existing or {}), **payload}
+        asset = str(merged.get("asset", "HYPE")).strip().upper()
+        if asset not in SUPPORTED_ASSETS:
+            raise ValueError(f"asset must be one of {', '.join(SUPPORTED_ASSETS)}")
         direction = str(merged.get("direction", "")).strip()
         if direction not in {"above", "below"}:
             raise ValueError("direction must be above or below")
@@ -140,7 +162,8 @@ class AlertEngine:
         if not 0 <= phone_delay_seconds <= 3_600:
             raise ValueError("phone_delay_seconds must be between 0 and 3600")
         return {
-            "name": str(merged.get("name") or f"HYPE {direction} {threshold:g}")[:80],
+            "name": str(merged.get("name") or f"{asset} {direction} {threshold:g}")[:80],
+            "asset": asset,
             "direction": direction,
             "threshold": threshold,
             "channels": channels,
@@ -204,13 +227,27 @@ class AlertEngine:
             return json.loads(json.dumps(event))
 
     def process_price(self, price: float, now: float | None = None) -> list[dict]:
-        now = now or time.time()
+        return self.process_prices({"HYPE": price}, now)
+
+    def process_prices(self, prices: dict[str, float], now: float | None = None) -> list[dict]:
+        now = time.time() if now is None else now
         now_iso = utc_now_iso(now)
         triggered: list[dict] = []
         with self.lock:
-            self.state["latest_price"] = price
+            normalized_prices = {
+                str(asset).upper(): float(price)
+                for asset, price in prices.items()
+                if str(asset).upper() in SUPPORTED_ASSETS and float(price) > 0
+            }
+            self.state["latest_prices"] = normalized_prices
+            self.state["latest_price"] = normalized_prices.get("HYPE")
             self.state["latest_price_at"] = now_iso
             for rule in self.state["rules"]:
+                asset = str(rule.get("asset", "HYPE")).upper()
+                price = normalized_prices.get(asset)
+                if price is None:
+                    rule["confirm_streak"] = 0
+                    continue
                 if not rule.get("enabled", True):
                     rule["confirm_streak"] = 0
                     continue
@@ -260,6 +297,7 @@ class AlertEngine:
             "id": uuid.uuid4().hex,
             "rule_id": rule["id"],
             "rule_name": rule["name"],
+            "asset": rule.get("asset", "HYPE"),
             "direction": rule["direction"],
             "threshold": rule["threshold"],
             "trigger_price": price,
@@ -354,17 +392,18 @@ class NotificationSender:
     def send_ntfy(self, event: dict) -> None:
         if not self.config.ntfy_topic:
             raise RuntimeError("NTFY_TOPIC is not configured")
+        asset = str(event.get("asset", "HYPE")).upper()
         direction = "上涨至" if event["direction"] == "above" else "下跌至"
         headers = {}
         if self.config.ntfy_token:
             headers["Authorization"] = f"Bearer {self.config.ntfy_token}"
         message = (
-            f"{event['rule_name']}：HYPE 已{direction} ${event['threshold']:g}，"
+            f"{event['rule_name']}：{asset} 已{direction} ${event['threshold']:g}，"
             f"触发价 ${event['trigger_price']:g}。请检查仓位和交易所止损。"
         )
         payload = {
             "topic": self.config.ntfy_topic,
-            "title": "HYPE 到价预警",
+            "title": f"{asset} 到价预警",
             "message": message,
             "priority": 5,
             "tags": ["rotating_light", "chart_with_upwards_trend"],
@@ -376,9 +415,10 @@ class NotificationSender:
     def send_phone(self, event: dict) -> None:
         if not all((self.config.tencent_secret_id, self.config.tencent_secret_key, self.config.tencent_policy_id)):
             raise RuntimeError("Tencent Cloud phone policy credentials are not configured")
+        asset = str(event.get("asset", "HYPE")).upper()
         direction = "上涨" if event["direction"] == "above" else "下跌"
         message = (
-            f"HYPE价格预警：当前价格{event['trigger_price']:g}美元，"
+            f"{asset}价格预警：当前价格{event['trigger_price']:g}美元，"
             f"已{direction}触发价{event['threshold']:g}美元。请检查仓位。"
         )
         self._tencent_request({"Module": "monitor", "PolicyId": self.config.tencent_policy_id, "Msg": message})
@@ -422,11 +462,11 @@ class NotificationSender:
 
 
 class PriceAlertApplication:
-    def __init__(self, config: ServiceConfig, fetch_price: Callable[[], float] = fetch_hype_mark_price):
+    def __init__(self, config: ServiceConfig, fetch_prices: Callable[[], dict[str, float]] = fetch_mark_prices):
         self.config = config
         self.engine = AlertEngine(JsonStateStore(config.state_path))
         self.sender = NotificationSender(config)
-        self.fetch_price = fetch_price
+        self.fetch_prices = fetch_prices
         self.stop_event = threading.Event()
         self.last_error = ""
         self.last_delivery: dict[str, dict] = {}
@@ -454,8 +494,8 @@ class PriceAlertApplication:
     def monitor_forever(self) -> None:
         while not self.stop_event.is_set():
             try:
-                price = self.fetch_price()
-                events = self.engine.process_price(price)
+                prices = self.fetch_prices()
+                events = self.engine.process_prices(prices)
                 self.last_error = ""
                 for event in events:
                     if "ntfy" in event["channels"]:
@@ -473,6 +513,7 @@ class PriceAlertApplication:
             "service": "hype-price-alert",
             "started_at": self.started_at,
             "latest_price": snapshot.get("latest_price"),
+            "latest_prices": snapshot.get("latest_prices", {}),
             "latest_price_at": snapshot.get("latest_price_at"),
             "last_error": self.last_error,
             "last_delivery": json.loads(json.dumps(self.last_delivery)),
@@ -518,6 +559,9 @@ def make_handler(application: PriceAlertApplication) -> type[BaseHTTPRequestHand
 
         def do_GET(self) -> None:  # noqa: N802
             path = urllib.parse.urlparse(self.path).path
+            if path == "/pair":
+                self._pair_page()
+                return
             if path == "/health":
                 self._json(HTTPStatus.OK, application.health(), authenticated=False)
                 return
@@ -530,31 +574,29 @@ def make_handler(application: PriceAlertApplication) -> type[BaseHTTPRequestHand
 
         def do_POST(self) -> None:  # noqa: N802
             path = urllib.parse.urlparse(self.path).path
+            if path == "/pair":
+                self._pair_from_form()
+                return
             if path == "/api/pair":
                 if not self._pairing_authorized():
                     return
                 session_token, expires_at = application.issue_session()
-                cookie = (
-                    f"{ALERT_SESSION_COOKIE}={session_token}; Path=/; Max-Age={application.config.session_seconds}; "
-                    "HttpOnly; Secure; SameSite=Strict"
-                )
                 self._json(
                     HTTPStatus.OK,
                     {"ok": True, "paired_until": utc_now_iso(expires_at)},
                     authenticated=False,
-                    extra_headers={"Set-Cookie": cookie},
+                    extra_headers={"Set-Cookie": self._session_cookie(session_token, application.config.session_seconds)},
                 )
                 return
             if path == "/api/logout":
                 if not self._origin_authorized():
                     self._json(HTTPStatus.FORBIDDEN, {"error": "request origin is not allowed"}, authenticated=False)
                     return
-                expired_cookie = f"{ALERT_SESSION_COOKIE}=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Strict"
                 self._json(
                     HTTPStatus.OK,
                     {"ok": True},
                     authenticated=False,
-                    extra_headers={"Set-Cookie": expired_cookie},
+                    extra_headers={"Set-Cookie": self._session_cookie("", 0)},
                 )
                 return
             if not self._authorized():
@@ -566,12 +608,18 @@ def make_handler(application: PriceAlertApplication) -> type[BaseHTTPRequestHand
                     return
                 if path == "/api/test":
                     channel = payload.get("channel")
+                    asset = str(payload.get("asset", "HYPE")).upper()
+                    if asset not in SUPPORTED_ASSETS:
+                        raise ValueError(f"asset must be one of {', '.join(SUPPORTED_ASSETS)}")
+                    latest_prices = application.engine.snapshot().get("latest_prices", {})
+                    latest_price = float(latest_prices.get(asset) or 0)
                     event = {
                         "id": "test",
                         "rule_name": "手动测试",
+                        "asset": asset,
                         "direction": "above",
-                        "threshold": float(application.engine.snapshot().get("latest_price") or 0),
-                        "trigger_price": float(application.engine.snapshot().get("latest_price") or 0),
+                        "threshold": latest_price,
+                        "trigger_price": latest_price,
                     }
                     delivery = application.test_delivery(channel, event)
                     self._json(HTTPStatus.OK, {"ok": True, "channel": channel, "delivery": delivery})
@@ -651,6 +699,61 @@ def make_handler(application: PriceAlertApplication) -> type[BaseHTTPRequestHand
             allowed = application.config.allowed_origin.rstrip("/")
             origin = self.headers.get("Origin", "").rstrip("/")
             return bool(origin and allowed != "*" and hmac.compare_digest(origin, allowed))
+
+        @staticmethod
+        def _session_cookie(value: str, max_age: int) -> str:
+            return (
+                f"{ALERT_SESSION_COOKIE}={value}; Path=/; Max-Age={max_age}; "
+                "HttpOnly; Secure; SameSite=Strict"
+            )
+
+        def _pair_from_form(self) -> None:
+            try:
+                length = int(self.headers.get("Content-Length", "0"))
+            except ValueError:
+                length = 0
+            if not 0 < length <= 4_096:
+                self._pair_page("配对请求无效，请返回重试。", HTTPStatus.BAD_REQUEST)
+                return
+            try:
+                form = urllib.parse.parse_qs(self.rfile.read(length).decode("utf-8"), keep_blank_values=True)
+            except UnicodeDecodeError:
+                self._pair_page("配对请求编码无效，请返回重试。", HTTPStatus.BAD_REQUEST)
+                return
+            supplied = str(form.get("token", [""])[0]).strip()
+            if not hmac.compare_digest(supplied, application.config.api_token):
+                self._pair_page("访问密钥不正确，请检查后重新输入。", HTTPStatus.UNAUTHORIZED)
+                return
+            session_token, _ = application.issue_session()
+            dashboard = application.config.dashboard_url.rstrip("/") or "https://northinterval.com"
+            self.send_response(HTTPStatus.SEE_OTHER)
+            self.send_header("Set-Cookie", self._session_cookie(session_token, application.config.session_seconds))
+            self.send_header("Location", f"{dashboard}/#alert")
+            self.send_header("Cache-Control", "no-store")
+            self.end_headers()
+
+        def _pair_page(self, error: str = "", status: HTTPStatus = HTTPStatus.OK) -> None:
+            error_markup = f'<p class="error">{html.escape(error)}</p>' if error else ""
+            body = f"""<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>价格预警设备配对</title><style>
+body{{margin:0;min-height:100vh;display:grid;place-items:center;background:#07110f;color:#edf8f2;font-family:system-ui,sans-serif}}
+main{{width:min(88vw,420px);padding:28px;border:1px solid #29483d;border-radius:18px;background:#0b1b16}}
+h1{{font-size:24px;margin:0 0 10px}}p{{color:#9bb7ab;line-height:1.6}}label{{display:grid;gap:8px;margin-top:22px;font-weight:700}}
+input{{padding:14px;border:1px solid #365c4d;border-radius:10px;background:#06100d;color:#fff;font-size:16px}}
+button{{width:100%;margin-top:16px;padding:14px;border:0;border-radius:10px;background:#7ff5b6;color:#092017;font-weight:800;font-size:16px}}
+.error{{padding:10px;border-radius:9px;background:#3b1717;color:#ffb3ad}}small{{display:block;margin-top:16px;color:#789287;line-height:1.5}}
+</style></head><body><main><h1>价格预警设备配对</h1><p>输入一次访问密钥，成功后会自动返回价格预警页面。关闭网页或电脑不会停止服务器上的规则。</p>
+{error_markup}<form method="post" action="/pair"><label>访问密钥<input type="password" name="token" minlength="16" autocomplete="new-password" required autofocus></label>
+<button type="submit">配对此设备</button></form><small>密钥不会写入网页存储；本设备配对有效期为 30 天。</small></main></body></html>""".encode("utf-8")
+            self.send_response(status)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'")
+            self.send_header("Referrer-Policy", "no-referrer")
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
 
         def _read_json(self) -> dict:
             length = int(self.headers.get("Content-Length", "0"))

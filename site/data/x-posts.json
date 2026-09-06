@@ -3,9 +3,47 @@
     "cost_usd": 0.15,
     "posts": 20
   },
-  "generated_at": "2026-09-05T21:37:29Z",
+  "generated_at": "2026-09-06T01:17:22Z",
   "mode": "x-api-paid",
   "posts": [
+    {
+      "analysis": {
+        "confidence": 92,
+        "direction": "bullish",
+        "direction_label": "偏多",
+        "direction_score": 88,
+        "engine": "rules-v1-server",
+        "event_type": "基本面 / 生态事件",
+        "factors": [
+          "偏多词 4 个",
+          "基本面 / 生态事件",
+          "自动采集"
+        ],
+        "horizon": "数日至数月",
+        "impact": "高",
+        "impact_score": 91,
+        "summary": "识别到的正向措辞更多，整体判断为偏多。事件类型更接近“基本面 / 生态事件”，主要影响窗口预计为数日至数月；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "897099896108404738",
+      "author_name": "0xMaxs",
+      "conversation_id": "2096403052093911244",
+      "created_at": "2026-09-06T01:00:11.000Z",
+      "fetched_at": "2026-09-06T01:17:22Z",
+      "id": "2096403052093911244",
+      "lang": "zh",
+      "public_metrics": {
+        "bookmark_count": 1,
+        "impression_count": 76,
+        "like_count": 2,
+        "quote_count": 0,
+        "reply_count": 1,
+        "retweet_count": 0
+      },
+      "source_role": "交易观点",
+      "text": "‼️Hype 日报 #249｜数据截至：2026-9-5\n\n回购：HYPE现价$85.46，昨日销毁$825.32K/9703.72枚（均价$85.05），累计销毁4702.37万枚\n\n估值：年回购金额$6.72亿，成交量(24h)$24.86亿，OI=$10.71B；最大供应9.53亿枚，FDV=$81.44B，PE=121，分位99.8% https://t.co/EFAfNNWzQr https://t.co/jYHGAr7j6I",
+      "url": "https://x.com/0xMaxs/status/2096403052093911244",
+      "username": "0xMaxs"
+    },
     {
       "analysis": {
         "confidence": 45,
@@ -11371,51 +11409,13 @@
       "text": "8月19日美东约11:00，距特朗普宣布CFTC正推动Hyperliquid“合法合规进入美国”约4小时：\n\n一名交易者耗资$65K，买入719张10月到期、执行价$8的看涨期权。该合约此前未平仓量仅67张，价格随后由$0.90涨至$2.45，持仓价值升至约$176K，当日浮盈约$111K。 https://t.co/r04PV1hz6l",
       "url": "https://x.com/0xMaxs/status/2090328866342785399",
       "username": "0xMaxs"
-    },
-    {
-      "analysis": {
-        "confidence": 44,
-        "direction": "neutral",
-        "direction_label": "中性 / 信息型",
-        "direction_score": 0,
-        "engine": "rules-v1-server",
-        "event_type": "一般市场观点",
-        "factors": [
-          "一般市场观点",
-          "自动采集",
-          "方向词不足"
-        ],
-        "horizon": "数小时至 3 天",
-        "impact": "有限",
-        "impact_score": 60,
-        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
-      },
-      "author_id": "1903429012535525376",
-      "author_name": "HYPEconomist",
-      "conversation_id": "2090326881715253702",
-      "created_at": "2026-08-20T06:35:39.000Z",
-      "fetched_at": "2026-08-20T16:45:10Z",
-      "id": "2090326881715253702",
-      "lang": "en",
-      "public_metrics": {
-        "bookmark_count": 3,
-        "impression_count": 5347,
-        "like_count": 204,
-        "quote_count": 3,
-        "reply_count": 33,
-        "retweet_count": 10
-      },
-      "source_role": "市场观察",
-      "text": "SEVENTY TWO UNITED STATES DOLLARS https://t.co/iAi6pNincc",
-      "url": "https://x.com/HYPEconomist/status/2090326881715253702",
-      "username": "HYPEconomist"
     }
   ],
   "sources": [
     {
       "handle": "0xMaxs",
       "influence": 72,
-      "last_seen_id": "2096083736693534916",
+      "last_seen_id": "2096403052093911244",
       "name": "0xMaxs",
       "role": "交易观点",
       "user_id": "897099896108404738"
@@ -11455,10 +11455,10 @@
   ],
   "timezone": "Asia/Shanghai",
   "usage_today": {
-    "analyses": 15,
+    "analyses": 16,
     "date": "2026-09-06",
-    "estimated_cost_usd": 0.075,
-    "post_reads": 15,
+    "estimated_cost_usd": 0.08,
+    "post_reads": 16,
     "user_reads": 0
   },
   "version": 1

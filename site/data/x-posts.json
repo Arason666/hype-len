@@ -3,9 +3,47 @@
     "cost_usd": 0.15,
     "posts": 20
   },
-  "generated_at": "2026-09-07T19:51:27Z",
+  "generated_at": "2026-09-07T22:45:30Z",
   "mode": "x-api-paid",
   "posts": [
+    {
+      "analysis": {
+        "confidence": 45,
+        "direction": "neutral",
+        "direction_label": "中性 / 信息型",
+        "direction_score": 0,
+        "engine": "rules-v1-server",
+        "event_type": "监管 / 上市事件",
+        "factors": [
+          "监管 / 上市事件",
+          "自动采集",
+          "方向词不足"
+        ],
+        "horizon": "1 天至数周",
+        "impact": "中等",
+        "impact_score": 77,
+        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“监管 / 上市事件”，主要影响窗口预计为1 天至数周；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "1903429012535525376",
+      "author_name": "HYPEconomist",
+      "conversation_id": "2097073721366151457",
+      "created_at": "2026-09-07T21:25:11.000Z",
+      "fetched_at": "2026-09-07T22:45:30Z",
+      "id": "2097073721366151457",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 4,
+        "impression_count": 4010,
+        "like_count": 115,
+        "quote_count": 0,
+        "reply_count": 35,
+        "retweet_count": 1
+      },
+      "source_role": "市场观察",
+      "text": "shilled this at 15k\n\nmachi aped 5 minutes later and shilled it in the hyperliquid VIP chat\n\nsecured my season 3 airdrop https://t.co/R4YTUSqPUf",
+      "url": "https://x.com/HYPEconomist/status/2097073721366151457",
+      "username": "HYPEconomist"
+    },
     {
       "analysis": {
         "confidence": 44,
@@ -11371,44 +11409,6 @@
       "text": "Update on that @HypernovaX  challenge.\n\nStarted at $10,000, target $11,000.\n\nCurrently sitting at $10,382, up $382 toward that $1,000 goal. 38% there.\n\nStill holding $JTO and $SOL, both green (+$99 and +$95).\nOthers: $PEPE hit TP, however $ZRO &amp; $TAO hit SL.\n\nEverything looks https://t.co/EK1rU8sFzl https://t.co/tmhS8Fbq16",
       "url": "https://x.com/louisdives/status/2090924928946299065",
       "username": "louisdives"
-    },
-    {
-      "analysis": {
-        "confidence": 64,
-        "direction": "bullish",
-        "direction_label": "偏多",
-        "direction_score": 22,
-        "engine": "rules-v1-server",
-        "event_type": "基本面 / 生态事件",
-        "factors": [
-          "偏多词 1 个",
-          "基本面 / 生态事件",
-          "自动采集"
-        ],
-        "horizon": "数日至数月",
-        "impact": "中等",
-        "impact_score": 76,
-        "summary": "识别到的正向措辞更多，整体判断为偏多。事件类型更接近“基本面 / 生态事件”，主要影响窗口预计为数日至数月；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
-      },
-      "author_id": "1903429012535525376",
-      "author_name": "HYPEconomist",
-      "conversation_id": "2090858478264897657",
-      "created_at": "2026-08-21T17:48:02.000Z",
-      "fetched_at": "2026-08-22T16:07:08Z",
-      "id": "2090858478264897657",
-      "lang": "en",
-      "public_metrics": {
-        "bookmark_count": 17,
-        "impression_count": 6075,
-        "like_count": 112,
-        "quote_count": 1,
-        "reply_count": 14,
-        "retweet_count": 6
-      },
-      "source_role": "市场观察",
-      "text": "nest-2:native generated $120K in 7D fees\n\n→ $6.24M annualized fees\n\n→ $13.5M FDV\n\nundervalued\n\nfree 10x",
-      "url": "https://x.com/HYPEconomist/status/2090858478264897657",
-      "username": "HYPEconomist"
     }
   ],
   "sources": [
@@ -11447,7 +11447,7 @@
     {
       "handle": "HYPEconomist",
       "influence": 60,
-      "last_seen_id": "2097012348938576359",
+      "last_seen_id": "2097073721366151457",
       "name": "HYPEconomist",
       "role": "市场观察",
       "user_id": "1903429012535525376"
@@ -11455,10 +11455,10 @@
   ],
   "timezone": "Asia/Shanghai",
   "usage_today": {
-    "analyses": 15,
+    "analyses": 16,
     "date": "2026-09-08",
-    "estimated_cost_usd": 0.075,
-    "post_reads": 15,
+    "estimated_cost_usd": 0.08,
+    "post_reads": 16,
     "user_reads": 0
   },
   "version": 1

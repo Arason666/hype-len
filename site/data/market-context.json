@@ -1,31 +1,6 @@
 {
   "funding_history": [
     {
-      "funding_rate": -2.8286e-06,
-      "premium": -0.0005226287,
-      "time": 1773298800046
-    },
-    {
-      "funding_rate": -2.29161e-05,
-      "premium": -0.0006833284,
-      "time": 1773302400068
-    },
-    {
-      "funding_rate": -2.8348e-05,
-      "premium": -0.0007267836,
-      "time": 1773306000063
-    },
-    {
-      "funding_rate": -2.10167e-05,
-      "premium": -0.0006681336,
-      "time": 1773309600013
-    },
-    {
-      "funding_rate": 9.0506e-06,
-      "premium": -0.0004275952,
-      "time": 1773313200017
-    },
-    {
       "funding_rate": -1.53049e-05,
       "premium": -0.0006224392,
       "time": 1773316800106
@@ -21599,10 +21574,35 @@
       "funding_rate": 1.25e-05,
       "premium": 1.67462e-05,
       "time": 1788847200009
+    },
+    {
+      "funding_rate": 1.25e-05,
+      "premium": -0.0001129669,
+      "time": 1788850800043
+    },
+    {
+      "funding_rate": 1.25e-05,
+      "premium": -0.0003403598,
+      "time": 1788854400047
+    },
+    {
+      "funding_rate": 1.25e-05,
+      "premium": -0.0001202065,
+      "time": 1788858000016
+    },
+    {
+      "funding_rate": 1.25e-05,
+      "premium": 2.22927e-05,
+      "time": 1788861600042
+    },
+    {
+      "funding_rate": 1.25e-05,
+      "premium": -8.78906e-05,
+      "time": 1788865200085
     }
   ],
   "funding_retention_days": 180,
-  "generated_at": "2026-09-08T06:14:40Z",
+  "generated_at": "2026-09-08T11:32:06Z",
   "snapshot_interval_minutes": 15,
   "snapshot_retention_days": 60,
   "snapshots": [
@@ -37130,6 +37130,31 @@
         "trade_count": 10
       },
       "time": 1788847200000
+    },
+    {
+      "day_notional_volume": 335744622.04921013,
+      "funding": 1.2165e-05,
+      "impact_ask": 83.16,
+      "impact_bid": 83.159,
+      "mark_price": 83.16,
+      "mid_price": 83.1595,
+      "open_interest": 23358585.399999972,
+      "oracle_price": 83.1955,
+      "order_book": {
+        "ask_notional_top10": 1176828.33,
+        "bid_notional_top10": 117689.86,
+        "imbalance": -0.818172,
+        "spread_bps": 0.1203
+      },
+      "premium": -0.0004267058,
+      "recent_flow": {
+        "buy_notional": 11283.1,
+        "buy_share": 0.682362,
+        "latest_trade_time": 1788867124777,
+        "sell_notional": 5252.26,
+        "trade_count": 10
+      },
+      "time": 1788867000000
     }
   ],
   "source": "Hyperliquid public info API",

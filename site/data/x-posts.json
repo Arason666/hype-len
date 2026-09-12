@@ -3,9 +3,47 @@
     "cost_usd": 0.15,
     "posts": 20
   },
-  "generated_at": "2026-09-12T18:27:59Z",
+  "generated_at": "2026-09-12T20:52:28Z",
   "mode": "x-api-paid",
   "posts": [
+    {
+      "analysis": {
+        "confidence": 46,
+        "direction": "neutral",
+        "direction_label": "中性 / 信息型",
+        "direction_score": 0,
+        "engine": "rules-v1-server",
+        "event_type": "一般市场观点",
+        "factors": [
+          "一般市场观点",
+          "自动采集",
+          "方向词不足"
+        ],
+        "horizon": "数小时至 3 天",
+        "impact": "中等",
+        "impact_score": 78,
+        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "2040391464761413633",
+      "author_name": "Louis",
+      "conversation_id": "2098852680374608238",
+      "created_at": "2026-09-12T19:14:08.000Z",
+      "fetched_at": "2026-09-12T20:52:28Z",
+      "id": "2098852680374608238",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 7,
+        "impression_count": 732,
+        "like_count": 17,
+        "quote_count": 0,
+        "reply_count": 4,
+        "retweet_count": 1
+      },
+      "source_role": "研究 / 数据",
+      "text": "Entropy just gave an airdrop in hyperliquid:native   through their rebate system. \n\nI got 3.71 hyperliquid:native , Thanks @entropyIO !\n\nBtw, if you guys use my reff you will get the high benefit.\n\nIt's 100% benefit while other people reffs are only 50%.\n\nLink: https://t.co/EME9beo2HQ https://t.co/8Zhgd1hSEo",
+      "url": "https://x.com/louisdives/status/2098852680374608238",
+      "username": "louisdives"
+    },
     {
       "analysis": {
         "confidence": 47,
@@ -11369,44 +11407,6 @@
       "text": "Net Supply Growth (Annualized): $HYPE vs $ETH vs $SOL\n\n#Hyperliquid +0.13% (374.85K HYPE)\n#Ethereum +0.87% (1.05M ETH)\n#Solana +3.95% (23.05M SOL)\n\nHYPE burns anytime, anywhere, anything.🔥 https://t.co/F67JWknlRg",
       "url": "https://x.com/Hyperliquid_Hub/status/2092604174513143968",
       "username": "Hyperliquid_Hub"
-    },
-    {
-      "analysis": {
-        "confidence": 64,
-        "direction": "bearish",
-        "direction_label": "偏空",
-        "direction_score": -22,
-        "engine": "rules-v1-server",
-        "event_type": "一般市场观点",
-        "factors": [
-          "偏空词 1 个",
-          "一般市场观点",
-          "自动采集"
-        ],
-        "horizon": "数小时至 3 天",
-        "impact": "有限",
-        "impact_score": 60,
-        "summary": "识别到的负向措辞更多，整体判断为偏空。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
-      },
-      "author_id": "1903429012535525376",
-      "author_name": "HYPEconomist",
-      "conversation_id": "2092600625557016981",
-      "created_at": "2026-08-26T13:10:42.000Z",
-      "fetched_at": "2026-08-26T16:03:14Z",
-      "id": "2092600625557016981",
-      "lang": "en",
-      "public_metrics": {
-        "bookmark_count": 5,
-        "impression_count": 3323,
-        "like_count": 71,
-        "quote_count": 0,
-        "reply_count": 8,
-        "retweet_count": 1
-      },
-      "source_role": "市场观察",
-      "text": "how to turn $50K into $1M in 2026:\n\n1. create 50 fomo accounts\n\n2. deposit $1K in each\n\n3. buy $1K of every potential runner\n\n4. hit one runner\n\n5. gain a bunch of followers\n\n6. launch a bundled meme &amp; ape it with size\n\n7. dump on your followers from side wallets\n\n→ cash out $1M",
-      "url": "https://x.com/HYPEconomist/status/2092600625557016981",
-      "username": "HYPEconomist"
     }
   ],
   "sources": [
@@ -11421,7 +11421,7 @@
     {
       "handle": "louisdives",
       "influence": 78,
-      "last_seen_id": "2098811811353223182",
+      "last_seen_id": "2098852680374608238",
       "name": "Louis",
       "role": "研究 / 数据",
       "user_id": "2040391464761413633"
@@ -11453,10 +11453,10 @@
   ],
   "timezone": "Asia/Shanghai",
   "usage_today": {
-    "analyses": 15,
+    "analyses": 16,
     "date": "2026-09-13",
-    "estimated_cost_usd": 0.075,
-    "post_reads": 15,
+    "estimated_cost_usd": 0.08,
+    "post_reads": 16,
     "user_reads": 0
   },
   "version": 1

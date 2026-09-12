@@ -3,9 +3,47 @@
     "cost_usd": 0.15,
     "posts": 20
   },
-  "generated_at": "2026-09-12T16:12:08Z",
+  "generated_at": "2026-09-12T18:27:59Z",
   "mode": "x-api-paid",
   "posts": [
+    {
+      "analysis": {
+        "confidence": 47,
+        "direction": "neutral",
+        "direction_label": "中性 / 信息型",
+        "direction_score": 0,
+        "engine": "rules-v1-server",
+        "event_type": "一般市场观点",
+        "factors": [
+          "一般市场观点",
+          "自动采集",
+          "方向词不足"
+        ],
+        "horizon": "数小时至 3 天",
+        "impact": "中等",
+        "impact_score": 78,
+        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "2040391464761413633",
+      "author_name": "Louis",
+      "conversation_id": "2098811811353223182",
+      "created_at": "2026-09-12T16:31:44.000Z",
+      "fetched_at": "2026-09-12T18:27:59Z",
+      "id": "2098811811353223182",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 0,
+        "impression_count": 1000,
+        "like_count": 14,
+        "quote_count": 0,
+        "reply_count": 5,
+        "retweet_count": 0
+      },
+      "source_role": "研究 / 数据",
+      "text": "As expected, Cascade just informed that they shutdown their operational (perp dex).\n\nBe Cascade:\n- Said they are new but actually rebranded or linked to  Perennial\n- People fomo on Cascade even willing to buy Cascade code\n- AFK for more than 1 month then make a new post about https://t.co/rlISlmeZbL https://t.co/F8F17iNuAu",
+      "url": "https://x.com/louisdives/status/2098811811353223182",
+      "username": "louisdives"
+    },
     {
       "analysis": {
         "confidence": 44,
@@ -11369,44 +11407,6 @@
       "text": "how to turn $50K into $1M in 2026:\n\n1. create 50 fomo accounts\n\n2. deposit $1K in each\n\n3. buy $1K of every potential runner\n\n4. hit one runner\n\n5. gain a bunch of followers\n\n6. launch a bundled meme &amp; ape it with size\n\n7. dump on your followers from side wallets\n\n→ cash out $1M",
       "url": "https://x.com/HYPEconomist/status/2092600625557016981",
       "username": "HYPEconomist"
-    },
-    {
-      "analysis": {
-        "confidence": 46,
-        "direction": "neutral",
-        "direction_label": "中性 / 信息型",
-        "direction_score": 0,
-        "engine": "rules-v1-server",
-        "event_type": "基本面 / 生态事件",
-        "factors": [
-          "基本面 / 生态事件",
-          "自动采集",
-          "方向词不足"
-        ],
-        "horizon": "数日至数月",
-        "impact": "高",
-        "impact_score": 94,
-        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“基本面 / 生态事件”，主要影响窗口预计为数日至数月；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
-      },
-      "author_id": "2040391464761413633",
-      "author_name": "Louis",
-      "conversation_id": "2092590829768671545",
-      "created_at": "2026-08-26T12:31:46.000Z",
-      "fetched_at": "2026-08-26T16:03:14Z",
-      "id": "2092590829768671545",
-      "lang": "en",
-      "public_metrics": {
-        "bookmark_count": 2,
-        "impression_count": 856,
-        "like_count": 10,
-        "quote_count": 0,
-        "reply_count": 4,
-        "retweet_count": 0
-      },
-      "source_role": "研究 / 数据",
-      "text": "2 Days ago, this perp dex, @popdex_ .\n\nThey appreciate their traders even without any special TnC, or making a lot of volume every single week.\n\nThey appreciate their traders up to $1,500 with only 100K volume from Aug 10 - 22 (It's almost 2 weeks, and I think to achieve 100K https://t.co/McGseEIZOx",
-      "url": "https://x.com/louisdives/status/2092590829768671545",
-      "username": "louisdives"
     }
   ],
   "sources": [
@@ -11421,7 +11421,7 @@
     {
       "handle": "louisdives",
       "influence": 78,
-      "last_seen_id": "2098723134069211510",
+      "last_seen_id": "2098811811353223182",
       "name": "Louis",
       "role": "研究 / 数据",
       "user_id": "2040391464761413633"
@@ -11453,10 +11453,10 @@
   ],
   "timezone": "Asia/Shanghai",
   "usage_today": {
-    "analyses": 14,
+    "analyses": 15,
     "date": "2026-09-13",
-    "estimated_cost_usd": 0.07,
-    "post_reads": 14,
+    "estimated_cost_usd": 0.075,
+    "post_reads": 15,
     "user_reads": 0
   },
   "version": 1

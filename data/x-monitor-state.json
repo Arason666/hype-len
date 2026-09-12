@@ -5,13 +5,13 @@
     "hypeconomist": "2098793012696432644",
     "hyperliquid_hub": "2098783039577030780",
     "hyperliquidx": "2097356047933755624",
-    "louisdives": "2098723134069211510"
+    "louisdives": "2098811811353223182"
   },
   "source_cursor": 0,
   "usage": {
-    "analyses": 14,
-    "estimated_cost_micros": 70000,
-    "post_reads": 14,
+    "analyses": 15,
+    "estimated_cost_micros": 75000,
+    "post_reads": 15,
     "user_reads": 0
   },
   "user_ids": {

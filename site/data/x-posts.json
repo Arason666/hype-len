@@ -3,9 +3,47 @@
     "cost_usd": 0.15,
     "posts": 20
   },
-  "generated_at": "2026-09-13T17:43:32Z",
+  "generated_at": "2026-09-13T19:52:21Z",
   "mode": "x-api-paid",
   "posts": [
+    {
+      "analysis": {
+        "confidence": 44,
+        "direction": "neutral",
+        "direction_label": "中性 / 信息型",
+        "direction_score": 0,
+        "engine": "rules-v1-server",
+        "event_type": "一般市场观点",
+        "factors": [
+          "一般市场观点",
+          "自动采集",
+          "方向词不足"
+        ],
+        "horizon": "数小时至 3 天",
+        "impact": "有限",
+        "impact_score": 60,
+        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "1903429012535525376",
+      "author_name": "HYPEconomist",
+      "conversation_id": "2099215993931247665",
+      "created_at": "2026-09-13T19:17:49.000Z",
+      "fetched_at": "2026-09-13T19:52:21Z",
+      "id": "2099215993931247665",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 0,
+        "impression_count": 1414,
+        "like_count": 50,
+        "quote_count": 1,
+        "reply_count": 14,
+        "retweet_count": 0
+      },
+      "source_role": "市场观察",
+      "text": "i hate when a funny memecoin just doesn’t run",
+      "url": "https://x.com/HYPEconomist/status/2099215993931247665",
+      "username": "HYPEconomist"
+    },
     {
       "analysis": {
         "confidence": 43,
@@ -11369,44 +11407,6 @@
       "text": "Was talking to someone about this yesterday, it’s about Variational TGE soon.\n\nEvery big TGE goes the same way. People farm for months, check the dashboard every morning, get obsessed with their points. Token drops, everyone claims, and a chunk of them just vanish. Not",
       "url": "https://x.com/louisdives/status/2092998315583717626",
       "username": "louisdives"
-    },
-    {
-      "analysis": {
-        "confidence": 43,
-        "direction": "neutral",
-        "direction_label": "中性 / 信息型",
-        "direction_score": 0,
-        "engine": "rules-v1-server",
-        "event_type": "一般市场观点",
-        "factors": [
-          "一般市场观点",
-          "自动采集",
-          "方向词不足"
-        ],
-        "horizon": "数小时至 3 天",
-        "impact": "中等",
-        "impact_score": 64,
-        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
-      },
-      "author_id": "1821500190312087552",
-      "author_name": "HL Hub",
-      "conversation_id": "2092986329399484670",
-      "created_at": "2026-08-27T14:54:47.000Z",
-      "fetched_at": "2026-08-27T23:56:50Z",
-      "id": "2092989206146720100",
-      "lang": "en",
-      "public_metrics": {
-        "bookmark_count": 0,
-        "impression_count": 160,
-        "like_count": 0,
-        "quote_count": 0,
-        "reply_count": 0,
-        "retweet_count": 0
-      },
-      "source_role": "生态资讯",
-      "text": "Source: https://t.co/P16ipYsogc",
-      "url": "https://x.com/Hyperliquid_Hub/status/2092989206146720100",
-      "username": "Hyperliquid_Hub"
     }
   ],
   "sources": [
@@ -11445,7 +11445,7 @@
     {
       "handle": "HYPEconomist",
       "influence": 60,
-      "last_seen_id": "2099166271946281066",
+      "last_seen_id": "2099215993931247665",
       "name": "HYPEconomist",
       "role": "市场观察",
       "user_id": "1903429012535525376"
@@ -11453,10 +11453,10 @@
   ],
   "timezone": "Asia/Shanghai",
   "usage_today": {
-    "analyses": 15,
+    "analyses": 16,
     "date": "2026-09-14",
-    "estimated_cost_usd": 0.075,
-    "post_reads": 15,
+    "estimated_cost_usd": 0.08,
+    "post_reads": 16,
     "user_reads": 0
   },
   "version": 1

@@ -3,9 +3,47 @@
     "cost_usd": 0.15,
     "posts": 20
   },
-  "generated_at": "2026-09-17T18:56:34Z",
+  "generated_at": "2026-09-17T22:04:34Z",
   "mode": "x-api-paid",
   "posts": [
+    {
+      "analysis": {
+        "confidence": 47,
+        "direction": "neutral",
+        "direction_label": "中性 / 信息型",
+        "direction_score": 0,
+        "engine": "rules-v1-server",
+        "event_type": "监管 / 上市事件",
+        "factors": [
+          "监管 / 上市事件",
+          "自动采集",
+          "方向词不足"
+        ],
+        "horizon": "1 天至数周",
+        "impact": "高",
+        "impact_score": 95,
+        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“监管 / 上市事件”，主要影响窗口预计为1 天至数周；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "2040391464761413633",
+      "author_name": "Louis",
+      "conversation_id": "2100661065629499831",
+      "created_at": "2026-09-17T19:00:01.000Z",
+      "fetched_at": "2026-09-17T22:04:34Z",
+      "id": "2100661065629499831",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 0,
+        "impression_count": 817,
+        "like_count": 13,
+        "quote_count": 0,
+        "reply_count": 1,
+        "retweet_count": 0
+      },
+      "source_role": "研究 / 数据",
+      "text": "A new listing from @entropyIO is also a new opportunity in Hyperliquid.\n\nFunding arbitrage strategy could be a very nice strategy to try here without allocate our money to another perp dex, so it's only on Hyperliquid.\n\nCome to try it, enjoy the max rebates (200%) with my reff https://t.co/eEKjx12k7N https://t.co/Nrv5Km0G3x",
+      "url": "https://x.com/louisdives/status/2100661065629499831",
+      "username": "louisdives"
+    },
     {
       "analysis": {
         "confidence": 46,
@@ -11367,44 +11405,6 @@
       "text": "Listing is not an endorsement of the project. Past performance does not guarantee future results. Do not trade assets you are unfamiliar with and do not understand the risks for. Exercise control. NFA. \n\nhttps://t.co/e1RFfWomXw",
       "url": "https://x.com/HyperliquidX/status/2094272871891931386",
       "username": "HyperliquidX"
-    },
-    {
-      "analysis": {
-        "confidence": 45,
-        "direction": "neutral",
-        "direction_label": "中性 / 信息型",
-        "direction_score": 0,
-        "engine": "rules-v1-server",
-        "event_type": "一般市场观点",
-        "factors": [
-          "一般市场观点",
-          "自动采集",
-          "方向词不足"
-        ],
-        "horizon": "数小时至 3 天",
-        "impact": "高",
-        "impact_score": 90,
-        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
-      },
-      "author_id": "1527020295059648513",
-      "author_name": "Hyperliquid",
-      "conversation_id": "2094272869731832151",
-      "created_at": "2026-08-31T03:55:36.000Z",
-      "fetched_at": "2026-08-31T20:45:43Z",
-      "id": "2094272869731832151",
-      "lang": "en",
-      "public_metrics": {
-        "bookmark_count": 83,
-        "impression_count": 531664,
-        "like_count": 2295,
-        "quote_count": 178,
-        "reply_count": 198,
-        "retweet_count": 218
-      },
-      "source_role": "官方动态",
-      "text": "By community request, ethereum:0x07f5b6823751c2e2cd4560f28af75ff887102241 perps have been listed with up to 3x leverage. https://t.co/3UnDi6ZYwL",
-      "url": "https://x.com/HyperliquidX/status/2094272869731832151",
-      "username": "HyperliquidX"
     }
   ],
   "sources": [
@@ -11419,7 +11419,7 @@
     {
       "handle": "louisdives",
       "influence": 78,
-      "last_seen_id": "2100604607080628470",
+      "last_seen_id": "2100661065629499831",
       "name": "Louis",
       "role": "研究 / 数据",
       "user_id": "2040391464761413633"
@@ -11451,10 +11451,10 @@
   ],
   "timezone": "Asia/Shanghai",
   "usage_today": {
-    "analyses": 14,
+    "analyses": 15,
     "date": "2026-09-18",
-    "estimated_cost_usd": 0.07,
-    "post_reads": 14,
+    "estimated_cost_usd": 0.075,
+    "post_reads": 15,
     "user_reads": 0
   },
   "version": 1

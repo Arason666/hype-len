@@ -3,9 +3,85 @@
     "cost_usd": 0.15,
     "posts": 20
   },
-  "generated_at": "2026-09-17T22:04:34Z",
+  "generated_at": "2026-09-18T00:10:19Z",
   "mode": "x-api-paid",
   "posts": [
+    {
+      "analysis": {
+        "confidence": 64,
+        "direction": "bullish",
+        "direction_label": "偏多",
+        "direction_score": 22,
+        "engine": "rules-v1-server",
+        "event_type": "基本面 / 生态事件",
+        "factors": [
+          "偏多词 1 个",
+          "基本面 / 生态事件",
+          "自动采集"
+        ],
+        "horizon": "数日至数月",
+        "impact": "中等",
+        "impact_score": 80,
+        "summary": "识别到的正向措辞更多，整体判断为偏多。事件类型更接近“基本面 / 生态事件”，主要影响窗口预计为数日至数月；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "1821500190312087552",
+      "author_name": "HL Hub",
+      "conversation_id": "2100728144739377261",
+      "created_at": "2026-09-17T23:26:34.000Z",
+      "fetched_at": "2026-09-18T00:10:19Z",
+      "id": "2100728144739377261",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 0,
+        "impression_count": 429,
+        "like_count": 6,
+        "quote_count": 0,
+        "reply_count": 0,
+        "retweet_count": 0
+      },
+      "source_role": "生态资讯",
+      "text": "$PURR @Hypurr  – Official mascot of HyperliquidHyperliquid is one of the largest on-chain perps platforms. $PURR is its first official spot token &amp; cat mascot.\n\nKey facts:\nMax 1B. 500M airdropped to points holders. 400M burned from HIP-2. ~100M locked forever as Hyperliquidity. https://t.co/AOp4yNjrsf",
+      "url": "https://x.com/Hyperliquid_Hub/status/2100728144739377261",
+      "username": "Hyperliquid_Hub"
+    },
+    {
+      "analysis": {
+        "confidence": 44,
+        "direction": "neutral",
+        "direction_label": "中性 / 信息型",
+        "direction_score": 0,
+        "engine": "rules-v1-server",
+        "event_type": "一般市场观点",
+        "factors": [
+          "一般市场观点",
+          "自动采集",
+          "方向词不足"
+        ],
+        "horizon": "数小时至 3 天",
+        "impact": "中等",
+        "impact_score": 64,
+        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "1821500190312087552",
+      "author_name": "HL Hub",
+      "conversation_id": "2100725304105046083",
+      "created_at": "2026-09-17T23:15:16.000Z",
+      "fetched_at": "2026-09-18T00:10:19Z",
+      "id": "2100725304105046083",
+      "lang": "da",
+      "public_metrics": {
+        "bookmark_count": 0,
+        "impression_count": 290,
+        "like_count": 2,
+        "quote_count": 0,
+        "reply_count": 1,
+        "retweet_count": 0
+      },
+      "source_role": "生态资讯",
+      "text": "H Y P E R L I Q U I D https://t.co/7GwBArJ3RQ",
+      "url": "https://x.com/Hyperliquid_Hub/status/2100725304105046083",
+      "username": "Hyperliquid_Hub"
+    },
     {
       "analysis": {
         "confidence": 47,
@@ -11329,82 +11405,6 @@
       "text": "https://t.co/m8I7LH9miZ",
       "url": "https://x.com/0xMaxs/status/2094279247506624587",
       "username": "0xMaxs"
-    },
-    {
-      "analysis": {
-        "confidence": 46,
-        "direction": "neutral",
-        "direction_label": "中性 / 信息型",
-        "direction_score": 0,
-        "engine": "rules-v1-server",
-        "event_type": "一般市场观点",
-        "factors": [
-          "一般市场观点",
-          "自动采集",
-          "方向词不足"
-        ],
-        "horizon": "数小时至 3 天",
-        "impact": "中等",
-        "impact_score": 72,
-        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
-      },
-      "author_id": "897099896108404738",
-      "author_name": "0xMaxs",
-      "conversation_id": "2094277648767918492",
-      "created_at": "2026-08-31T04:14:35.000Z",
-      "fetched_at": "2026-08-31T20:45:42Z",
-      "id": "2094277648767918492",
-      "lang": "zh",
-      "public_metrics": {
-        "bookmark_count": 1,
-        "impression_count": 560,
-        "like_count": 6,
-        "quote_count": 0,
-        "reply_count": 3,
-        "retweet_count": 0
-      },
-      "source_role": "交易观点",
-      "text": "RH链龙头项目 ethereum:0x07f5b6823751c2e2cd4560f28af75ff887102241 现已在Hyperliquid上线！\n\n早于主流CEX快速上线潜力项目，正是Hyperliquid的一贯风格。\n\nPONS是近几周的当红炸子鸡，也是今年不可多得的Real goat，增长势头很猛，而现在你可以3x杠杆在hyperliquid上交易它🧑‍💻 https://t.co/9dygRNzkyg https://t.co/FtnPQR3P7y",
-      "url": "https://x.com/0xMaxs/status/2094277648767918492",
-      "username": "0xMaxs"
-    },
-    {
-      "analysis": {
-        "confidence": 46,
-        "direction": "neutral",
-        "direction_label": "中性 / 信息型",
-        "direction_score": 0,
-        "engine": "rules-v1-server",
-        "event_type": "监管 / 上市事件",
-        "factors": [
-          "监管 / 上市事件",
-          "自动采集",
-          "方向词不足"
-        ],
-        "horizon": "1 天至数周",
-        "impact": "高",
-        "impact_score": 100,
-        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“监管 / 上市事件”，主要影响窗口预计为1 天至数周；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
-      },
-      "author_id": "1527020295059648513",
-      "author_name": "Hyperliquid",
-      "conversation_id": "2094272869731832151",
-      "created_at": "2026-08-31T03:55:37.000Z",
-      "fetched_at": "2026-08-31T20:45:43Z",
-      "id": "2094272871891931386",
-      "lang": "en",
-      "public_metrics": {
-        "bookmark_count": 3,
-        "impression_count": 18978,
-        "like_count": 67,
-        "quote_count": 0,
-        "reply_count": 7,
-        "retweet_count": 4
-      },
-      "source_role": "官方动态",
-      "text": "Listing is not an endorsement of the project. Past performance does not guarantee future results. Do not trade assets you are unfamiliar with and do not understand the risks for. Exercise control. NFA. \n\nhttps://t.co/e1RFfWomXw",
-      "url": "https://x.com/HyperliquidX/status/2094272871891931386",
-      "username": "HyperliquidX"
     }
   ],
   "sources": [
@@ -11435,7 +11435,7 @@
     {
       "handle": "Hyperliquid_Hub",
       "influence": 64,
-      "last_seen_id": "2100638549163098317",
+      "last_seen_id": "2100728144739377261",
       "name": "HL Hub",
       "role": "生态资讯",
       "user_id": "1821500190312087552"
@@ -11451,10 +11451,10 @@
   ],
   "timezone": "Asia/Shanghai",
   "usage_today": {
-    "analyses": 15,
+    "analyses": 17,
     "date": "2026-09-18",
-    "estimated_cost_usd": 0.075,
-    "post_reads": 15,
+    "estimated_cost_usd": 0.085,
+    "post_reads": 17,
     "user_reads": 0
   },
   "version": 1

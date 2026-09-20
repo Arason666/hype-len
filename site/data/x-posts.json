@@ -3,9 +3,47 @@
     "cost_usd": 0.15,
     "posts": 20
   },
-  "generated_at": "2026-09-20T18:10:17Z",
+  "generated_at": "2026-09-20T23:09:46Z",
   "mode": "x-api-paid",
   "posts": [
+    {
+      "analysis": {
+        "confidence": 44,
+        "direction": "neutral",
+        "direction_label": "中性 / 信息型",
+        "direction_score": 0,
+        "engine": "rules-v1-server",
+        "event_type": "一般市场观点",
+        "factors": [
+          "一般市场观点",
+          "自动采集",
+          "方向词不足"
+        ],
+        "horizon": "数小时至 3 天",
+        "impact": "有限",
+        "impact_score": 60,
+        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "1903429012535525376",
+      "author_name": "HYPEconomist",
+      "conversation_id": "2101797633652044078",
+      "created_at": "2026-09-20T22:16:20.000Z",
+      "fetched_at": "2026-09-20T23:09:46Z",
+      "id": "2101797633652044078",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 1,
+        "impression_count": 1802,
+        "like_count": 69,
+        "quote_count": 1,
+        "reply_count": 24,
+        "retweet_count": 0
+      },
+      "source_role": "市场观察",
+      "text": "hit 20k followers today and as a little gift to myself i bought the next $10M+ runner early",
+      "url": "https://x.com/HYPEconomist/status/2101797633652044078",
+      "username": "HYPEconomist"
+    },
     {
       "analysis": {
         "confidence": 64,
@@ -11367,44 +11405,6 @@
       "text": "Blockworks 数据研究员 Troy Harris 提到：\n\n8 月 Hyperliquid Builder Revenue 达到 $8.8M，创 2026 年单月新高。\n\nBuilder Code可以理解成 Hyperliquid 给外部应用开放的一套「交易分销系统」：\n\nMetaMask、Phantom、Trust Wallet、Rabby，以及各种交易终端、机器人，都可以把用户订单直接接入 https://t.co/z3LQgYHgrd https://t.co/Dc0fJhcqUY",
       "url": "https://x.com/0xMaxs/status/2095378446423863326",
       "username": "0xMaxs"
-    },
-    {
-      "analysis": {
-        "confidence": 92,
-        "direction": "bullish",
-        "direction_label": "偏多",
-        "direction_score": 88,
-        "engine": "rules-v1-server",
-        "event_type": "基本面 / 生态事件",
-        "factors": [
-          "偏多词 4 个",
-          "基本面 / 生态事件",
-          "自动采集"
-        ],
-        "horizon": "数日至数月",
-        "impact": "高",
-        "impact_score": 91,
-        "summary": "识别到的正向措辞更多，整体判断为偏多。事件类型更接近“基本面 / 生态事件”，主要影响窗口预计为数日至数月；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
-      },
-      "author_id": "897099896108404738",
-      "author_name": "0xMaxs",
-      "conversation_id": "2095341941127004339",
-      "created_at": "2026-09-03T02:43:42.000Z",
-      "fetched_at": "2026-09-03T18:43:55Z",
-      "id": "2095341941127004339",
-      "lang": "zh",
-      "public_metrics": {
-        "bookmark_count": 1,
-        "impression_count": 340,
-        "like_count": 2,
-        "quote_count": 0,
-        "reply_count": 1,
-        "retweet_count": 0
-      },
-      "source_role": "交易观点",
-      "text": "‼️Hype 日报 #246｜数据截至：2026-9-2\n\n回购：HYPE现价$81.53，昨日销毁$1.71M/20962.42枚（均价$81.73），累计销毁4695.89万枚\n\n估值：年回购金额$6.74亿，成交量(24h)$55.18亿，OI=$9.89B；最大供应9.53亿枚，FDV=$77.70B，PE=115，分位99.2% https://t.co/9mFnzxwWRc https://t.co/RanYUbycR0",
-      "url": "https://x.com/0xMaxs/status/2095341941127004339",
-      "username": "0xMaxs"
     }
   ],
   "sources": [
@@ -11443,7 +11443,7 @@
     {
       "handle": "HYPEconomist",
       "influence": 60,
-      "last_seen_id": "2101715907537932574",
+      "last_seen_id": "2101797633652044078",
       "name": "HYPEconomist",
       "role": "市场观察",
       "user_id": "1903429012535525376"
@@ -11451,10 +11451,10 @@
   ],
   "timezone": "Asia/Shanghai",
   "usage_today": {
-    "analyses": 14,
+    "analyses": 15,
     "date": "2026-09-21",
-    "estimated_cost_usd": 0.07,
-    "post_reads": 14,
+    "estimated_cost_usd": 0.075,
+    "post_reads": 15,
     "user_reads": 0
   },
   "version": 1

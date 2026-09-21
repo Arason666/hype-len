@@ -3,9 +3,85 @@
     "cost_usd": 0.15,
     "posts": 20
   },
-  "generated_at": "2026-09-20T23:09:46Z",
+  "generated_at": "2026-09-21T01:11:55Z",
   "mode": "x-api-paid",
   "posts": [
+    {
+      "analysis": {
+        "confidence": 46,
+        "direction": "neutral",
+        "direction_label": "中性 / 信息型",
+        "direction_score": 0,
+        "engine": "rules-v1-server",
+        "event_type": "一般市场观点",
+        "factors": [
+          "一般市场观点",
+          "自动采集",
+          "方向词不足"
+        ],
+        "horizon": "数小时至 3 天",
+        "impact": "中等",
+        "impact_score": 64,
+        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "1821500190312087552",
+      "author_name": "HL Hub",
+      "conversation_id": "2101840170253447488",
+      "created_at": "2026-09-21T01:05:21.000Z",
+      "fetched_at": "2026-09-21T01:11:55Z",
+      "id": "2101840170253447488",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 0,
+        "impression_count": 129,
+        "like_count": 2,
+        "quote_count": 0,
+        "reply_count": 0,
+        "retweet_count": 1
+      },
+      "source_role": "生态资讯",
+      "text": "Hyperliquid liquidity is getting serious.\n\nHYPE TWAP flow:\n• Next 1H: +$1.07M\n• Next 24H: +$3.41M\nMeanwhile, BTC resting liquidity within ±0.1% of mid:\n• Hyperliquid: 628 BTC / $51.2M\n• Binance: 392 BTC / $31.9M\nThat’s 1.60x more near-mid BTC liquidity on Hyperliquid than https://t.co/IgrWC4Mmjs",
+      "url": "https://x.com/Hyperliquid_Hub/status/2101840170253447488",
+      "username": "Hyperliquid_Hub"
+    },
+    {
+      "analysis": {
+        "confidence": 43,
+        "direction": "neutral",
+        "direction_label": "中性 / 信息型",
+        "direction_score": 0,
+        "engine": "rules-v1-server",
+        "event_type": "一般市场观点",
+        "factors": [
+          "一般市场观点",
+          "自动采集",
+          "方向词不足"
+        ],
+        "horizon": "数小时至 3 天",
+        "impact": "中等",
+        "impact_score": 64,
+        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "1821500190312087552",
+      "author_name": "HL Hub",
+      "conversation_id": "2101818857795326396",
+      "created_at": "2026-09-20T23:40:40.000Z",
+      "fetched_at": "2026-09-21T01:11:55Z",
+      "id": "2101818857795326396",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 0,
+        "impression_count": 265,
+        "like_count": 1,
+        "quote_count": 0,
+        "reply_count": 1,
+        "retweet_count": 0
+      },
+      "source_role": "生态资讯",
+      "text": "gm purr-2:native",
+      "url": "https://x.com/Hyperliquid_Hub/status/2101818857795326396",
+      "username": "Hyperliquid_Hub"
+    },
     {
       "analysis": {
         "confidence": 44,
@@ -11329,82 +11405,6 @@
       "text": "if you haven’t made money in the robinhood trenches yet, you probably don’t have what it takes...\n\nstop wasting your money and just buy $HYPE",
       "url": "https://x.com/HYPEconomist/status/2095416298922451421",
       "username": "HYPEconomist"
-    },
-    {
-      "analysis": {
-        "confidence": 46,
-        "direction": "neutral",
-        "direction_label": "中性 / 信息型",
-        "direction_score": 0,
-        "engine": "rules-v1-server",
-        "event_type": "一般市场观点",
-        "factors": [
-          "一般市场观点",
-          "自动采集",
-          "方向词不足"
-        ],
-        "horizon": "数小时至 3 天",
-        "impact": "中等",
-        "impact_score": 78,
-        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
-      },
-      "author_id": "2040391464761413633",
-      "author_name": "Louis",
-      "conversation_id": "2095391343258349668",
-      "created_at": "2026-09-03T06:00:01.000Z",
-      "fetched_at": "2026-09-03T18:43:55Z",
-      "id": "2095391343258349668",
-      "lang": "en",
-      "public_metrics": {
-        "bookmark_count": 2,
-        "impression_count": 2153,
-        "like_count": 39,
-        "quote_count": 0,
-        "reply_count": 5,
-        "retweet_count": 0
-      },
-      "source_role": "研究 / 数据",
-      "text": "A month ago Multicoin Capital withdraw 395K $HYPE ,\nand today 10 hours ago, they deposit $11M or $143K $HYPE into Coinbase.\n\nBut a month ago, they said \"Not selling\".\n\nDon't know what reason they will use right now, \"Not selling\" again? just deposit into CEX?\n\nActually in my https://t.co/Mbi2Z9LAPI",
-      "url": "https://x.com/louisdives/status/2095391343258349668",
-      "username": "louisdives"
-    },
-    {
-      "analysis": {
-        "confidence": 46,
-        "direction": "neutral",
-        "direction_label": "中性 / 信息型",
-        "direction_score": 0,
-        "engine": "rules-v1-server",
-        "event_type": "基本面 / 生态事件",
-        "factors": [
-          "基本面 / 生态事件",
-          "自动采集",
-          "方向词不足"
-        ],
-        "horizon": "数日至数月",
-        "impact": "高",
-        "impact_score": 85,
-        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“基本面 / 生态事件”，主要影响窗口预计为数日至数月；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
-      },
-      "author_id": "897099896108404738",
-      "author_name": "0xMaxs",
-      "conversation_id": "2095378446423863326",
-      "created_at": "2026-09-03T05:08:46.000Z",
-      "fetched_at": "2026-09-03T18:43:55Z",
-      "id": "2095378446423863326",
-      "lang": "zh",
-      "public_metrics": {
-        "bookmark_count": 3,
-        "impression_count": 889,
-        "like_count": 10,
-        "quote_count": 1,
-        "reply_count": 1,
-        "retweet_count": 0
-      },
-      "source_role": "交易观点",
-      "text": "Blockworks 数据研究员 Troy Harris 提到：\n\n8 月 Hyperliquid Builder Revenue 达到 $8.8M，创 2026 年单月新高。\n\nBuilder Code可以理解成 Hyperliquid 给外部应用开放的一套「交易分销系统」：\n\nMetaMask、Phantom、Trust Wallet、Rabby，以及各种交易终端、机器人，都可以把用户订单直接接入 https://t.co/z3LQgYHgrd https://t.co/Dc0fJhcqUY",
-      "url": "https://x.com/0xMaxs/status/2095378446423863326",
-      "username": "0xMaxs"
     }
   ],
   "sources": [
@@ -11435,7 +11435,7 @@
     {
       "handle": "Hyperliquid_Hub",
       "influence": 64,
-      "last_seen_id": "2101653802948374535",
+      "last_seen_id": "2101840170253447488",
       "name": "HL Hub",
       "role": "生态资讯",
       "user_id": "1821500190312087552"
@@ -11451,10 +11451,10 @@
   ],
   "timezone": "Asia/Shanghai",
   "usage_today": {
-    "analyses": 15,
+    "analyses": 17,
     "date": "2026-09-21",
-    "estimated_cost_usd": 0.075,
-    "post_reads": 15,
+    "estimated_cost_usd": 0.085,
+    "post_reads": 17,
     "user_reads": 0
   },
   "version": 1

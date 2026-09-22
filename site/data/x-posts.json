@@ -3,9 +3,47 @@
     "cost_usd": 0.15,
     "posts": 20
   },
-  "generated_at": "2026-09-22T19:16:04Z",
+  "generated_at": "2026-09-22T22:16:56Z",
   "mode": "x-api-paid",
   "posts": [
+    {
+      "analysis": {
+        "confidence": 43,
+        "direction": "neutral",
+        "direction_label": "中性 / 信息型",
+        "direction_score": 0,
+        "engine": "rules-v1-server",
+        "event_type": "一般市场观点",
+        "factors": [
+          "一般市场观点",
+          "自动采集",
+          "方向词不足"
+        ],
+        "horizon": "数小时至 3 天",
+        "impact": "有限",
+        "impact_score": 60,
+        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "1903429012535525376",
+      "author_name": "HYPEconomist",
+      "conversation_id": "2102516294545502637",
+      "created_at": "2026-09-22T21:52:02.000Z",
+      "fetched_at": "2026-09-22T22:16:56Z",
+      "id": "2102516294545502637",
+      "lang": "da",
+      "public_metrics": {
+        "bookmark_count": 1,
+        "impression_count": 1167,
+        "like_count": 72,
+        "quote_count": 1,
+        "reply_count": 8,
+        "retweet_count": 3
+      },
+      "source_role": "市场观察",
+      "text": "HYPERLIQUID https://t.co/Cs4x3SGmPL",
+      "url": "https://x.com/HYPEconomist/status/2102516294545502637",
+      "username": "HYPEconomist"
+    },
     {
       "analysis": {
         "confidence": 44,
@@ -11367,44 +11405,6 @@
       "text": "variational at lighter’s current FDV ($4.8B):\n\n25% airdrop → $127/point\n\n30% airdrop → $153/point\n\nanything under $50/point at TGE is an easy buy",
       "url": "https://x.com/HYPEconomist/status/2095944734896226583",
       "username": "HYPEconomist"
-    },
-    {
-      "analysis": {
-        "confidence": 46,
-        "direction": "neutral",
-        "direction_label": "中性 / 信息型",
-        "direction_score": 0,
-        "engine": "rules-v1-server",
-        "event_type": "一般市场观点",
-        "factors": [
-          "一般市场观点",
-          "自动采集",
-          "方向词不足"
-        ],
-        "horizon": "数小时至 3 天",
-        "impact": "中等",
-        "impact_score": 78,
-        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
-      },
-      "author_id": "2040391464761413633",
-      "author_name": "Louis",
-      "conversation_id": "2095927981508297208",
-      "created_at": "2026-09-04T17:32:25.000Z",
-      "fetched_at": "2026-09-04T18:18:00Z",
-      "id": "2095927981508297208",
-      "lang": "en",
-      "public_metrics": {
-        "bookmark_count": 0,
-        "impression_count": 306,
-        "like_count": 13,
-        "quote_count": 0,
-        "reply_count": 3,
-        "retweet_count": 0
-      },
-      "source_role": "研究 / 数据",
-      "text": "My current Lighter Robinhood point is 39.43 pts.\n\n39.43 points Lighter Robinhood = $2,081.\n\nAssumption 1 ethereum:0x232ce3bd40fcd6f80f3d55a522d03f25df784ee2  = $4.8\n\nCalculation?\n\nRemember the total pool = 11M ethereum:0x232ce3bd40fcd6f80f3d55a522d03f25df784ee2 tokens.\n\nBull https://t.co/iSxSad3LyL",
-      "url": "https://x.com/louisdives/status/2095927981508297208",
-      "username": "louisdives"
     }
   ],
   "sources": [
@@ -11443,7 +11443,7 @@
     {
       "handle": "HYPEconomist",
       "influence": 60,
-      "last_seen_id": "2102404992699339203",
+      "last_seen_id": "2102516294545502637",
       "name": "HYPEconomist",
       "role": "市场观察",
       "user_id": "1903429012535525376"
@@ -11451,10 +11451,10 @@
   ],
   "timezone": "Asia/Shanghai",
   "usage_today": {
-    "analyses": 13,
+    "analyses": 14,
     "date": "2026-09-23",
-    "estimated_cost_usd": 0.065,
-    "post_reads": 13,
+    "estimated_cost_usd": 0.07,
+    "post_reads": 14,
     "user_reads": 0
   },
   "version": 1

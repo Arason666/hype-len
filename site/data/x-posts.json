@@ -3,9 +3,47 @@
     "cost_usd": 0.15,
     "posts": 20
   },
-  "generated_at": "2026-09-21T18:45:46Z",
+  "generated_at": "2026-09-22T00:54:28Z",
   "mode": "x-api-paid",
   "posts": [
+    {
+      "analysis": {
+        "confidence": 44,
+        "direction": "neutral",
+        "direction_label": "中性 / 信息型",
+        "direction_score": 0,
+        "engine": "rules-v1-server",
+        "event_type": "一般市场观点",
+        "factors": [
+          "一般市场观点",
+          "自动采集",
+          "方向词不足"
+        ],
+        "horizon": "数小时至 3 天",
+        "impact": "有限",
+        "impact_score": 60,
+        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "1903429012535525376",
+      "author_name": "HYPEconomist",
+      "conversation_id": "2102170453661884527",
+      "created_at": "2026-09-21T22:57:47.000Z",
+      "fetched_at": "2026-09-22T00:54:28Z",
+      "id": "2102170453661884527",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 1,
+        "impression_count": 1306,
+        "like_count": 34,
+        "quote_count": 0,
+        "reply_count": 12,
+        "retweet_count": 0
+      },
+      "source_role": "市场观察",
+      "text": "just one more runner and i’ll delete the app forever",
+      "url": "https://x.com/HYPEconomist/status/2102170453661884527",
+      "username": "HYPEconomist"
+    },
     {
       "analysis": {
         "confidence": 44,
@@ -11367,44 +11405,6 @@
       "text": "Bro, I think you forgot or haven't read the rules 😭.\n\nYou just disqualified yourself from the Variational rewards 😭.\n\nContext:\nThis guy participated in the Variational referral campaign and was set to receive rewards of 4,000 USDC + 1,600 Variational Points.\n\nThe rewards were https://t.co/5YxH7lKr5P https://t.co/4H89GDNHOf",
       "url": "https://x.com/louisdives/status/2095755048466964545",
       "username": "louisdives"
-    },
-    {
-      "analysis": {
-        "confidence": 92,
-        "direction": "bullish",
-        "direction_label": "偏多",
-        "direction_score": 88,
-        "engine": "rules-v1-server",
-        "event_type": "基本面 / 生态事件",
-        "factors": [
-          "偏多词 4 个",
-          "基本面 / 生态事件",
-          "自动采集"
-        ],
-        "horizon": "数日至数月",
-        "impact": "高",
-        "impact_score": 91,
-        "summary": "识别到的正向措辞更多，整体判断为偏多。事件类型更接近“基本面 / 生态事件”，主要影响窗口预计为数日至数月；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
-      },
-      "author_id": "897099896108404738",
-      "author_name": "0xMaxs",
-      "conversation_id": "2095727870182363432",
-      "created_at": "2026-09-04T04:17:15.000Z",
-      "fetched_at": "2026-09-04T18:18:00Z",
-      "id": "2095727870182363432",
-      "lang": "zh",
-      "public_metrics": {
-        "bookmark_count": 1,
-        "impression_count": 374,
-        "like_count": 5,
-        "quote_count": 0,
-        "reply_count": 2,
-        "retweet_count": 0
-      },
-      "source_role": "交易观点",
-      "text": "‼️Hype 日报 #247｜数据截至：2026-9-3\n\n回购：HYPE现价$86.72，昨日销毁$2.49M/29850.37枚（均价$83.52），累计销毁4698.99万枚\n\n估值：年回购金额$6.75亿，成交量(24h)$83.52亿，OI=$10.54B；最大供应9.53亿枚，FDV=$82.65B，PE=122，分位100.0% https://t.co/fRgKkOIzu3 https://t.co/yx9KVOshak",
-      "url": "https://x.com/0xMaxs/status/2095727870182363432",
-      "username": "0xMaxs"
     }
   ],
   "sources": [
@@ -11443,7 +11443,7 @@
     {
       "handle": "HYPEconomist",
       "influence": 60,
-      "last_seen_id": "2102075381830283274",
+      "last_seen_id": "2102170453661884527",
       "name": "HYPEconomist",
       "role": "市场观察",
       "user_id": "1903429012535525376"
@@ -11451,10 +11451,10 @@
   ],
   "timezone": "Asia/Shanghai",
   "usage_today": {
-    "analyses": 15,
+    "analyses": 16,
     "date": "2026-09-22",
-    "estimated_cost_usd": 0.075,
-    "post_reads": 15,
+    "estimated_cost_usd": 0.08,
+    "post_reads": 16,
     "user_reads": 0
   },
   "version": 1

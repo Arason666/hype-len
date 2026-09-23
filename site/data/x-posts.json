@@ -3,9 +3,85 @@
     "cost_usd": 0.15,
     "posts": 20
   },
-  "generated_at": "2026-09-22T22:16:56Z",
+  "generated_at": "2026-09-23T05:15:35Z",
   "mode": "x-api-paid",
   "posts": [
+    {
+      "analysis": {
+        "confidence": 92,
+        "direction": "bullish",
+        "direction_label": "偏多",
+        "direction_score": 88,
+        "engine": "rules-v1-server",
+        "event_type": "基本面 / 生态事件",
+        "factors": [
+          "偏多词 4 个",
+          "基本面 / 生态事件",
+          "自动采集"
+        ],
+        "horizon": "数日至数月",
+        "impact": "高",
+        "impact_score": 91,
+        "summary": "识别到的正向措辞更多，整体判断为偏多。事件类型更接近“基本面 / 生态事件”，主要影响窗口预计为数日至数月；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "897099896108404738",
+      "author_name": "0xMaxs",
+      "conversation_id": "2102617727680835902",
+      "created_at": "2026-09-23T04:35:05.000Z",
+      "fetched_at": "2026-09-23T05:15:35Z",
+      "id": "2102617727680835902",
+      "lang": "zh",
+      "public_metrics": {
+        "bookmark_count": 1,
+        "impression_count": 98,
+        "like_count": 1,
+        "quote_count": 0,
+        "reply_count": 0,
+        "retweet_count": 0
+      },
+      "source_role": "交易观点",
+      "text": "‼️Hype 日报 #266｜数据截至：2026-9-22\n\n回购：HYPE现价$96.86，昨日销毁$2.30M/24204.85枚（均价$94.95），累计销毁4741.89万枚\n\n估值：年回购金额$6.60亿，成交量(24h)$68.24亿，OI=$14.16B；最大供应9.53亿枚，FDV=$92.26B，PE=140，分位100.0% https://t.co/ugSoBrEog2 https://t.co/cEu7DquSgk",
+      "url": "https://x.com/0xMaxs/status/2102617727680835902",
+      "username": "0xMaxs"
+    },
+    {
+      "analysis": {
+        "confidence": 44,
+        "direction": "neutral",
+        "direction_label": "中性 / 信息型",
+        "direction_score": 0,
+        "engine": "rules-v1-server",
+        "event_type": "技术面 / 仓位观点",
+        "factors": [
+          "技术面 / 仓位观点",
+          "自动采集",
+          "方向词不足"
+        ],
+        "horizon": "数小时至 3 天",
+        "impact": "高",
+        "impact_score": 88,
+        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“技术面 / 仓位观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "2040391464761413633",
+      "author_name": "Louis",
+      "conversation_id": "2102592664474677747",
+      "created_at": "2026-09-23T02:55:30.000Z",
+      "fetched_at": "2026-09-23T05:15:35Z",
+      "id": "2102592664474677747",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 1,
+        "impression_count": 1386,
+        "like_count": 26,
+        "quote_count": 1,
+        "reply_count": 4,
+        "retweet_count": 1
+      },
+      "source_role": "研究 / 数据",
+      "text": "1 $HYPE = $100 today?\n\nLet's hunt the liquidation price.\n\n$12.5M will be liquidation if $HYPE can hit $101.92. https://t.co/RfXGqObSiH",
+      "url": "https://x.com/louisdives/status/2102592664474677747",
+      "username": "louisdives"
+    },
     {
       "analysis": {
         "confidence": 43,
@@ -11329,89 +11405,13 @@
       "text": "‼️Hype 日报 #248｜数据截至：2026-9-4\n\n回购：HYPE现价$84.47，昨日销毁$2.18M/25496.59枚（均价$85.64），累计销毁4701.43万枚\n\n估值：年回购金额$6.74亿，成交量(24h)$65.40亿，OI=$10.52B；最大供应9.53亿枚，FDV=$80.50B，PE=119，分位99.8% https://t.co/6EmxOSHe1C https://t.co/HMmD7woTb0",
       "url": "https://x.com/0xMaxs/status/2096068724931563930",
       "username": "0xMaxs"
-    },
-    {
-      "analysis": {
-        "confidence": 44,
-        "direction": "neutral",
-        "direction_label": "中性 / 信息型",
-        "direction_score": 0,
-        "engine": "rules-v1-server",
-        "event_type": "一般市场观点",
-        "factors": [
-          "一般市场观点",
-          "自动采集",
-          "方向词不足"
-        ],
-        "horizon": "数小时至 3 天",
-        "impact": "有限",
-        "impact_score": 60,
-        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
-      },
-      "author_id": "1903429012535525376",
-      "author_name": "HYPEconomist",
-      "conversation_id": "2095990587363115464",
-      "created_at": "2026-09-04T21:41:12.000Z",
-      "fetched_at": "2026-09-05T17:32:09Z",
-      "id": "2095990587363115464",
-      "lang": "en",
-      "public_metrics": {
-        "bookmark_count": 0,
-        "impression_count": 2110,
-        "like_count": 30,
-        "quote_count": 0,
-        "reply_count": 2,
-        "retweet_count": 1
-      },
-      "source_role": "市场观察",
-      "text": "few things feel better than averaging down a trade and watching it reverse",
-      "url": "https://x.com/HYPEconomist/status/2095990587363115464",
-      "username": "HYPEconomist"
-    },
-    {
-      "analysis": {
-        "confidence": 45,
-        "direction": "neutral",
-        "direction_label": "中性 / 信息型",
-        "direction_score": 0,
-        "engine": "rules-v1-server",
-        "event_type": "一般市场观点",
-        "factors": [
-          "一般市场观点",
-          "自动采集",
-          "方向词不足"
-        ],
-        "horizon": "数小时至 3 天",
-        "impact": "有限",
-        "impact_score": 60,
-        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
-      },
-      "author_id": "1903429012535525376",
-      "author_name": "HYPEconomist",
-      "conversation_id": "2095944734896226583",
-      "created_at": "2026-09-04T18:39:00.000Z",
-      "fetched_at": "2026-09-05T17:32:09Z",
-      "id": "2095944734896226583",
-      "lang": "en",
-      "public_metrics": {
-        "bookmark_count": 6,
-        "impression_count": 8406,
-        "like_count": 155,
-        "quote_count": 1,
-        "reply_count": 14,
-        "retweet_count": 6
-      },
-      "source_role": "市场观察",
-      "text": "variational at lighter’s current FDV ($4.8B):\n\n25% airdrop → $127/point\n\n30% airdrop → $153/point\n\nanything under $50/point at TGE is an easy buy",
-      "url": "https://x.com/HYPEconomist/status/2095944734896226583",
-      "username": "HYPEconomist"
     }
   ],
   "sources": [
     {
       "handle": "0xMaxs",
       "influence": 72,
-      "last_seen_id": "2102255854045249935",
+      "last_seen_id": "2102617727680835902",
       "name": "0xMaxs",
       "role": "交易观点",
       "user_id": "897099896108404738"
@@ -11419,7 +11419,7 @@
     {
       "handle": "louisdives",
       "influence": 78,
-      "last_seen_id": "2102344429281726477",
+      "last_seen_id": "2102592664474677747",
       "name": "Louis",
       "role": "研究 / 数据",
       "user_id": "2040391464761413633"
@@ -11451,10 +11451,10 @@
   ],
   "timezone": "Asia/Shanghai",
   "usage_today": {
-    "analyses": 14,
+    "analyses": 16,
     "date": "2026-09-23",
-    "estimated_cost_usd": 0.07,
-    "post_reads": 14,
+    "estimated_cost_usd": 0.08,
+    "post_reads": 16,
     "user_reads": 0
   },
   "version": 1

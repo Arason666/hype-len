@@ -3,9 +3,47 @@
     "cost_usd": 0.15,
     "posts": 20
   },
-  "generated_at": "2026-09-23T18:58:36Z",
+  "generated_at": "2026-09-24T00:33:25Z",
   "mode": "x-api-paid",
   "posts": [
+    {
+      "analysis": {
+        "confidence": 44,
+        "direction": "neutral",
+        "direction_label": "中性 / 信息型",
+        "direction_score": 0,
+        "engine": "rules-v1-server",
+        "event_type": "一般市场观点",
+        "factors": [
+          "一般市场观点",
+          "自动采集",
+          "方向词不足"
+        ],
+        "horizon": "数小时至 3 天",
+        "impact": "有限",
+        "impact_score": 60,
+        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "1903429012535525376",
+      "author_name": "HYPEconomist",
+      "conversation_id": "2102890383621697653",
+      "created_at": "2026-09-23T22:38:31.000Z",
+      "fetched_at": "2026-09-24T00:33:25Z",
+      "id": "2102890383621697653",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 0,
+        "impression_count": 1568,
+        "like_count": 32,
+        "quote_count": 1,
+        "reply_count": 6,
+        "retweet_count": 0
+      },
+      "source_role": "市场观察",
+      "text": "all it takes is one trade\n\nand i put all my eggs in one nest-2:native",
+      "url": "https://x.com/HYPEconomist/status/2102890383621697653",
+      "username": "HYPEconomist"
+    },
     {
       "analysis": {
         "confidence": 45,
@@ -11367,44 +11405,6 @@
       "text": "why do most RH meme charts look like this\n\nalmost every coin’s top traders show zero buys, but they have an infinite bag to dump into every pump\n\nno wonder pons has never had a $20M runner https://t.co/FppLvGvKpW",
       "url": "https://x.com/HYPEconomist/status/2096512962034901167",
       "username": "HYPEconomist"
-    },
-    {
-      "analysis": {
-        "confidence": 76,
-        "direction": "bullish",
-        "direction_label": "偏多",
-        "direction_score": 44,
-        "engine": "rules-v1-server",
-        "event_type": "一般市场观点",
-        "factors": [
-          "偏多词 2 个",
-          "一般市场观点",
-          "自动采集"
-        ],
-        "horizon": "数小时至 3 天",
-        "impact": "中等",
-        "impact_score": 72,
-        "summary": "识别到的正向措辞更多，整体判断为偏多。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
-      },
-      "author_id": "897099896108404738",
-      "author_name": "0xMaxs",
-      "conversation_id": "2096468430832722209",
-      "created_at": "2026-09-06T05:19:59.000Z",
-      "fetched_at": "2026-09-06T16:28:38Z",
-      "id": "2096468430832722209",
-      "lang": "zh",
-      "public_metrics": {
-        "bookmark_count": 4,
-        "impression_count": 558,
-        "like_count": 6,
-        "quote_count": 0,
-        "reply_count": 6,
-        "retweet_count": 0
-      },
-      "source_role": "交易观点",
-      "text": "2026.9.6实盘更新，加仓光模块、重回战壕，对错唯有交给时间⏰\n\n本周组合总资产¥494,150，总浮盈由 +¥59,756 回落至 +¥43,514，收益率由 19.57% 降至 9.66%。\n\n本周最重要的操作：\n\n1.继续加仓中际旭创：持仓由 200股增至300股，平均成本由约 ¥903.70 降至 ¥886.95。不过股价本周由 ¥858.35 https://t.co/KDtsF057ro https://t.co/p3sBzn9Fby",
-      "url": "https://x.com/0xMaxs/status/2096468430832722209",
-      "username": "0xMaxs"
     }
   ],
   "sources": [
@@ -11443,7 +11443,7 @@
     {
       "handle": "HYPEconomist",
       "influence": 60,
-      "last_seen_id": "2102787800449896746",
+      "last_seen_id": "2102890383621697653",
       "name": "HYPEconomist",
       "role": "市场观察",
       "user_id": "1903429012535525376"
@@ -11451,10 +11451,10 @@
   ],
   "timezone": "Asia/Shanghai",
   "usage_today": {
-    "analyses": 15,
+    "analyses": 16,
     "date": "2026-09-24",
-    "estimated_cost_usd": 0.075,
-    "post_reads": 15,
+    "estimated_cost_usd": 0.08,
+    "post_reads": 16,
     "user_reads": 0
   },
   "version": 1

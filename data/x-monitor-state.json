@@ -1,17 +1,17 @@
 {
-  "day": "2026-09-26",
+  "day": "2026-09-27",
   "since_ids": {
-    "0xmaxs": "2103512489287950352",
-    "hypeconomist": "2103479478756188329",
-    "hyperliquid_hub": "2103474404302950435",
+    "0xmaxs": "2103842066266812771",
+    "hypeconomist": "2103864331398173136",
+    "hyperliquid_hub": "2103859422103753035",
     "hyperliquidx": "2102643440446271884",
-    "louisdives": "2103501728977178641"
+    "louisdives": "2103864302352650704"
   },
   "source_cursor": 0,
   "usage": {
-    "analyses": 17,
-    "estimated_cost_micros": 85000,
-    "post_reads": 17,
+    "analyses": 18,
+    "estimated_cost_micros": 90000,
+    "post_reads": 18,
     "user_reads": 0
   },
   "user_ids": {

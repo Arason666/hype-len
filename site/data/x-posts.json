@@ -3,9 +3,85 @@
     "cost_usd": 0.15,
     "posts": 20
   },
-  "generated_at": "2026-09-27T17:57:05Z",
+  "generated_at": "2026-09-27T21:16:06Z",
   "mode": "x-api-paid",
   "posts": [
+    {
+      "analysis": {
+        "confidence": 44,
+        "direction": "neutral",
+        "direction_label": "中性 / 信息型",
+        "direction_score": 0,
+        "engine": "rules-v1-server",
+        "event_type": "一般市场观点",
+        "factors": [
+          "一般市场观点",
+          "自动采集",
+          "方向词不足"
+        ],
+        "horizon": "数小时至 3 天",
+        "impact": "有限",
+        "impact_score": 60,
+        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "1903429012535525376",
+      "author_name": "HYPEconomist",
+      "conversation_id": "2104308580295860593",
+      "created_at": "2026-09-27T20:33:56.000Z",
+      "fetched_at": "2026-09-27T21:16:06Z",
+      "id": "2104308580295860593",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 3,
+        "impression_count": 1680,
+        "like_count": 57,
+        "quote_count": 0,
+        "reply_count": 14,
+        "retweet_count": 6
+      },
+      "source_role": "市场观察",
+      "text": "betting on $NEAR continuing its run\n\nwhat's a fair valuation for the top meme on NEAR? $10M, $20M, or $50M? https://t.co/TcVWbLsIuq",
+      "url": "https://x.com/HYPEconomist/status/2104308580295860593",
+      "username": "HYPEconomist"
+    },
+    {
+      "analysis": {
+        "confidence": 44,
+        "direction": "neutral",
+        "direction_label": "中性 / 信息型",
+        "direction_score": 0,
+        "engine": "rules-v1-server",
+        "event_type": "技术面 / 仓位观点",
+        "factors": [
+          "技术面 / 仓位观点",
+          "自动采集",
+          "方向词不足"
+        ],
+        "horizon": "数小时至 3 天",
+        "impact": "中等",
+        "impact_score": 67,
+        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“技术面 / 仓位观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
+      },
+      "author_id": "1903429012535525376",
+      "author_name": "HYPEconomist",
+      "conversation_id": "2104269481291677834",
+      "created_at": "2026-09-27T17:58:34.000Z",
+      "fetched_at": "2026-09-27T21:16:06Z",
+      "id": "2104269481291677834",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 31,
+        "impression_count": 18484,
+        "like_count": 264,
+        "quote_count": 3,
+        "reply_count": 50,
+        "retweet_count": 11
+      },
+      "source_role": "市场观察",
+      "text": "NEAR trenches are actually fun\n\nthis bag will be wroth six figures when fomo adds NEAR chain support https://t.co/FYIPihIlxg",
+      "url": "https://x.com/HYPEconomist/status/2104269481291677834",
+      "username": "HYPEconomist"
+    },
     {
       "analysis": {
         "confidence": 44,
@@ -11330,82 +11406,6 @@
       "text": "round tripped six figures, but made some friends along the way\n\n$HYPE is looking strong af\n\ngood day overall",
       "url": "https://x.com/HYPEconomist/status/2097793411424100355",
       "username": "HYPEconomist"
-    },
-    {
-      "analysis": {
-        "confidence": 44,
-        "direction": "neutral",
-        "direction_label": "中性 / 信息型",
-        "direction_score": 0,
-        "engine": "rules-v1-server",
-        "event_type": "一般市场观点",
-        "factors": [
-          "一般市场观点",
-          "自动采集",
-          "方向词不足"
-        ],
-        "horizon": "数小时至 3 天",
-        "impact": "有限",
-        "impact_score": 60,
-        "summary": "没有识别到足够明确的方向表达，暂按信息型观点处理。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
-      },
-      "author_id": "1903429012535525376",
-      "author_name": "HYPEconomist",
-      "conversation_id": "2097737574177501371",
-      "created_at": "2026-09-09T17:23:06.000Z",
-      "fetched_at": "2026-09-09T18:40:58Z",
-      "id": "2097737574177501371",
-      "lang": "en",
-      "public_metrics": {
-        "bookmark_count": 0,
-        "impression_count": 2448,
-        "like_count": 74,
-        "quote_count": 1,
-        "reply_count": 20,
-        "retweet_count": 0
-      },
-      "source_role": "市场观察",
-      "text": "dear jeff, i need S3 to make it all back https://t.co/LkF08DIsO2",
-      "url": "https://x.com/HYPEconomist/status/2097737574177501371",
-      "username": "HYPEconomist"
-    },
-    {
-      "analysis": {
-        "confidence": 64,
-        "direction": "bearish",
-        "direction_label": "偏空",
-        "direction_score": -22,
-        "engine": "rules-v1-server",
-        "event_type": "一般市场观点",
-        "factors": [
-          "偏空词 1 个",
-          "一般市场观点",
-          "自动采集"
-        ],
-        "horizon": "数小时至 3 天",
-        "impact": "中等",
-        "impact_score": 78,
-        "summary": "识别到的负向措辞更多，整体判断为偏空。事件类型更接近“一般市场观点”，主要影响窗口预计为数小时至 3 天；实际有效性仍需结合发布后的 HYPE 价格和相对强弱验证。"
-      },
-      "author_id": "2040391464761413633",
-      "author_name": "Louis",
-      "conversation_id": "2097722104175263833",
-      "created_at": "2026-09-09T16:21:38.000Z",
-      "fetched_at": "2026-09-09T18:40:57Z",
-      "id": "2097722104175263833",
-      "lang": "en",
-      "public_metrics": {
-        "bookmark_count": 0,
-        "impression_count": 713,
-        "like_count": 22,
-        "quote_count": 0,
-        "reply_count": 3,
-        "retweet_count": 0
-      },
-      "source_role": "研究 / 数据",
-      "text": "I think if Variational do an airdrop this week, i think 1 Variational point might be worth at least $100.\n\nWhy? Because all tokens are currently pumping, and it seems like a great momentum for Variational to do TGE.\n\nHowever, if the market dumps, it is very possible that 1",
-      "url": "https://x.com/louisdives/status/2097722104175263833",
-      "username": "louisdives"
     }
   ],
   "sources": [
@@ -11444,7 +11444,7 @@
     {
       "handle": "HYPEconomist",
       "influence": 60,
-      "last_seen_id": "2104223739667697897",
+      "last_seen_id": "2104308580295860593",
       "name": "HYPEconomist",
       "role": "市场观察",
       "user_id": "1903429012535525376"
@@ -11452,10 +11452,10 @@
   ],
   "timezone": "Asia/Shanghai",
   "usage_today": {
-    "analyses": 15,
+    "analyses": 17,
     "date": "2026-09-28",
-    "estimated_cost_usd": 0.075,
-    "post_reads": 15,
+    "estimated_cost_usd": 0.085,
+    "post_reads": 17,
     "user_reads": 0
   },
   "version": 1

@@ -1,41 +1,6 @@
 {
   "funding_history": [
     {
-      "funding_rate": -4.50053e-05,
-      "premium": -0.0008600427,
-      "time": 1776128400057
-    },
-    {
-      "funding_rate": -9.8403e-06,
-      "premium": -0.000578722,
-      "time": 1776132000017
-    },
-    {
-      "funding_rate": -8.2425e-06,
-      "premium": -0.0005659402,
-      "time": 1776135600043
-    },
-    {
-      "funding_rate": -8.7287e-06,
-      "premium": -0.0005698296,
-      "time": 1776139200009
-    },
-    {
-      "funding_rate": 1.407e-07,
-      "premium": -0.0004988745,
-      "time": 1776142800054
-    },
-    {
-      "funding_rate": 2.5374e-06,
-      "premium": -0.0004797009,
-      "time": 1776146400057
-    },
-    {
-      "funding_rate": 5.8626e-06,
-      "premium": -0.0004530992,
-      "time": 1776150000076
-    },
-    {
       "funding_rate": -4.8847e-06,
       "premium": -0.0005390773,
       "time": 1776153600066
@@ -21599,88 +21564,48 @@
       "funding_rate": 1.25e-05,
       "premium": -2.55962e-05,
       "time": 1791676800076
+    },
+    {
+      "funding_rate": 1.25e-05,
+      "premium": 5.2563e-05,
+      "time": 1791680400025
+    },
+    {
+      "funding_rate": 1.25e-05,
+      "premium": -1.54745e-05,
+      "time": 1791684000065
+    },
+    {
+      "funding_rate": 1.25e-05,
+      "premium": -1.7983e-05,
+      "time": 1791687600010
+    },
+    {
+      "funding_rate": 1.25e-05,
+      "premium": 4.26427e-05,
+      "time": 1791691200017
+    },
+    {
+      "funding_rate": 1.25e-05,
+      "premium": -2.65687e-05,
+      "time": 1791694800004
+    },
+    {
+      "funding_rate": 1.25e-05,
+      "premium": 2.94737e-05,
+      "time": 1791698400065
+    },
+    {
+      "funding_rate": 1.25e-05,
+      "premium": 2.06165e-05,
+      "time": 1791702000000
     }
   ],
   "funding_retention_days": 180,
-  "generated_at": "2026-10-11T00:58:50Z",
+  "generated_at": "2026-10-11T07:08:45Z",
   "snapshot_interval_minutes": 15,
   "snapshot_retention_days": 60,
   "snapshots": [
-    {
-      "day_notional_volume": 126682339.7280501,
-      "funding": 1.25e-05,
-      "impact_ask": 54.577,
-      "impact_bid": 54.575,
-      "mark_price": 54.583,
-      "mid_price": 54.5765,
-      "open_interest": 21509577.500000004,
-      "oracle_price": 54.5765,
-      "order_book": {
-        "ask_notional_top10": 24035.23,
-        "bid_notional_top10": 83028.23,
-        "imbalance": 0.55101,
-        "spread_bps": 0.1832
-      },
-      "premium": 0.0,
-      "recent_flow": {
-        "buy_notional": 749.89,
-        "buy_share": 0.470553,
-        "latest_trade_time": 1786502479046,
-        "sell_notional": 843.74,
-        "trade_count": 10
-      },
-      "time": 1786501800000
-    },
-    {
-      "day_notional_volume": 125999143.66690007,
-      "funding": 1.25e-05,
-      "impact_ask": 54.445,
-      "impact_bid": 54.4324,
-      "mark_price": 54.443,
-      "mid_price": 54.4445,
-      "open_interest": 21493198.7,
-      "oracle_price": 54.4475,
-      "order_book": {
-        "ask_notional_top10": 93928.94,
-        "bid_notional_top10": 20628.27,
-        "imbalance": -0.639861,
-        "spread_bps": 0.1837
-      },
-      "premium": -4.59158e-05,
-      "recent_flow": {
-        "buy_notional": 2873.07,
-        "buy_share": 1.0,
-        "latest_trade_time": 1786509701555,
-        "sell_notional": 0.0,
-        "trade_count": 10
-      },
-      "time": 1786509000000
-    },
-    {
-      "day_notional_volume": 125704231.75500017,
-      "funding": 1.25e-05,
-      "impact_ask": 54.7103,
-      "impact_bid": 54.7,
-      "mark_price": 54.701,
-      "mid_price": 54.7005,
-      "open_interest": 21477955.6,
-      "oracle_price": 54.706,
-      "order_book": {
-        "ask_notional_top10": 23683.28,
-        "bid_notional_top10": 102229.8,
-        "imbalance": 0.623815,
-        "spread_bps": 0.1828
-      },
-      "premium": 0.0,
-      "recent_flow": {
-        "buy_notional": 5623.96,
-        "buy_share": 1.0,
-        "latest_trade_time": 1786514851337,
-        "sell_notional": 0.0,
-        "trade_count": 10
-      },
-      "time": 1786514400000
-    },
     {
       "day_notional_volume": 128833268.73957004,
       "funding": 1.25e-05,
@@ -40155,6 +40080,31 @@
         "trade_count": 10
       },
       "time": 1791679500000
+    },
+    {
+      "day_notional_volume": 222198333.17933977,
+      "funding": 1.25e-05,
+      "impact_ask": 84.8983,
+      "impact_bid": 84.8864,
+      "mark_price": 84.893,
+      "mid_price": 84.8925,
+      "open_interest": 19999858.56,
+      "oracle_price": 84.912,
+      "order_book": {
+        "ask_notional_top10": 22285.8,
+        "bid_notional_top10": 22533.48,
+        "imbalance": 0.005526,
+        "spread_bps": 0.1178
+      },
+      "premium": -0.0001613435,
+      "recent_flow": {
+        "buy_notional": 101.02,
+        "buy_share": 0.085984,
+        "latest_trade_time": 1791702525011,
+        "sell_notional": 1073.88,
+        "trade_count": 10
+      },
+      "time": 1791702000000
     }
   ],
   "source": "Hyperliquid public info API",

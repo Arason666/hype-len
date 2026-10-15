@@ -1,31 +1,6 @@
 {
   "funding_history": [
     {
-      "funding_rate": -2.51517e-05,
-      "premium": -0.0007012138,
-      "time": 1776474000049
-    },
-    {
-      "funding_rate": -2.95105e-05,
-      "premium": -0.0007360836,
-      "time": 1776477600042
-    },
-    {
-      "funding_rate": -2.1382e-05,
-      "premium": -0.0006710557,
-      "time": 1776481200031
-    },
-    {
-      "funding_rate": -2.82514e-05,
-      "premium": -0.0007260114,
-      "time": 1776484800009
-    },
-    {
-      "funding_rate": -7.6023e-06,
-      "premium": -0.0005608188,
-      "time": 1776488400060
-    },
-    {
       "funding_rate": -2.6967e-06,
       "premium": -0.0005215734,
       "time": 1776492000049
@@ -21599,138 +21574,38 @@
       "funding_rate": 1.25e-05,
       "premium": 8.5722e-05,
       "time": 1792022400057
+    },
+    {
+      "funding_rate": 1.25e-05,
+      "premium": 2.5673e-05,
+      "time": 1792026000056
+    },
+    {
+      "funding_rate": 1.25e-05,
+      "premium": 9.92973e-05,
+      "time": 1792029600035
+    },
+    {
+      "funding_rate": 1.25e-05,
+      "premium": 0.0001294072,
+      "time": 1792033200050
+    },
+    {
+      "funding_rate": 1.25e-05,
+      "premium": 0.0001126993,
+      "time": 1792036800049
+    },
+    {
+      "funding_rate": 1.25e-05,
+      "premium": 0.0001634967,
+      "time": 1792040400065
     }
   ],
   "funding_retention_days": 180,
-  "generated_at": "2026-10-15T00:30:16Z",
+  "generated_at": "2026-10-15T05:10:30Z",
   "snapshot_interval_minutes": 15,
   "snapshot_retention_days": 60,
   "snapshots": [
-    {
-      "day_notional_volume": 83910901.96511,
-      "funding": 1.25e-05,
-      "impact_ask": 56.7844,
-      "impact_bid": 56.78,
-      "mark_price": 56.779,
-      "mid_price": 56.7805,
-      "open_interest": 22119594.080000006,
-      "oracle_price": 56.783,
-      "order_book": {
-        "ask_notional_top10": 55395.08,
-        "bid_notional_top10": 27519.39,
-        "imbalance": -0.336198,
-        "spread_bps": 0.1761
-      },
-      "premium": 0.0,
-      "recent_flow": {
-        "buy_notional": 139.11,
-        "buy_share": 0.193373,
-        "latest_trade_time": 1786841201047,
-        "sell_notional": 580.29,
-        "trade_count": 10
-      },
-      "time": 1786841100000
-    },
-    {
-      "day_notional_volume": 84465306.16306996,
-      "funding": 1.25e-05,
-      "impact_ask": 56.881,
-      "impact_bid": 56.8783,
-      "mark_price": 56.881,
-      "mid_price": 56.8805,
-      "open_interest": 22150037.02,
-      "oracle_price": 56.8825,
-      "order_book": {
-        "ask_notional_top10": 92410.95,
-        "bid_notional_top10": 12962.85,
-        "imbalance": -0.753964,
-        "spread_bps": 0.1758
-      },
-      "premium": -2.63701e-05,
-      "recent_flow": {
-        "buy_notional": 328.21,
-        "buy_share": 0.754255,
-        "latest_trade_time": 1786846607046,
-        "sell_notional": 106.94,
-        "trade_count": 10
-      },
-      "time": 1786846500000
-    },
-    {
-      "day_notional_volume": 81773052.14627996,
-      "funding": 1.25e-05,
-      "impact_ask": 57.0527,
-      "impact_bid": 57.0437,
-      "mark_price": 57.049,
-      "mid_price": 57.0485,
-      "open_interest": 22172020.9,
-      "oracle_price": 57.0406,
-      "order_book": {
-        "ask_notional_top10": 33940.12,
-        "bid_notional_top10": 45365.36,
-        "imbalance": 0.144066,
-        "spread_bps": 0.1753
-      },
-      "premium": 5.43473e-05,
-      "recent_flow": {
-        "buy_notional": 24.53,
-        "buy_share": 0.007789,
-        "latest_trade_time": 1786850717682,
-        "sell_notional": 3124.91,
-        "trade_count": 10
-      },
-      "time": 1786850100000
-    },
-    {
-      "day_notional_volume": 81107789.7425502,
-      "funding": 1.25e-05,
-      "impact_ask": 56.958,
-      "impact_bid": 56.9477,
-      "mark_price": 56.958,
-      "mid_price": 56.9575,
-      "open_interest": 22172159.800000016,
-      "oracle_price": 56.944,
-      "order_book": {
-        "ask_notional_top10": 35780.04,
-        "bid_notional_top10": 9354.34,
-        "imbalance": -0.585489,
-        "spread_bps": 0.1756
-      },
-      "premium": 6.49761e-05,
-      "recent_flow": {
-        "buy_notional": 60.37,
-        "buy_share": 0.096635,
-        "latest_trade_time": 1786853296023,
-        "sell_notional": 564.39,
-        "trade_count": 10
-      },
-      "time": 1786852800000
-    },
-    {
-      "day_notional_volume": 79592596.66468996,
-      "funding": 1.25e-05,
-      "impact_ask": 57.127,
-      "impact_bid": 57.126,
-      "mark_price": 57.127,
-      "mid_price": 57.1265,
-      "open_interest": 22175599.280000035,
-      "oracle_price": 57.118,
-      "order_book": {
-        "ask_notional_top10": 23313.81,
-        "bid_notional_top10": 155783.15,
-        "imbalance": 0.739652,
-        "spread_bps": 0.1751
-      },
-      "premium": 0.0001400609,
-      "recent_flow": {
-        "buy_notional": 4244.54,
-        "buy_share": 0.997181,
-        "latest_trade_time": 1786855770025,
-        "sell_notional": 12.0,
-        "trade_count": 10
-      },
-      "time": 1786855500000
-    },
     {
       "day_notional_volume": 78241463.70595002,
       "funding": 1.25e-05,
@@ -38055,6 +37930,31 @@
         "trade_count": 10
       },
       "time": 1792024200000
+    },
+    {
+      "day_notional_volume": 478965302.58324987,
+      "funding": 1.25e-05,
+      "impact_ask": 79.6596,
+      "impact_bid": 79.6515,
+      "mark_price": 79.6482,
+      "mid_price": 79.657,
+      "open_interest": 20365733.54000001,
+      "oracle_price": 79.615,
+      "order_book": {
+        "ask_notional_top10": 34196.52,
+        "bid_notional_top10": 31967.28,
+        "imbalance": -0.033693,
+        "spread_bps": 0.2511
+      },
+      "premium": 0.0004584563,
+      "recent_flow": {
+        "buy_notional": 0.0,
+        "buy_share": 0.0,
+        "latest_trade_time": 1792041029671,
+        "sell_notional": 81599.35,
+        "trade_count": 10
+      },
+      "time": 1792040400000
     }
   ],
   "source": "Hyperliquid public info API",
